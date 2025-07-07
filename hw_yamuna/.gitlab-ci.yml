@@ -1,0 +1,38 @@
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - tag
+
+before_script:
+    - export PATH=/scratch/shakti/csmith/bin:/home/gitlab-runner/.local/bin:/scratch/riscv-tools/shakti-tools/riscv64/bin:/scratch/shakti/bsc/inst/bin:/scratch/mod-spike/riscv-isa-sim/bin:/scratch/shakti/verilator/bin:$PATH
+
+build-job:
+  stage: build
+  tags: 
+    - sostoperipverif
+  script:
+    - echo "Compiling the code..."
+    - make simulate
+    - echo "Compile complete."
+    - echo "Starting RISC-V Tests..."
+    - make regress opts='--filter=rv64 --test_opts='--timeout=20s' --sub --parallel=6' CONFIG_ISA=RV64IMAFDC
+    - make regress opts='--filter=rv64 --final'
+    - echo "RISC-V Test Done. Starting AAPG Tests..."
+    - make aapg opts='--config=rv64imafdc* --test_count=1 --debug' CONFIG_ISA=RV64IMAFDC
+    - make regress opts='--list=aapg.list --sub --test_opts='--timeout=15m' --parallel=6' CONFIG_ISA=RV64IMAFDC
+    - make regress opts='--list=aapg.list --final' CONFIG_ISA=RV64IMAFDC
+    - echo "AAPG Test Done. Starting RISC-V Torture Tests..."
+    - make torture opts='--config=bringup --test_count=1' CONFIG_ISA=RV64IMAFDC
+    - make regress opts='--list=riscv-torture.list --test_opts="--mod-spike --timeout=30m" --sub  --parallel=6' CONFIG_ISA=RV64IMAFDC
+    - make regress opts='--list=riscv-torture.list --final'
+    - echo "RISC-V, AAPG, and Torture Tests done..."
+    
+tag-job:
+  stage: tag
+  tags:
+    - sostoperipverif
+  script:
+    - python3 /scratch/version-extract-rst.py
+  only:
+    - master
+  when: manual
+
