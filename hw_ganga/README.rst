@@ -97,8 +97,8 @@ To Build MCS File:
 
 .. code-block:: shell-session
 
-  $ git clone https://gitlab.com/shaktiproject/sos.git
-  $ cd sos/
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw_ganga
   $ make build BOARD=arty_a7_ganga
 
 Connecting to the Target

@@ -20,9 +20,9 @@ For more SoC related details please view README.rst
 <b>To Build MCS File:</b>
 
 ```
-  $ git clone https://gitlab.com/shaktiproject/sos.git
-  $ cd sos/
-  $ make build BOARD=<board>
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw_ganga
+  $ make build BOARD=arty_a7_ganga
 ```
 
 <b>Supported Boards:</b>

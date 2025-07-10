@@ -143,8 +143,8 @@ To Build MCS File:
 
 .. code-block:: shell-session
 
-  $ git clone https://gitlab.com/shaktiproject/sos.git
-  $ cd sos/
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw_yamuna/
   $ make build BOARD=arty_a7_yamuna XLEN_build=32
 
 Connecting to the Target

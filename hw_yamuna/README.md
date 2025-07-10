@@ -20,8 +20,8 @@ For more SoC related details please view README.rst
 <b>To Build MCS File:</b>
 
 ```
-  $ git clone https://gitlab.com/shaktiproject/sos.git
-  $ cd sos/
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw_yamuna/
   $ make build BOARD=arty_a7_yamuna XLEN_build=32
 ```
 
