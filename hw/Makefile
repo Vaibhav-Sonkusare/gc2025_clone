@@ -111,8 +111,16 @@ simulate: run_setup_sim
 
 .PHONY: generate_boot_files
 generate_boot_files:
+ifeq ($(BOARD), arty_a7_yamuna)
+	@cd boot-code-yamuna; make
+	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
+else ifeq ($(BOARD), arty_a7_ganga)
+	@cd boot-code-ganga; make
+	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
+else
 	@cd boot-code; make
 	@cp boot-code/outputs/boot.mem $(VERILOGDIR)/
+endif
 
 .PHONY: quick_build_xilinx
 quick_build_xilinx: run_setup_fpga
