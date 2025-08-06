@@ -72,13 +72,13 @@ help: ## This help dialog.
 .PHONY: run_setup_fpga
 run_setup_fpga: ## Run command to setup all dependant files for FPGA.
 	@pip3 install -r requirements.txt
+	@cp -r boards/$(BOARD)/. .
 	@python3 -m configure.main --ispec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_isa.yaml \
 	--customspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_custom.yaml \
 	--cspec sample_config/c$(XLEN_build)_$(BOARD)/core$(XLEN_build).yaml \
 	--gspec sample_config/c$(XLEN_build)_$(BOARD)/csr_grouping$(XLEN_build).yaml \
 	--dspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_debug.yaml
 # ifeq ($(BOARD), arty_a7)
-	@cp -r boards/$(BOARD)/. .
 # endif
 	@mkdir build
 	@mkdir build/hw
