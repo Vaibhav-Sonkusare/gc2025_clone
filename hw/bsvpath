@@ -28,3 +28,4 @@ devices/i2c/
 devices/spi_v2/
 devices/gptimer/
 devices/iqc
+devices/tcm

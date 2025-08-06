@@ -21,6 +21,9 @@ ifeq ($(BOARD), arty_a7)
 else ifeq ($(BOARD), arty_a7_yamuna)
 	FPGA:=xc7a100tcsg324-1
 	MCS:=true
+else ifeq ($(BOARD), nexys_a7)
+	FPGA:=xc7a100tcsg324-1
+	MCS:=true
 else ifeq ($(BOARD), arty_a7_ganga)
 	FPGA:=xc7a100tcsg324-1
 	MCS:=true
@@ -112,6 +115,9 @@ simulate: run_setup_sim
 .PHONY: generate_boot_files
 generate_boot_files:
 ifeq ($(BOARD), arty_a7_yamuna)
+	@cd boot-code-yamuna; make
+	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
+else ifeq ($(BOARD), nexys_a7)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
 else ifeq ($(BOARD), arty_a7_ganga)

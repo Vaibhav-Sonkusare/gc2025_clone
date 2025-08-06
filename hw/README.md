@@ -33,6 +33,14 @@ For more SoC related details please view README.rst
   $ make build BOARD=arty_a7_ganga
 ```
 
+<b>To Build MCS File for Nexys A7:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build BOARD=nexys_a7 XLEN_build=32
+```
+
 
 <b>Supported Boards:</b>
 
