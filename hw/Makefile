@@ -189,6 +189,7 @@ generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/SyncBit.v ${VERILOGDIR}
 	@cp ./common_verilog/bram_1rw.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/FIFO20.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/BRAM1.v ${VERILOGDIR}
 	@cp ./common_verilog/bram_2rw.v ${VERILOGDIR}
 	@cp common_verilog/signedmul.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
