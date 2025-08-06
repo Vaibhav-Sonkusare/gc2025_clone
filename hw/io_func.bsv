@@ -39,6 +39,8 @@ package io_func;
 		  return True;
     else if(addr >= `MemoryBase && addr <= `MemoryEnd )
       return False;
+    else if(addr >= `TCMBase && addr <= `TCMEnd )
+      return False;
     else if (addr >= `BootBase && addr <= `BootEnd)
       return False;
 	  else
