@@ -300,7 +300,7 @@ package Soc;
   typedef (TAdd#(Debug_master_num, 1)) Num_Fast_Masters;
 
   (*synthesize*)
-   module mktcm(Ifc_TCM_axi4#(`paddr,XLEN,USERSPACE, 8,1,15));
+   module mktcm(Ifc_TCM_axi4#(`paddr,XLEN,USERSPACE, 4,1,15));
     let ifc();
     mkTCM_axi4#("TCM", valueOf(`TCMBase)) _temp(ifc);
     return ifc;
