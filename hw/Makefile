@@ -1,6 +1,7 @@
 ## 			Makefile for C-Class on Arty-A7
 -include makefile.inc
 XLEN_build ?= 64
+BOARD ?= asic_yamuna
 ISA=RV$(XLEN_build)IMAFDCSU
 JOBS:=$(shell nproc)
 SHAKTI_HOME:=$(CURDIR)
@@ -52,6 +53,7 @@ MOREDEFINES=$(addprefix -D , $(BSC_DEFINES))
 # ------------------------------------- Makefile TARGETS ----------------------------------------- #
 default: quick_build_xilinx
 build:  quick_build_xilinx 
+yamuna_asic: quick_asic_build
 build_hyp: quick_build_xilinx_hyp
 build: ## To start bitstream and MCS file generation for boards (passed through BOARD parameter)
 
@@ -117,6 +119,9 @@ generate_boot_files:
 ifeq ($(BOARD), arty_a7_yamuna)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
+else ifeq ($(BOARD), asic_yamuna)
+	@cd boot-code-yamuna; make
+	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
 else ifeq ($(BOARD), nexys_a7)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
@@ -131,6 +136,10 @@ endif
 .PHONY: quick_build_xilinx
 quick_build_xilinx: run_setup_fpga
 	@make generate_verilog -j && make generate_boot_files ip_build board_build
+	
+.PHONY: quick_asic_build
+quick_asic_build: run_setup_fpga
+	@make generate_verilog -j && make generate_boot_files
 
 .PHONY: quick_build_xilinx_hyp
 quick_build_xilinx_hyp: run_setup_fpga_hyp
