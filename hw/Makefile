@@ -139,7 +139,7 @@ quick_build_xilinx: run_setup_fpga
 	
 .PHONY: quick_asic_build
 quick_asic_build: run_setup_fpga
-	@make generate_verilog -j && make generate_boot_files
+	@make generate_verilog_asic -j && make generate_boot_files
 
 .PHONY: quick_build_xilinx_hyp
 quick_build_xilinx_hyp: run_setup_fpga_hyp
@@ -200,6 +200,36 @@ generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/FIFO20.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/BRAM1.v ${VERILOGDIR}
 	@cp ./common_verilog/bram_2rw.v ${VERILOGDIR}
+	@cp common_verilog/signedmul.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/UngatedClockMux.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
+	@echo Compilation finished
+	
+.PHONY: generate_verilog_asic 
+generate_verilog_asic: $(BSVBUILDDIR)/$(TOP_BIN)
+	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/RegFile.v ${VERILOGDIR}  
+	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/BRAM2BELoad.v ${VERILOGDIR}  
+	@cp ${BS_VERILOG_LIB}/FIFO2.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFO1.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFO10.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFOL1.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/Counter.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SizedFIFO.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ResetEither.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/MakeReset0.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncReset0.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ClockInverter.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncFIFO1.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncFIFO.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/RevertReg.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncBit.v ${VERILOGDIR}
+	@cp ./bram_verilog/bram_1rw.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFO20.v ${VERILOGDIR}
+	@cp ./bram_verilog/BRAM1.v ${VERILOGDIR}
 	@cp common_verilog/signedmul.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
