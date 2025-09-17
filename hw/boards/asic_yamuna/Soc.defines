@@ -24,18 +24,17 @@
 `endif
 
 `ifdef simulate
-  `define Num_Fast_Slaves 7
-`else
   `define Num_Fast_Slaves 6
+`else
+  `define Num_Fast_Slaves 5
 `endif
 `define TCM_slave_num 0
 `define Clint_slave_num 1
 `define Debug_slave_num 2
 `define FastErr_slave_num 3
 `define Slow_fabric_slave_num 4
-`define Boot_slave_num  5
 `ifdef simulate
-  `define Sign_slave_num 6
+  `define Sign_slave_num 5
 `endif
 
 

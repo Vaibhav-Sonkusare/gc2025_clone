@@ -139,7 +139,7 @@ quick_build_xilinx: run_setup_fpga
 	
 .PHONY: quick_asic_build
 quick_asic_build: run_setup_fpga
-	@make generate_verilog_asic -j && make generate_boot_files
+	@make generate_verilog_asic -j
 
 .PHONY: quick_build_xilinx_hyp
 quick_build_xilinx_hyp: run_setup_fpga_hyp

@@ -48,7 +48,7 @@ dcache_configuration:
   ecc_enable: false
   one_hot_select: false
   rwports: '1rw'
-reset_pc: 4096
+reset_pc: 2147483648
 bus_protocol: AXI4
 bsc_compile_options:
   test_memory_size: 33554432

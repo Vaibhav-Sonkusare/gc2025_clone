@@ -79,8 +79,6 @@ package Soc;
     else if(addr >= `DebugBase && addr <= `DebugEnd)
       slave_num = `Debug_slave_num;
   `endif
-    else if(addr >= `BootBase && addr <= `BootEnd)
-      slave_num = `Boot_slave_num;
     else if(addr >= `SlowBase && addr <= `SlowEnd)
       slave_num = `Slow_fabric_slave_num;
     else if(addr >= `PLICBase && addr <= `PLICEnd)
@@ -300,7 +298,7 @@ package Soc;
   typedef (TAdd#(Debug_master_num, 1)) Num_Fast_Masters;
 
   (*synthesize*)
-   module mktcm(Ifc_TCM_axi4#(`paddr,XLEN,USERSPACE, 4,1,15));
+   module mktcm(Ifc_TCM_axi4#(`paddr,XLEN,USERSPACE,4,1,15));
     let ifc();
     mkTCM_axi4#("TCM", valueOf(`TCMBase)) _temp(ifc);
     return ifc;
@@ -338,7 +336,6 @@ package Soc;
     Ifc_spi_cluster spi_cluster <- mkspi_cluster;
     Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster;
     Ifc_err_slave_axi4lite#(`paddr,32,0) err_slave <- mkerr_slave_axi4lite;
-    Ifc_bram_axi4#(`paddr, XLEN, 0,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();
     `endif
@@ -438,7 +435,6 @@ package Soc;
     mkConnection (fabric.v_to_slaves [`FastErr_slave_num ] , fast_err_slave.slave);
 
     mkConnection (fabric.v_to_slaves [`Slow_fabric_slave_num], slow_fabric.v_from_masters[0]);
-    mkConnection (fabric.v_to_slaves [`Boot_slave_num], boot.slave);
 
     // sideband connection
     mkConnection(ccore.sb_clint_msip,clint.sb_clint_msip);
