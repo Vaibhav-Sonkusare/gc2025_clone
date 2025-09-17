@@ -211,8 +211,7 @@ generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	
 .PHONY: generate_verilog_asic 
 generate_verilog_asic: $(BSVBUILDDIR)/$(TOP_BIN)
-	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/RegFile.v ${VERILOGDIR}  
-	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/BRAM2BELoad.v ${VERILOGDIR}  
+	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/RegFile.v ${VERILOGDIR}    
 	@cp ${BS_VERILOG_LIB}/FIFO2.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/FIFO1.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/FIFO10.v ${VERILOGDIR}
@@ -237,6 +236,7 @@ generate_verilog_asic: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
+	@@rm -rf ${VERILOGDIR}/*.use
 	@echo Compilation finished
 
 .PHONY: regress
