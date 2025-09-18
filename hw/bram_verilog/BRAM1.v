@@ -26,6 +26,7 @@ module BRAM1(
 
    assign WE_I =  ~WE ;
    assign EN_I =  ~EN ;
+   assign CLK_I = ~CLK ;
 
    genvar i;
 
@@ -37,7 +38,7 @@ module BRAM1(
      SPRAM_4096x32 inst( .A(ADDR), .CE(CLK), .WEB(WE_I), .OEB(1'b0), .CSB(EN_I), .I(DI), .O(DO));
     end
     else if( ADDR_WIDTH==13 && DATA_WIDTH==32) begin : gen_blk_1  
-     spram_8192_32 inst( .A(ADDR), .CEB(CLK), .WEB(WE_I), .OEB(1'b0), .CSB(EN_I), .I(DI), .O(DO));
+     spram_8192_32 inst( .A(ADDR), .CEB(CLK_I), .WEB(WE_I), .OEB(1'b0), .CSB(EN_I), .I(DI), .O(DO));
     end
      else if(ADDR_WIDTH==12 && DATA_WIDTH==16) begin : gen_blk_1  
      SPRAM_4096x16 inst( .A(ADDR), .CE(CLK), .WEB(WE_I), .OEB(1'b0), .CSB(EN_I), .I(DI), .O(DO));
