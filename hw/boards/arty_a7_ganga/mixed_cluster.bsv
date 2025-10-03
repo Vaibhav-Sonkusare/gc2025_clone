@@ -88,7 +88,7 @@ endmodule
   endmodule
 
   (*synthesize*)
-  module mkplic(Ifc_plic_axi4lite#(`paddr, 32, 0, 33, 2, 7));
+  module mkplic(Ifc_plic_axi4lite#(`paddr, 32, 0, 35, 2, 7));
     let ifc();
     mkplic_axi4lite#(`PLICBase)_temp(ifc);
     return ifc;
@@ -155,7 +155,7 @@ endmodule
     rule rl_connect_plic_connections;
 			let tmp <- gpio.sb_gpio_to_plic.get;
 			Bit#(16) lv_gpio_intr= truncate(pack(tmp));
-			Bit#(33) plic_inputs= {wr_external_interrupts[12:6], 1'b0, i2c0.isint, gptimer1.sb_interrupt, gptimer0.sb_interrupt, lv_gpio_intr, wr_external_interrupts[5:0]};
+			Bit#(35) plic_inputs= {wr_external_interrupts[12:6], 1'b0, i2c0.isint, 2'b0, gptimer1.sb_interrupt, gptimer0.sb_interrupt, lv_gpio_intr, wr_external_interrupts[5:0]};
 			plic.sb_frm_sources(plic_inputs);
 		endrule
 

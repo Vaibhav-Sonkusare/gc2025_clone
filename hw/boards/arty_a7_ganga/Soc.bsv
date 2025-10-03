@@ -376,8 +376,8 @@ package Soc;
 		endrule
 
     rule connect_interrupt_lines;
-      mixed_cluster.interrupts({spi_cluster.spi0_sb_interrupt,
-                                spi_cluster.spi1_sb_interrupt,
+      mixed_cluster.interrupts({spi_cluster.spi1_sb_interrupt,
+                                spi_cluster.spi0_sb_interrupt,
                                 wr_ext_interrupts, uart_cluster.uart_interrupts, 6'b000000});//, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0});// pwm_cluster.pwm0_sb_interrupt, 
 //                                                  pwm_cluster.pwm1_sb_interrupt, 
 //                                                  pwm_cluster.pwm2_sb_interrupt, 
