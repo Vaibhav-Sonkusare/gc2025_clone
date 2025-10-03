@@ -302,9 +302,6 @@ else
 ifeq ($(PROGRAM),rgb)
 filepath := gpio_applns/rgb
 else
-ifeq ($(PROGRAM),linkedlist)
-filepath := malloc_test/linkedlist
-else
 ifeq ($(PROGRAM),light_blocking)
 filepath := gpio_applns/light_blocking
 else
@@ -325,6 +322,12 @@ filepath := gpio_applns/soft_i2c
 else
 ifeq ($(PROGRAM),malloc_test)
 filepath := malloc_test/malloc_test
+else
+ifeq ($(PROGRAM),realloc_test)
+filepath := malloc_test/realloc_test
+else
+ifeq ($(PROGRAM),calloc_test)
+filepath := malloc_test/calloc_test
 else
 ifeq ($(PROGRAM),gyroi2c)
 filepath := gpio_applns/gyroi2c
@@ -573,6 +576,7 @@ ifeq ($(PROGRAM),gptpwm_interrupt)
 filepath := gpt_applns/gptpwm_interrupt
 else
 	@echo "Entry for $(PROGRAM) not present"
+endif
 endif
 endif
 endif
