@@ -425,6 +425,18 @@ else
 ifeq ($(PROGRAM),gpiointerrupt)
 filepath := gpiov2_applns/gpiointerrupt
 else
+ifeq ($(PROGRAM),gpio_odd_intr_high)
+filepath := gpiov2_applns/gpio_odd_intr_high
+else
+ifeq ($(PROGRAM),gpio_odd_intr_low)
+filepath := gpiov2_applns/gpio_odd_intr_low
+else
+ifeq ($(PROGRAM),gpio_even_intr_high)
+filepath := gpiov2_applns/gpio_even_intr_high
+else
+ifeq ($(PROGRAM),gpio_even_intr_low)
+filepath := gpiov2_applns/gpio_even_intr_low
+else
 ifeq ($(PROGRAM),pwmled_v2)
 filepath := pwmv2_applns/pwmled_v2
 else
@@ -576,6 +588,10 @@ ifeq ($(PROGRAM),gptpwm_interrupt)
 filepath := gpt_applns/gptpwm_interrupt
 else
 	@echo "Entry for $(PROGRAM) not present"
+endif
+endif
+endif
+endif
 endif
 endif
 endif
