@@ -310,6 +310,13 @@ program_mcs: ## Program the FPGA Configuration Memory in order to use the onboar
 	echo "After programming reset the device once and run \"sudo openocd \
 	-f shakti-arty.cfg\" to start a gdb server at localhost:3333 "
 
+.PHONY: program_bitstream
+program_bitstream: ## Program the FPGA bitstream directly to the FPGA device
+	$(Vivado_loc) -nojournal -nolog -mode tcl -source boards/$(BOARD)/tcl/program.tcl
+	echo "Bitstream programmed to FPGA."
+	echo "Run \"sudo openocd -f shakti-arty.cfg\" to start GDB server at localhost:3333"
+
+
 .PHONY: clean
 clean: ## clean bsv build director
 	rm -rf build
