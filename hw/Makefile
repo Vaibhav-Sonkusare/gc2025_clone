@@ -1,6 +1,7 @@
 ## 			Makefile for C-Class on Arty-A7
 -include makefile.inc
 XLEN_build ?= 64
+BOARD ?= asic_yamuna
 ISA=RV$(XLEN_build)IMAFDCSU
 JOBS:=$(shell nproc)
 SHAKTI_HOME:=$(CURDIR)
@@ -52,6 +53,7 @@ MOREDEFINES=$(addprefix -D , $(BSC_DEFINES))
 # ------------------------------------- Makefile TARGETS ----------------------------------------- #
 default: quick_build_xilinx
 build:  quick_build_xilinx 
+yamuna_asic: quick_asic_build
 build_hyp: quick_build_xilinx_hyp
 build: ## To start bitstream and MCS file generation for boards (passed through BOARD parameter)
 
@@ -117,6 +119,9 @@ generate_boot_files:
 ifeq ($(BOARD), arty_a7_yamuna)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
+else ifeq ($(BOARD), asic_yamuna)
+	@cd boot-code-yamuna; make
+	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
 else ifeq ($(BOARD), nexys_a7)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
@@ -131,6 +136,10 @@ endif
 .PHONY: quick_build_xilinx
 quick_build_xilinx: run_setup_fpga
 	@make generate_verilog -j && make generate_boot_files ip_build board_build
+	
+.PHONY: quick_asic_build
+quick_asic_build: run_setup_fpga
+	@make generate_verilog_asic -j
 
 .PHONY: quick_build_xilinx_hyp
 quick_build_xilinx_hyp: run_setup_fpga_hyp
@@ -198,6 +207,36 @@ generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
+	@echo Compilation finished
+	
+.PHONY: generate_verilog_asic 
+generate_verilog_asic: $(BSVBUILDDIR)/$(TOP_BIN)
+	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/RegFile.v ${VERILOGDIR}    
+	@cp ${BS_VERILOG_LIB}/FIFO2.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFO1.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFO10.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFOL1.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/Counter.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SizedFIFO.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ResetEither.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/MakeReset0.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncReset0.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ClockInverter.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncFIFO1.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncFIFO.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/RevertReg.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncBit.v ${VERILOGDIR}
+	@cp ./bram_verilog/bram_1rw.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/FIFO20.v ${VERILOGDIR}
+	@cp ./bram_verilog/BRAM1.v ${VERILOGDIR}
+	@cp common_verilog/signedmul.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/UngatedClockMux.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
+	@@rm -rf ${VERILOGDIR}/*.use
 	@echo Compilation finished
 
 .PHONY: regress
@@ -270,6 +309,13 @@ program_mcs: ## Program the FPGA Configuration Memory in order to use the onboar
 	echo "Please Disconnect and reconnect Your Arty Board from your PC"
 	echo "After programming reset the device once and run \"sudo openocd \
 	-f shakti-arty.cfg\" to start a gdb server at localhost:3333 "
+
+.PHONY: program_bitstream
+program_bitstream: ## Program the FPGA bitstream directly to the FPGA device
+	$(Vivado_loc) -nojournal -nolog -mode tcl -source boards/$(BOARD)/tcl/program.tcl
+	echo "Bitstream programmed to FPGA."
+	echo "Run \"sudo openocd -f shakti-arty.cfg\" to start GDB server at localhost:3333"
+
 
 .PHONY: clean
 clean: ## clean bsv build director

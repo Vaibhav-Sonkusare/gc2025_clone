@@ -41,6 +41,13 @@ For more SoC related details please view README.rst
   $ make build BOARD=nexys_a7 XLEN_build=32
 ```
 
+<b>To Build RTL for Yamuna [ASIC]:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make yamuna_asic XLEN_build=32
+```
 
 <b>Supported Boards:</b>
 

@@ -31,8 +31,8 @@
 extern char _end[];                /* _end is set in the linker file */
 extern char _heap_end[];	   /* _heap_end is set in the linker file */
 
-char *heap_ptr=(char *)&_end;
-char *end_of_heap=(char *)&_heap_end;
+char *heap_ptr=(char *)&_end;// Initializes the heap pointer to the end of the text section
+char *end_of_heap=(char *)&_heap_end;// Initializes the end of the heap to the value set in the linker file
 
 /* OS LESS IMPLEMENTATION OF SBRK
  * sbrk -- changes heap size. Get nbytes more RAM.
@@ -51,20 +51,38 @@ char * m_sbrk (nbytes)
 {
 	char *base;
 
-	log_debug("\nHeap pointer is %x",heap_ptr);
-
+	log_debug("\nHeap pointer is %x",heap_ptr);//heap start
+	log_debug("\nEnd of heap is %x",end_of_heap);//heap end
+    log_debug("\n[m_sbrk] Requested bytes: %x", nbytes);
+    log_debug("\n[m_sbrk] Heap starts at %x", &_end);
+    log_debug("\n[m_sbrk] Heap max (end_of_heap): %x", end_of_heap);
 	if(!heap_ptr)
+	{
+		log_debug("\n[m_sbrk] heap_ptr was NULL, re-initializing to _end");
 		heap_ptr = (char *)&_end;
-
+}
 	base = heap_ptr;
-	heap_ptr += nbytes;
+	 log_debug("\n[m_sbrk] Base (old break) = %x", base);
 
-	log_debug("\nNew System BRK: %x %x %x",base,heap_ptr,end_of_heap);
+	if (heap_ptr + nbytes > end_of_heap) {
+        log_error("\n[m_sbrk]Memory allocation error: Insufficient Space");
+        log_error("\n[m_sbrk] ERROR: Out of memory! requied size is larger than the heap available size heap_ptr=%x end_of_heap=%x req=%x avail=%x",
+                  heap_ptr, end_of_heap, nbytes, end_of_heap - heap_ptr);
+        return (char *)-1;   // return error
+    }
+
+	heap_ptr += nbytes;
+	 log_debug("\n[m_sbrk] New heap_ptr after increment = %x", heap_ptr);
+
+	log_debug("\n[m_sbrk] New System BRK: %x %x %x",base,heap_ptr,end_of_heap);
 
 	if(heap_ptr>end_of_heap)
 	{
 		log_error("\nMemory allocation error: Insufficient Space");
+		  log_error("\n[m_sbrk] ERROR: Out of memory! heap_ptr=%x exceeds end_of_heap=%x",
+                  heap_ptr, end_of_heap);
 		return -1;
 	}
+	  log_debug("\n[m_sbrk] Allocation successful. Returning base=%x", base);
 	return base;
 }
