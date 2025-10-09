@@ -126,36 +126,20 @@ platform.h - header file for SoS C class SoC on artix7_100t
 #define PLIC_INTERRUPT_20  20	/* GPIO 13 */
 #define PLIC_INTERRUPT_21  21	/* GPIO 14 */
 #define PLIC_INTERRUPT_22  22	/* GPIO 15 */
-#define PLIC_INTERRUPT_23  23	/* GPIO 16  */
-#define PLIC_INTERRUPT_24  24	/* GPIO 17   */
-#define PLIC_INTERRUPT_25  25 	/* GPIO 18  */
-#define PLIC_INTERRUPT_26  26 	/* GPIO 19  */
-#define PLIC_INTERRUPT_27  27 	/* GPIO 20  */
-#define PLIC_INTERRUPT_28  28 	/* GPIO 21  */
-#define PLIC_INTERRUPT_29  29 	/* GPIO 22  */
-#define PLIC_INTERRUPT_30  30 	/* GPIO 23  */
-#define PLIC_INTERRUPT_31  31 	/* GPIO 24  */
-#define PLIC_INTERRUPT_32  32	/* GPIO 25  */
-#define PLIC_INTERRUPT_33  33	/* GPIO 26  */
-#define PLIC_INTERRUPT_34  34	/* GPIO 27 */
-#define PLIC_INTERRUPT_35  35	/* GPIO 28 */
-#define PLIC_INTERRUPT_36  36	/* GPIO 29 */
-#define PLIC_INTERRUPT_37  37	/* GPIO 30 */
-#define PLIC_INTERRUPT_38  38	/* GPIO 31 */
-#define PLIC_INTERRUPT_39  39	/* GPT0 */
-#define PLIC_INTERRUPT_40  40	/*GPT1  */
-#define PLIC_INTERRUPT_41  41	/* GPT2   */
-#define PLIC_INTERRUPT_42  42 	/* GPT3  */
-#define PLIC_INTERRUPT_43  43 	/* I2C0  */
-#define PLIC_INTERRUPT_44  44 	/* I2C1 */
-#define PLIC_INTERRUPT_45  45 	/* UART0  */
-#define PLIC_INTERRUPT_46  46 	/* UART1  */
-#define PLIC_INTERRUPT_47  47 	/* UART2  */
-#define PLIC_INTERRUPT_48  48 	/* XADC  */
-#define PLIC_INTERRUPT_49  49 	/* ETHERNET  */
-#define PLIC_INTERRUPT_50  50 	/* SSPI 0  */
-#define PLIC_INTERRUPT_51  51 	/* SSPI 1  */
-#define PLIC_MAX_INTERRUPT_SRC 52
+#define PLIC_INTERRUPT_23  23	/* GPT0  */
+#define PLIC_INTERRUPT_24  24	/* GPT1  */
+#define PLIC_INTERRUPT_25  25 	/* GPT2  */
+#define PLIC_INTERRUPT_26  26 	/* GPT3  */
+#define PLIC_INTERRUPT_27  27 	/* I2C0  */
+#define PLIC_INTERRUPT_28  28 	/* I2C1  */
+#define PLIC_INTERRUPT_29  29 	/* UART0  */
+#define PLIC_INTERRUPT_30  30 	/* UART1  */
+#define PLIC_INTERRUPT_31  31 	/* UART2  */
+#define PLIC_INTERRUPT_32  32	/* XADC  */
+#define PLIC_INTERRUPT_33  33	/* ETHERNET  */
+#define PLIC_INTERRUPT_34  34	/* SSPI 0  */
+#define PLIC_INTERRUPT_35  35	/* SSPI 1  */
+#define PLIC_MAX_INTERRUPT_SRC 36
 
 /*!General Purpose Input / Output */
 #define GPIO_START 0x00040100 //GPIO Start Address */
