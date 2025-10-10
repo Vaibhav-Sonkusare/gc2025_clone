@@ -29,7 +29,7 @@
 #include "plic_driver.h"
 #include "log.h"
 #include "uart.h"
-#ifndef ARTIX7_100T
+
 unsigned int uart0_prev_rcv_isr_count_flag = 0;
 unsigned int uart1_prev_rcv_isr_count_flag = 0;
 unsigned int uart2_prev_rcv_isr_count_flag = 0;
@@ -61,80 +61,36 @@ void init_variables()
 	uart1_prev_tx_isr_count_flag = 0;
 	uart2_prev_tx_isr_count_flag = 0;
 }
-#endif
 
-/** @fn
- * @brief
- *
+
+/**
+ * @fn int main(void)
+ * @brief UART0 interrupt test application.
  * @details
- *
- *
+ * This function tests UART0 interrupt functionality on the Shakti SoC.
+ * It initializes UART0, configures the PLIC for UART interrupt (ID 29),
+ * enables global machine interrupts, and continuously monitors transmit
+ * (TX) and receive (RX) interrupt flags. It periodically prints received
+ * characters and interrupt counts to the console. prints what we types in console with count
  * @warning
- *
- * @param[in]
- * @param[Out]
+ * Incorrect interrupt id mention may cause unexpected behavior.
+ * @return Always returns 0 on success.
  */
-
 int main(void){
-
-#ifndef ARTIX7_100T
 	unsigned int int_id = 1;
 	register uint32_t retval;
 	int i;
-	log_debug("\tUart 0 Interrupt Test\n");
-
+	printf("\tUart 0 Interrupt Test\n");
 	init_variables();
-
-	set_baud_rate(uart_instance[0], 19200);
-
+	printf("1"	);
+	//set_baud_rate(uart_instance[0], 19200);
+	printf("1"	);
 	plic_init();
-
-	//interrupt id 13, 10, 14, 20, 21 are coming continuously without manual trigger
-
-	configure_interrupt(25);
-	isr_table[PLIC_INTERRUPT_25] = uart0_isr;
-
-	// Enable Global (PLIC) interrupts.
-	asm volatile("li      t0, 8\t\n"
-		     "csrrs   zero, mstatus, t0\t\n"
-		    );
-
-	asm volatile("li      t0, 0x800\t\n"
-		     "csrrs   zero, mie, t0\t\n"
-		    );
-
-	asm volatile(
-		     "csrr %[retval], mstatus\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
-	asm volatile(
-		     "csrr %[retval], mie\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mip\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
+	configure_interrupt(29);
+	isr_table[PLIC_INTERRUPT_29] = uart0_isr;
+	enable_machine_global_interrupts();
 	uart0_prev_tx_isr_count_flag = uart0_tx_isr_count;
 	uart0_prev_rcv_isr_count_flag = uart0_rcv_isr_count;
-
-
 	enable_uart_interrupts(uart_instance[0],  ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL);
 	write_uart_string(uart_instance[0], "Uart 0 Interrupt TeSt");
 	i = 0;
@@ -149,7 +105,7 @@ int main(void){
 		{
 			uart0_prev_rcv_isr_count_flag = uart0_rcv_isr_count;
 		}
-		if(i++ >= 10)
+		if(i++ >= 20)
 		{
 			u0_rcv_char[++uart0_rcv_isr_count] = '\0';
 //			printf("\n TxISR Count Flag: %d", uart0_tx_isr_count_flag);
@@ -159,9 +115,7 @@ int main(void){
 			i = 0;
 			uart0_rcv_isr_count = 0;
 			memset(u0_rcv_char,'\0', UARTX_BUFFER_SIZE);
-//			break;
 		}
 	};
-#endif
 	return 0;
 }

@@ -22,20 +22,16 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
  ***************************************************************************/
-//#include "gpiov2.h"
 #include "traps.h"
 #include "platform.h"
 #include "plic_driver.h"
 #include "log.h"
 #include "pinmux.h"
-#ifdef BSOC
-#include "uartv3.h"
-#else
 #include "uart.h"
-#endif
 
-# define UART1 1
-//# define UART2 0
+
+//# define UART1 1
+# define UART2 0
 
 unsigned int uart0_prev_rcv_isr_count_flag = 0;
 unsigned int uart1_prev_rcv_isr_count_flag = 0;
@@ -103,25 +99,14 @@ void init_variables()
 
 int main(void)
 {
-#ifdef BSOC
-	uart_instance[0]->clk_enable = UART_CLK_EN;
-	uart_instance[1]->clk_enable = UART_CLK_EN;
-	uart_instance[2]->clk_enable = UART_CLK_EN;
-	set_baud_rate(uart_instance[0], 115200);
-	set_baud_rate(uart_instance[1], 115200);
-	set_baud_rate(uart_instance[2], 115200);
-	set_pinmux_configuration(GROUP0_AF2_UART1_NM | GROUP0_AF3_UART2_NM, GROUPx_DEFAULT_GPIOs, GROUPx_DEFAULT_GPIOs, GROUPx_DEFAULT_GPIOs);
-#endif
-#ifndef BSOC
 	*(pinmux_config_reg) = 0x55;
-#endif
 	write_uart_string(uart_instance[0], "\nHello World from UART0");
 	init_variables();
 	plic_init();
-	configure_interrupt(PLIC_INTERRUPT_28);
-	isr_table[PLIC_INTERRUPT_28] = uart1_isr;
-	configure_interrupt(PLIC_INTERRUPT_29);
-	isr_table[PLIC_INTERRUPT_29] = uart2_isr;
+	configure_interrupt(PLIC_INTERRUPT_30);
+	isr_table[PLIC_INTERRUPT_30] = uart1_isr;
+	configure_interrupt(PLIC_INTERRUPT_31);
+	isr_table[PLIC_INTERRUPT_31] = uart2_isr;
 	enable_machine_global_interrupts();
 #ifdef UART1
 	printf("\tUart0 big file test using uart 1\n");
