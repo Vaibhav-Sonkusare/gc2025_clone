@@ -31,7 +31,7 @@
 
 #define MODULE_NO 0
 
-uint8_t upcntr_sts[2] = {0};
+uint8_t upcntr_sts[4] = {0};
 
 /** @fn gpt_timer_interrupt() 
  * @brief gpt timer interrupt for all gpt up counters
@@ -44,7 +44,7 @@ unsigned gpt_timer_interrupt (unsigned num)
 {
 	gpt_struct* instance = NULL;
 	instance = gpt_instance[0];
-	printf("\noverflow interrupt occured for GPT %d  module",num);
+	//printf("\noverflow interrupt occured for GPT %d  module",num);
 	uint16_t status = instance->gpt_control;
 	uint16_t status1 = status;	
 	status = status & 0x87FF;
@@ -68,6 +68,10 @@ unsigned gpt_timer_interrupt (unsigned num)
 			
 		case 24:
 			instance = gpt_instance[1];
+			status = instance->gpt_control;
+	 		status1 = status;
+			status = status & 0x87FF;
+	 		status_new = status;
 			if ( status1 & 0x2000 )
 			{
 				status_new |= 0x2000;
@@ -81,14 +85,18 @@ unsigned gpt_timer_interrupt (unsigned num)
 			instance->gpt_control = status_new;
 		break;
 
-		case 41:
-			instance = gpt_instance[0];
+		case 25:
+			instance = gpt_instance[2];
+			status = instance->gpt_control;
+	 		status1 = status;
+			status = status & 0x87FF;
+	 		status_new = status;
 			if ( status1 & 0x2000 )
 			{
 				status_new |= 0x2000;
 				if(status1 & 0x200)
 				{
-					upcntr_sts[0]=1;
+					upcntr_sts[2]=1;
 					instance->gpt_control |= 0x20; // Reset counter
 					instance->gpt_control &= 0xFFDF; //Disable reset counter
 				}
@@ -96,14 +104,18 @@ unsigned gpt_timer_interrupt (unsigned num)
 			instance->gpt_control = status_new;
 			break;
 			
-		case 42:
-			instance = gpt_instance[1];
+		case 26:
+			instance = gpt_instance[3];
+			status = instance->gpt_control;
+	 		status1 = status;
+			status = status & 0x87FF;
+	 		status_new = status;
 			if ( status1 & 0x2000 )
 			{
 				status_new |= 0x2000;
 				if(status1 & 0x200)
 				{
-					upcntr_sts[1]=1;
+					upcntr_sts[3]=1;
 					instance->gpt_control |= 0x20; // Reset counter
 					instance->gpt_control &= 0xFFDF; //Disable reset counter
 				}
@@ -127,14 +139,13 @@ int main()
     uint8_t module = 0;
 	gpt_struct* instance = NULL;
 	gpt_init();
-    // plic_init();
 	log_info("\n ****GPT UP COUNTER OVERFLOW TEST CODE**** \n");
     instance = gpt_get_instance(module);
 	printf("\n Clock Ena address is %x", instance);
 	printf("\n Clock Ena address is %d", CLOCK_FREQUENCY);
-	//instance->gpt_clk_control=GPT_CLK_EN;
-    instance->gpt_clk_control=GPT_CLK_EN | 0x2000;//16 th bit enable in clk control reg and prescale value write for async reset
+    instance->gpt_clk_control=0x2000;//16 th bit enable in clk control reg and prescale value write for async reset
 	printf("\nclk_enable in clk ctrl reg=%x",instance->gpt_clk_control);
+	plic_init();
 #ifdef 	ALL
 	for(module = MODULE_NO; module < 2; module ++)
 #else
@@ -157,6 +168,7 @@ int main()
 	while(1)
 	{
 #ifdef 	ALL
+// change module count  to 2 for ganga and 4 for yamuna soc
 	for(module = MODULE_NO; module < 2; module ++)
 #else
 	module = MODULE_NO;
@@ -174,6 +186,16 @@ int main()
 		{
 			log_info("\n GPT 1 Overflow\n\n");
 			upcntr_sts[1] = 0;
+		}
+		if(1 == upcntr_sts[2] )
+		{
+			log_info("\n GPT 2 Overflow\n\n");
+			upcntr_sts[2] = 0;
+		}
+		if(1 == upcntr_sts[3] )
+		{
+			log_info("\n GPT 3 Overflow\n\n");
+			upcntr_sts[3] = 0;
 		}
  	}
 	return 0;
