@@ -1,11 +1,11 @@
 /***************************************************************************
- * Project               	    	:  shakti devt board
- * Name of the file	            	:  sspi_tx_empty_interrupt.c
+ * Project               	    	    :  shakti devt board
+ * Name of the file	            	    :  sspi_tx_empty_interrupt.c
  * Brief Description of file            :  sspi tx empty interrupt code.
  * Name of Author    	                :  Kotteeswaran
  * Email ID                             :  kottee.1@gmail.com
 
- Copyright (C) 2019  IIT Madras. All rights reserved.
+ Copyright (C) 2025  IIT Madras. All rights reserved.
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -23,75 +23,17 @@
  ***************************************************************************/
 
 #include "platform.h"
+#include "pinmux.h"
 #include "plic_driver.h"
 #include "log.h"
-#include "pinmux.h"
-#define USE_INTERRUPT 1
+#include "sspi.h"
+#include "uart.h"
 
+
+
+#define SSPI_INSTANCE 1
 #define SSPI_SIZE 8
 #define DATA_SIZE 8
-
-#define SSPI0_COMMCTRL		0x00020000
-#define SSPI0_CLKCTRL		0x00020004
-#define SSPI0_TXREG		0x00020008
-#define SSPI0_RXREG		0x0002000C
-#define SSPI0_INTR_EN		0x00020010
-#define SSPI0_FIFOSTATUS	0x00020014
-#define SSPI0_COMMSTATUS	0x00020018
-#define SSPI0_INQUAL		0x0002001C
-
-#define COMMCTRL_MOSI_OUTEN		(1<<25)
-#define COMMCTRL_MISO_OUTEN		(1<<24)
-#define COMMCTRL_SCLK_OUTEN		(1<<23)
-#define COMMCTRL_CS_OUTEN		(1<<22)
-#define COMMCTRL_RX_BITS(x)		(x<<14)
-#define COMMCTRL_TX_BITS(x)		(x<<6)
-#define COMMCTRL_COMM_MODE(x)		(x<<4)
-#define COMMCTRL_LSB_FIRST		(1<<2)
-#define COMMCTRL_SPI_EN			(1<<1)
-#define COMMCTRL_MASTER_MODE		(1<<0)
-
-#define CLKCTRL_T_CS(x)			(x<<18)
-#define CLKCTRL_CS_T(x)			(x<<10)
-#define CLKCTRL_PRESCALE(x)		(x<<2)
-#define CLKCTRL_PHASE			(1<<1)
-#define CLKCTRL_POLARITY		(1<<0)
-
-
-#define SSPI1_COMMCTRL		0x00020100
-#define SSPI1_CLKCTRL		0x00020104
-#define SSPI1_TXREG		0x00020108
-#define SSPI1_RXREG		0x0002010C
-#define SSPI1_INTR_EN		0x00020110
-#define SSPI1_FIFOSTATUS	0x00020114
-#define SSPI1_COMMSTATUS	0x00020118
-#define SSPI1_INQUAL		0x0002011C
-
-volatile uint32_t* spi0_commctrl		=	(const uint32_t*) SSPI0_COMMCTRL;
-volatile uint32_t* spi0_clkctrl 		=	(const uint32_t*) SSPI0_CLKCTRL;
-volatile uint8_t* spi0_tx8			=	(const uint8_t*) SSPI0_TXREG;
-volatile uint16_t* spi0_tx16			=	(const uint16_t*) SSPI0_TXREG;
-volatile uint32_t* spi0_tx32			=	(const uint32_t*) SSPI0_TXREG;
-volatile uint8_t* spi0_rx8			=	(const uint8_t*) SSPI0_RXREG;
-volatile uint16_t* spi0_rx16			=	(const uint16_t*) SSPI0_RXREG;
-volatile uint32_t* spi0_rx32			=	(const uint32_t*) SSPI0_RXREG;
-volatile uint8_t* spi0_fifostatus		=	(const uint8_t*) SSPI0_FIFOSTATUS;
-volatile uint8_t* spi0_commstatus	=	(const uint8_t*) SSPI0_COMMSTATUS;
-volatile uint32_t* spi0_inqual		=	(const uint32_t*) SSPI0_INQUAL;
-
-
-volatile uint32_t* spi1_commctrl		=	(const uint32_t*) SSPI1_COMMCTRL;
-volatile uint32_t* spi1_clkctrl 		=	(const uint32_t*) SSPI1_CLKCTRL;
-volatile uint8_t* spi1_tx8			=	(const uint8_t*) SSPI1_TXREG;
-volatile uint16_t* spi1_tx16			=	(const uint16_t*) SSPI1_TXREG;
-volatile uint32_t* spi1_tx32			=	(const uint32_t*) SSPI1_TXREG;
-volatile uint8_t* spi1_rx8			=	(const uint8_t*) SSPI1_RXREG;
-volatile uint16_t* spi1_rx16			=	(const uint16_t*) SSPI1_RXREG;
-volatile uint32_t* spi_rx32			=	(const uint32_t*) SSPI1_RXREG;
-volatile uint8_t* spi1_fifostatus		=	(const uint8_t*) SSPI1_FIFOSTATUS;
-volatile uint8_t* spi1_commstatus	=	(const uint8_t*) SSPI1_COMMSTATUS;
-volatile uint32_t* spi1_inqual		=	(const uint32_t*) SSPI1_INQUAL;
-volatile uint16_t* spi1_intr_enable			=	(const uint16_t*) SSPI1_INTR_EN;
 
 uint8_t spi0_tx[SSPI_SIZE] = {0};
 uint8_t spi0_rx[SSPI_SIZE] = {0};
@@ -101,242 +43,122 @@ uint8_t spi1_rx[SSPI_SIZE] = {0};
 
 uint8_t spi0_intr_flag = 0;
 uint8_t spi1_intr_flag = 0;
+uint8_t spi2_intr_flag = 0;
+uint8_t spi3_intr_flag = 0;
 
-__attribute__((always_inline))
-static inline void set_shakti32(uint32_t* addr, uint32_t val)
-{
-	*addr = val;
-}
-
-__attribute__((always_inline))
-static inline void set_shakti16(uint16_t* addr, uint16_t val)
-{
-	*addr = val;
-}
-
-__attribute__((always_inline))                                                                      
-static inline void set_shakti8(uint8_t* addr, uint8_t val)                                   
-{                                                                                                   
-    *addr = val;                                                                                    
-} 
-
-__attribute__((always_inline))
-static inline uint32_t get_shakti32(uint32_t* addr)
-{
-	return *addr;
-}
-
-__attribute__((always_inline))
-static inline uint16_t get_shakti16(uint16_t* addr)
-{
-	return *addr;
-}
-
-
-__attribute__((always_inline))
-static inline uint8_t get_shakti8(uint8_t* addr)
-{
-	return *addr;
-}
-
-unsigned spi0_rx_interrupt (unsigned num)
-{
-	printf("Got intr:%d\n", num);
-	for(int i = 0; i < SSPI_SIZE; i++)
-	{
-//		printf("\n i: %x", i);
-		spi0_rx[i] =  *spi0_rx8;
-//		spi1_rx[i] =  *spi1_rx8;
-		
-	}
-	spi0_intr_flag = 1;
-}
-
-unsigned spi1_rx_interrupt (unsigned num)
-{
-	printf("\n ISR");
-	printf("Got intr:%d\n", num);
-/*	for(int i = 0; i < SSPI_SIZE; i++)
-	{
-//		printf("\n i: %x", i);
-//		spi0_rx[i] =  *spi0_rx8;
-		spi1_rx[i] =  *spi1_rx8;
-		
-	}*/
-	spi1_intr_flag = 1;
-}
-
-
-int spi_notbusy(char number)
-{
-	int temp = 0x00000001;
-	while(temp & 0x00000001){
-		waitfor(10);
-		printf("\n SSPI %x Status is %x", number, temp);
-		if(number == 0)
-			temp = get_shakti8(spi0_commstatus);
-		else if(number == 1)
-			temp = get_shakti8(spi1_commstatus);
-		else 
-		{
-			printf("\n Incorrect SPI number");
-			return -1;
-		}
-	}
-//	printf("\n SPI comm done \n");
-	return 1;
-}
-
-
-/** @fn main() 
- * @brief main function that runs the code
- * @details runs the code
+/** @fn sspi_configure(sspi_struct *sspi_instance, uint32_t clk_rate, uint8_t clk_pol, uint8_t clk_phase, uint8_t pins_master, uint8_t mas_slv, uint8_t lsb_first, uint8_t setup_time, uint8_t hold_time) 
+ * @brief sspi configuration function which configures the SSPI registers
+ * @details Configures the SSPI registers like control register, clock register, etc. 
  * @warning No warning
- * @param[in] No input parameter 
+ * @param[in] sspi_struct *sspi_instance ---> instance of SSPI that needs to be configured
+ * 			  clk_rate --> SSPI clock frequency.
+ * 			  clk_pol --> Polarity of the clock
+ * 			  clk_phase --> Phase of the clock, 
+ * 			  pins_master --> SPI pin functionality (master or slave)
+ * 			  mas_slv --> SSPI Master / SSPI Slave, 
+ * 			  lsb_first --> Bit transfer (MSB first / LSB first),
+ *  		  setup_time --> Delay in data transfer after CS is low and before the data transmit starts,
+ * 			  hold_time ---> Delay after data transfer completes and before CS becomes high.
  * @param[Out] No output parameter
+ */
+
+void sspi_configure(sspi_struct *sspi_instance, uint32_t clk_rate, uint8_t clk_pol, uint8_t clk_phase, uint8_t pins_master, uint8_t mas_slv, uint8_t lsb_first, uint8_t setup_time, uint8_t hold_time)
+{
+ 	sspi_enable_txrx(sspi_instance, DISABLE);
+	sspi_configure_clock(sspi_instance, clk_rate, clk_pol, clk_phase);
+	sspi_configure_clock_in_hz(sspi_instance, clk_rate); /* Currently configuring for 100kHz, as the maximum clock is 20MHz */
+	sspi_configure_clock_pol(sspi_instance, clk_pol);
+	sspi_configure_clock_phase(sspi_instance, clk_phase);	
+	if(pins_master)
+		sspi_configure_pins(sspi_instance, 1, 0 ,  1 , 1);
+	else
+		sspi_configure_pins(sspi_instance, 0, 1 ,  0 , 0);
+	if(mas_slv)
+		sspi_configure_mas_slv(sspi_instance, SPI_MASTER);
+//	else
+//		sspi_configure_mas_slv(sspi_instance[SSPI_INSTANCE], ~SPI_MASTER );
+	if(!lsb_first)
+		sspi_configure_lsb_first(sspi_instance, MSB_FIRST);
+	sspi_configure_tx_setup_time(sspi_instance, setup_time);
+	sspi_configure_tx_hold_time(sspi_instance, hold_time);
+}
+
+/**
+ * @fn unsigned spi0_tx_empty_interrupt(unsigned num)
+ * @brief Interrupt handler for SPI0 Transmit Empty interrupt
+ * @details interrupt service routine (ISR) is triggered when the SPI0 transmit FIFO becomes empty.
+ * confirms the TX_EMPTY condition, and sends a byte (0x0A) to mstop interrupt
+ *It also sets a software flag to indicate the interrupt occurred.
+ * @param[in] num Interrupt number (unused)
+ * @return unsigned Returns 0
+ */
+unsigned spi0_tx_empty_interrupt (unsigned num)
+{
+	log_debug("\n sspi_instance[SSPI0_INSTANCE]->fifo_status: %x", sspi_instance[SSPI_INSTANCE]->fifo_status);
+	log_debug("\n sspi_instance[SSPI0_INSTANCE]->comm_status: %x", sspi_instance[SSPI_INSTANCE]->comm_status);
+if(sspi_instance[SSPI_INSTANCE]->fifo_status & SPI_TX_EMPTY)
+	{
+		log_info("\n SPI 0 Transmit Empty interrupt occured");
+	}
+	sspi_instance[SSPI_INSTANCE]->data_tx = 0x0a;
+	spi0_intr_flag = 1;
+	log_debug("\n sspi_instance[SSPI_INSTANCE]->fifo_status: %x", sspi_instance[SSPI_INSTANCE]->fifo_status);
+	log_debug("\n sspi_instance[SSPI_INSTANCE]->comm_status: %x", sspi_instance[SSPI_INSTANCE]->comm_status);
+}
+/**
+ * @fn unsigned spi1_tx_empty_interrupt(unsigned num)
+ * @brief Interrupt handler for SPI1 Transmit Empty interrupt
+ * @details interrupt service routine (ISR) is triggered when the SPI1 transmit FIFO becomes empty.
+ * confirms the TX_EMPTY condition, and sends a byte (0x0A) to mstop interrupt
+ *It also sets a software flag to indicate the interrupt occurred.
+ * @param[in] num Interrupt number (unused)
+ * @return unsigned Returns 0
+ */
+unsigned spi1_tx_empty_interrupt (unsigned num)
+{
+	log_debug("\n sspi_instance[SSPI_INSTANCE]->fifo_status: %x", sspi_instance[SSPI_INSTANCE]->fifo_status);
+	log_debug("\n sspi_instance[SSPI_INSTANCE]->comm_status: %x", sspi_instance[SSPI_INSTANCE]->comm_status);
+	if(sspi_instance[SSPI_INSTANCE]->fifo_status & SPI_TX_EMPTY)
+	{
+		log_info("\n SPI 1 Transmit Empty interrupt occured");
+	}
+	sspi_instance[SSPI_INSTANCE]->data_tx = 0x0a;
+	spi1_intr_flag = 1;
+	log_debug("\n sspi_instance[SSPI_INSTANCE]->fifo_status: %x", sspi_instance[SSPI_INSTANCE]->fifo_status);
+	log_debug("\n sspi_instance[SSPI_INSTANCE]->comm_status: %x", sspi_instance[SSPI_INSTANCE]->comm_status);
+}
+/**
+ * @fn int main()
+ * @brief Entry point to test SSPI1 Transmit Empty interrupt functionality.
+ * This function initializes the UART configures SSPI,enables the TX_EMPTY interrupt.
+ * It is primarily used to verify whether the transmit empty interrupt is triggered correctly when TX fifo is empty.
+ * @warning Ensure that `SSPI_INSTANCE` is mapped correctly to the SPI peripheral being tested.
+ * @return int Always returns 0 
  */
 int main()
 {
-
-//	gpt_struct* instance;
 	uint32_t temp = 0, retval = 0;
 	uint8_t i = 0, j = 0;
 	uint8_t temp_data = 0;
+	uint32_t clk_rate = SSPI_CLOCK_FREQUENCY;
+	uint8_t setup_time = SETUP_TIME_CYCLES, hold_time = HOLD_TIME_CYCLES;
+	printf("\n SSPI1 tx empty Interrupt Check\n");
+	printf("\n Configure SSPI/n");
+	sspi_init();
 	*(pinmux_config_reg) = 0x154000;
-
-	printf("\n SSPI1 Interrupt Check\n");
-
-	printf("\n Configure SSPI");
-//	temp = spi_notbusy(0);
-//	printf("SSPI0 status: %x \n", temp);
-
-	temp = spi_notbusy(1);
-	printf("SSPI1 status: %x \n", temp);
-
-	set_shakti32(spi1_clkctrl,(CLKCTRL_PRESCALE(60)|CLKCTRL_POLARITY | CLKCTRL_PHASE));
-	set_shakti8(spi1_inqual, 0x00);
-	temp = spi_notbusy(1);
-	printf("SSPI1 status: %x \n", temp);
-
-//	set_shakti32(sspi1_clkctrl,(CLKCTRL_PRESCALE(30) |CLKCTRL_POLARITY | CLKCTRL_PHASE));
-	set_shakti8(spi1_inqual, 0x00);
-	temp = spi_notbusy(1);
-	printf("SSPI1 status: %x \n", temp);
-
+	sspi_clear_fifo(sspi_instance[SSPI_INSTANCE]);
+	temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE]);
+	sspi_configure(sspi_instance[SSPI_INSTANCE],  clk_rate, CLK_POLARITY_HIGH, CLK_PHASE_HIGH, MASTER, SPI_MASTER, MSB_FIRST, setup_time, hold_time);
+//	sspi_instance[SSPI_INSTANCE]->qual = 0x00;
+	temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE]);
 	plic_init();
-	configure_interrupt(PLIC_INTERRUPT_30);
-	isr_table[PLIC_INTERRUPT_30] = spi1_rx_interrupt;
-	// Enable Global (PLIC) interrupts.
-	asm volatile("li	  t0, 8\t\n"
-			 "csrrs   zero, mstatus, t0\t\n"
-			);
-
-	asm volatile("li	  t0, 0x800\t\n"
-			 "csrrs   zero, mie, t0\t\n"
-			);
-
-	asm volatile(
-			 "csrr %[retval], mstatus\n"
-			 :
-			 [retval]
-			 "=r"
-			 (retval)
-			);
-
-	printf(" retval = %x\n", retval);
-	asm volatile(
-			 "csrr %[retval], mie\n"
-			 :
-			 [retval]
-			 "=r"
-			 (retval)
-			);
-
-	printf(" retval = %x\n", retval);
-
-	asm volatile(
-			 "csrr %[retval], mip\n"
-			 :
-			 [retval]
-			 "=r"
-			 (retval)
-			);
-
-	*spi1_intr_enable = 0x01;
-
-
-
+	configure_interrupt(PLIC_INTERRUPT_35);
+	isr_table[PLIC_INTERRUPT_35] = spi1_tx_empty_interrupt;
+	enable_machine_global_interrupts();
+	sspi_instance[SSPI_INSTANCE]->intr_en = SPI_TX_EMPTY_INTR_EN;
 	delay_loop(1, 100);
-	while(1)
-	{
-	
-			temp_data = 0x01;
-			for(i = 0; i < SSPI_SIZE; i++)
-			{
-				spi1_rx[i] = 0;
-				spi1_tx[i] = temp_data;
-//				spi1_rx[i] = 0;
-//				spi1_tx[i] = temp_data + 0x10;
-				temp_data += 0x01;
-			}
-			printf("\n Filling Fifo data");
-			for(i = 0; i < SSPI_SIZE; i++)
-			{
-//				*spi0_tx8 = spi0_tx[i];
-				*spi1_tx8 = spi1_tx[i];
-			}
-			
-			set_shakti32(spi1_commctrl,(COMMCTRL_MOSI_OUTEN | COMMCTRL_SCLK_OUTEN | \
-				COMMCTRL_CS_OUTEN | COMMCTRL_TX_BITS(SSPI_SIZE * DATA_SIZE) | \
-				COMMCTRL_RX_BITS(SSPI_SIZE * DATA_SIZE) | COMMCTRL_COMM_MODE(3) | \
-				COMMCTRL_SPI_EN | COMMCTRL_MASTER_MODE));
-//			temp = spi_notbusy(0);
-			temp = spi_notbusy(1);
-//			printf("\n SSPI 0 Commn status: %x", *spi0_commstatus );
-//			printf("\n SSPI 0 Fifo status: %x", *spi0_fifostatus );
-			printf("\n SSPI 1 Commn status: %x", *spi1_commstatus );
-			printf("\n SSPI 1 Fifo status: %x", *spi1_fifostatus );
-			
-//			if( ( (0x4 & get_shakti8(spi1_commstatus) ) != 0) )
-//			{
-//			printf("\n SSPI 0 Commn status: %x", *spi0_commstatus );
-//			printf("\n SSPI 0 Fifo status: %x", *spi0_fifostatus );
-			printf("\n SSPI 1 Commn status: %x", *spi1_commstatus );
-			printf("\n SSPI 1 Fifo status: %x", *spi1_fifostatus );
-
-#ifdef USE_INTERRUPT
-			if(spi1_intr_flag)
-			{
-#endif
-#ifndef USE_INTERRUPT
-				for(int i = 0; i < SSPI_SIZE; i++)
-				{
-					printf("\n i: %x", i);
-					spi1_rx[i] =  *spi1_rx8;
-					
-				}
-
-#endif
-				printf("\n SSPI READ VALUES");
-				
-				for(int i = 0; i < SSPI_SIZE; i++)
-				{
-					printf("\n SSPI1[%x]: %x", i, spi1_rx[i]);
-	//				printf("\n ADC[%x]:%x", i, adc_read[i]);
-				}
-#ifdef USE_INTERRUPT
-			}
-			else
-			{
-				printf("\n Didn't receive any data ");
-
-			}
-#endif
-//			printf("Read values from ADC \n");
-				delay_loop(1, 100);
-		
-			}
-  return 0;
+	while(1);
+	return 0;
 }
 
 
