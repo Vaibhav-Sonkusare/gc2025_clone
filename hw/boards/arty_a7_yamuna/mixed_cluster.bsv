@@ -80,9 +80,9 @@ package mixed_cluster;
   endmodule
 
   (*synthesize*)
-module mkgptimer#(Clock ext_clk, Reset ext_rst)(Ifc_gptimer_axi4lite#(`paddr, 32, 0,32)); 
+module mkgptimer#(Clock ext_clk)(Ifc_gptimer_axi4lite#(`paddr, 32, 0,32)); 
   let ifc();
-  mkgptimer_axi4lite#(ext_clk,ext_rst) _temp(ifc);
+  mkgptimer_axi4lite#(ext_clk) _temp(ifc);
   return ifc;
 endmodule
 
@@ -146,15 +146,14 @@ endmodule
     
     let curr_clk<- exposeCurrentClock;
     let curr_rst <- exposeCurrentReset;
-    Reset ext_rst <- mkAsyncReset(2,curr_rst,ext_clk);                                               
     let i2c0 <- mki2c;
     let i2c1 <- mki2c;
     let gpio <- mkgpio();
     let plic <- mkplic();
-    let gptimer0 <- mkgptimer(ext_clk,ext_rst);
-    let gptimer1 <- mkgptimer(ext_clk,ext_rst);
-    let gptimer2 <- mkgptimer(ext_clk,ext_rst);
-    let gptimer3 <- mkgptimer(ext_clk,ext_rst);
+    let gptimer0 <- mkgptimer(ext_clk);
+    let gptimer1 <- mkgptimer(ext_clk);
+    let gptimer2 <- mkgptimer(ext_clk);
+    let gptimer3 <- mkgptimer(ext_clk);
     let pinmuxtop <- mkpinmuxtop();
     Ifc_err_slave_axi4lite#(`paddr, 32, 0 ) err_slave <- mkerr_slave_axi4lite;
 		Wire#(Bit#(13)) wr_external_interrupts <- mkDWire('d0);
