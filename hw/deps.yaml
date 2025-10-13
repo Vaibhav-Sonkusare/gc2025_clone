@@ -9,10 +9,10 @@ common_bsv:
   checkout: 3.0.0
 devices:
   url: https://gitlab.com/shaktiproject/uncore/devices
-  checkout: gc2025
+  checkout: 114-rv32imafcsu-1
 fabrics:
   url: https://gitlab.com/shaktiproject/uncore/fabrics
-  checkout: 1.3.3
+  checkout: 1.3.5
 common_verilog:
   url: https://gitlab.com/shaktiproject/common_verilog
   checkout: 3.2.0
