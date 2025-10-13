@@ -118,7 +118,7 @@ hart0:
                     wr_illegal:
                       - Unchanged
             fs:
-                implemented: false
+                implemented: true
                 type:
                   warl:
                     dependency_fields: []
@@ -162,14 +162,6 @@ hart0:
                 type:
                   wlrl:
                     - 0:1
-            sxl:
-                implemented: true
-                type:
-                  ro_constant: 2
-            uxl:
-                implemented: true
-                type: 
-                  ro_constant: 2
             sd:
                 implemented: true
                 type:
@@ -366,7 +358,7 @@ hart0:
             accessible: false
         rv32:
             accessible: true
-	    exception_code:
+            exception_code:
               implemented: True
               type:
                 wlrl:
@@ -532,6 +524,12 @@ hart0:
                         - "pmp3cfg[7] in [0] -> pmp3cfg[7] in [0x0,0x1] pmp3cfg[6:5] in [0] pmp3cfg[4:3] not in [2] pmp3cfg[2:0] not in [2,6]"
                       wr_illegal:
                         - Unchanged
+    pmpcfg1:
+        reset-val: 0x0
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
             pmp4cfg:
                 implemented: true
                 type:
@@ -550,9 +548,9 @@ hart0:
                   ro_constant: 0
     pmpcfg2:
         reset-val: 0
-        rv32:
-            accessible: false
         rv64:
+            accessible: false
+        rv32:
             accessible: true
             pmp8cfg:
                 implemented: true
@@ -570,6 +568,12 @@ hart0:
                 implemented: true
                 type:
                   ro_constant: 0
+    pmpcfg3:
+        reset-val: 0
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
             pmp12cfg:
                 implemented: true
                 type:
