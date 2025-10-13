@@ -705,6 +705,19 @@ hart0:
         accessible: False
       rv32:
         accessible: True
+    mhpmcounter3h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            type: 
+                warl:
+                    dependency_fields: []
+                    legal:
+                      - "mhpmcounter3h[31:0] in [0x00000000:0xFFFFFFFF]"
+                    wr_illegal:
+                      - Unchanged
+        reset-val: 0
     mhpmcounter3:
         rv64:
             accessible: false
@@ -715,6 +728,19 @@ hart0:
                     dependency_fields: []
                     legal:
                       - "mhpmcounter3[31:0] in [0x00000000:0xFFFFFFFF]"
+                    wr_illegal:
+                      - Unchanged
+        reset-val: 0
+    mhpmcounter4h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            type: 
+                warl:
+                    dependency_fields: []
+                    legal:
+                      - "mhpmcounter4h[31:0] in [0x00000000:0xFFFFFFFF]"
                     wr_illegal:
                       - Unchanged
         reset-val: 0
@@ -731,6 +757,19 @@ hart0:
                     wr_illegal:
                       - Unchanged
         reset-val: 0
+    mhpmcounter5h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            type: 
+                warl:
+                    dependency_fields: []
+                    legal:
+                      - "mhpmcounter5h[31:0] in [0x00000000:0xFFFFFFFF]"
+                    wr_illegal:
+                      - Unchanged
+        reset-val: 0
     mhpmcounter5:
         rv64:
             accessible: false
@@ -741,6 +780,19 @@ hart0:
                     dependency_fields: []
                     legal:
                       - "mhpmcounter5[31:0] in [0x00000000:0xFFFFFFFF]"
+                    wr_illegal:
+                      - Unchanged
+        reset-val: 0
+    mhpmcounter6h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            type: 
+                warl:
+                    dependency_fields: []
+                    legal:
+                      - "mhpmcounter6h[31:0] in [0x00000000:0xFFFFFFFF]"
                     wr_illegal:
                       - Unchanged
         reset-val: 0
@@ -757,12 +809,28 @@ hart0:
                     wr_illegal:
                       - Unchanged
         reset-val: 0
+    hpmcounter3h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            shadow: mhpmcounter3h
+            shadow_type: ro
+        reset-val: 0
     hpmcounter3:
         rv64:
             accessible: false
         rv32:
             accessible: true
             shadow: mhpmcounter3
+            shadow_type: ro
+        reset-val: 0
+    hpmcounter4h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            shadow: mhpmcounter4h
             shadow_type: ro
         reset-val: 0
     hpmcounter4:
@@ -773,12 +841,28 @@ hart0:
             shadow: mhpmcounter4
             shadow_type: ro
         reset-val: 0
+    hpmcounter5h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            shadow: mhpmcounter5h
+            shadow_type: ro
+        reset-val: 0
     hpmcounter5:
         rv64:
             accessible: false
         rv32:
             accessible: true
             shadow: mhpmcounter5
+            shadow_type: ro
+        reset-val: 0
+    hpmcounter6h:
+        rv64:
+            accessible: false
+        rv32:
+            accessible: true
+            shadow: mhpmcounter6h
             shadow_type: ro
         reset-val: 0
     hpmcounter6:
