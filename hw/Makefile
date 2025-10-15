@@ -2,6 +2,7 @@
 -include makefile.inc
 XLEN_build ?= 64
 BOARD ?= asic_yamuna
+SYNTHTOP ?= fpga_top
 ISA=RV$(XLEN_build)IMAFDCSU
 JOBS:=$(shell nproc)
 SHAKTI_HOME:=$(CURDIR)
@@ -249,6 +250,7 @@ generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/UngatedClockMux.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ClockMux.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
@@ -278,6 +280,7 @@ generate_verilog_asic: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/UngatedClockMux.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ClockMux.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
