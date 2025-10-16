@@ -3,6 +3,7 @@
 XLEN_build ?= 64
 BOARD ?= asic_yamuna
 SYNTHTOP ?= fpga_top
+debug_bus_sz := $(word 2,$(subst =, ,$(filter debug_bus_sz=%,$(BSC_DEFINES))))
 ISA=RV$(XLEN_build)IMAFDCSU
 JOBS:=$(shell nproc)
 SHAKTI_HOME:=$(CURDIR)
@@ -15,6 +16,10 @@ ifeq ($(BSCAN2E), enable)
 	JTAG_TYPE:=JTAG_BSCAN2E
 else
 	JTAG_TYPE:=JTAG_EXTERNAL
+endif
+
+ifeq ($(debug_bus_sz), 64)
+	override BSC_DEFINES += debug_datawidth64=True
 endif
 
 ifeq ($(BOARD), arty_a7)
@@ -67,6 +72,8 @@ build_program: ## To start bitstream and MCS file generation  for boards (passed
 
 %.bo:
 	 $(info building $@)
+	 $(info debug_bus_sz = $(debug_bus_sz))
+	 $(info BSC_DEFINES = $(MOREDEFINES))
 	 @$(BSCCMD) $(MOREDEFINES) -p $(BSVINCDIR) $<
 
 .PHONY: help
