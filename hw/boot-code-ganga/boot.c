@@ -30,7 +30,6 @@ protocol.
 
 #include <stdint.h>
 #include "sspi.h"
-#include "boot.h"
 //#include "app_data.h"
 
 
@@ -83,9 +82,6 @@ void main()
 	int  data = 0, count = 0; //32 bits of data can be written at a time
 	uint32_t length = 11;
 	int* bram_address = (int*) 0x80000000;
-
-	printf("%s\n\n",bootlogo);
-	printf("%s\n\n",bootstring);
 
 	sspi_init();
 	flash_init();
