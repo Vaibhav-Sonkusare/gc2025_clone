@@ -1,7 +1,7 @@
 #include "pwmv2.h"
 #include <stdio.h>
-
-#define PWM_0 0
+#include "pinmux.h"
+#define PWM_0 2
 
 #define PERIOD 15685
 
@@ -58,6 +58,7 @@ void set_servo(int angle) {
 
 int main()
 {
+	*pinmux_config_reg = 0x2aa80;
 	pwm_init();
 	// pwm_clear(PWM_0);
 	pwm_set_prescalar_value(PWM_0, 50);

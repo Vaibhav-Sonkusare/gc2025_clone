@@ -222,7 +222,6 @@ ifeq ($(TARGET),sos)
 	cd ./uart_testcases && $(MAKE) all TARGET=$(TARGET)
 else
 	cd ./gpio_applns && $(MAKE) all TARGET=$(TARGET)
-	cd ./pwm_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./spi_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./plic_applns && $(MAKE) all TARGET=$(TARGET)
 endif
@@ -358,12 +357,6 @@ filepath := spi_applns/w25q32_read
 else
 ifeq ($(PROGRAM),mcp4921_dac)
 filepath := spi_applns/mcp4921_dac
-else
-ifeq ($(PROGRAM),pwmmotor)
-filepath := pwm_applns/pwmmotor
-else
-ifeq ($(PROGRAM),pwmled)
-filepath := pwm_applns/pwmled
 else
 ifeq ($(PROGRAM),test)
 filepath := plic_applns/test
@@ -588,8 +581,6 @@ ifeq ($(PROGRAM),gptpwm_interrupt)
 filepath := gpt_applns/gptpwm_interrupt
 else
 	@echo "Entry for $(PROGRAM) not present"
-endif
-endif
 endif
 endif
 endif
