@@ -22,6 +22,9 @@
 
 ***************************************************************************/
 /*
+Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
+Run the code and type in the UART1 Miniterm window
 UART0: 19200, No parity; (miniterm)
 UART1: 19200, stop bit=2 No parity; (cutecom)
 Try sending chars from UART1 to UART0

@@ -30,8 +30,8 @@
 #include "uart.h"
 
 
-//# define UART1 1
-# define UART2 0
+# define UART1 1
+// # define UART2 0
 
 unsigned int uart0_prev_rcv_isr_count_flag = 0;
 unsigned int uart1_prev_rcv_isr_count_flag = 0;
@@ -55,6 +55,9 @@ extern volatile unsigned int* pinmux_config_reg;
  * - Clears ISR (Interrupt Service Routine) counters for UART0, UART1, and UART2.
  * - Resets the receive buffers (u0_rcv_char, u1_rcv_char, u2_rcv_char) to null.
  * - Clears previous ISR count flags used for checking ISR progress.
+ *   Connection Details:
+ * - Take a UART Module and connect the TX to RX of other module and vice versa
+ * - Run the code and type in the UART1 Miniterm window
  */
 
 void init_variables()
