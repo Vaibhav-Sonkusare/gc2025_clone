@@ -124,8 +124,8 @@ package Soc;
 		method I2C_out i2c0_out;									//I2c IO interface
 		method I2C_out i2c1_out;									//I2c IO interface
     (*always_ready, always_enabled*)
-    interface AXI4_Lite_Master_IFC#(`paddr, 32, 0) xadc_master;
-    interface AXI4_Lite_Master_IFC#(`paddr, 32, 0) eth_master;
+    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, 0) xadc_master;
+    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, 0) eth_master;
     interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, 0) mem_master;
     interface IOCellSide iocell_io;
 
@@ -318,13 +318,13 @@ package Soc;
   //`endif
     Ifc_err_slave_axi4#(`paddr, `axi4_id_width, `buswidth, USERSPACE) fast_err_slave <- mkerr_slave_axi4;
 
-    AXI4_Lite_Fabric_IFC #(`Num_Masters, `Num_Slaves, `paddr, 32, USERSPACE) 
+    AXI4_Lite_Fabric_IFC #(`Num_Masters, `Num_Slaves, `paddr, `buswidth, USERSPACE) 
                                                         slow_fabric <- mkAXI4_Lite_Fabric(fn_slave_map);
     Ifc_pwm_cluster pwm_cluster <- mkpwm_cluster;
     Ifc_uart_cluster uart_cluster <- mkuart_cluster;
     Ifc_spi_cluster spi_cluster <- mkspi_cluster;
     Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster(ext_clk);
-    Ifc_err_slave_axi4lite#(`paddr,32,0) err_slave <- mkerr_slave_axi4lite;
+    Ifc_err_slave_axi4lite#(`paddr,`buswidth,0) err_slave <- mkerr_slave_axi4lite;
     Ifc_bram_axi4#(`paddr, `axi4_id_width, XLEN, USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();

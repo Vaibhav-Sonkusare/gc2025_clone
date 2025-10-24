@@ -5,8 +5,8 @@ isb_sizes:
     isb_s3s4: 8
     isb_s4s5: 8
 num_harts: 1
-merged_rf: False
 hardfloat: False
+merged_rf: False
 s_extension:
   itlb_size: 4
   dtlb_size: 4
@@ -37,8 +37,8 @@ icache_configuration:
 dcache_configuration:
   instantiate: true
   sets: 64
-  word_size: 4
-  block_size: 16
+  word_size: 8
+  block_size: 8
   ways: 1
   fb_size: 4
   sb_size: 2

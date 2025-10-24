@@ -115,8 +115,8 @@ package TbSoc;
   `endif
 
     Ifc_bram_axi4#(`paddr, XLEN, 0,  25) bram <- mkbram_axi4('h8000_0000, "code.mem","BRAM");
-    Ifc_bram_axi4lite#(`paddr, 32, 0,  15) xbram <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
-    Ifc_bram_axi4lite#(`paddr, 32, 0,  15) eth0 <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
+    Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  15) xbram <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
+    Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  15) eth0 <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
 
     /*doc:wire: */
     Wire#(Bit#(32)) wr_reset_pc <- mkDWire(`MemoryBase);
