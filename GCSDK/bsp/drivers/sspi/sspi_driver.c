@@ -90,7 +90,7 @@ int sspi_notbusy(sspi_struct *sspi_instance)
 	while(read_data & 0x01){
 		waitfor(10);
 		read_data = sspi_instance -> comm_status;
-        log_info("\n Status Register: %x", read_data);
+        //log_info("\n Status Register: %x", read_data);
 	}
 	log_debug("\n SPI comm done \n");
 	return 1;
