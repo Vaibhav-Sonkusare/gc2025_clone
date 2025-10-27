@@ -73,61 +73,17 @@ int main(void){
 	register uint32_t retval;
 	int i;
 	printf("\tUart 1 Interrupt Test\n");
-
 	init_variables();
-
-//	pinmux_config_reg = PINMUX_CONFIGURE_REG;
 	*(pinmux_config_reg) = 0x55;
 	set_baud_rate(uart_instance[0], 19200);
 	set_baud_rate(uart_instance[1], 19200);
-
 	plic_init();
 	printf("\tUart 1 Interrupt Test after init\n");
-
 	configure_interrupt(PLIC_INTERRUPT_26);
 	isr_table[PLIC_INTERRUPT_26] = uart1_isr;
-
-	// Enable Global (PLIC) interrupts.
-	asm volatile("li      t0, 8\t\n"
-		     "csrrs   zero, mstatus, t0\t\n"
-		    );
-
-	asm volatile("li      t0, 0x800\t\n"
-		     "csrrs   zero, mie, t0\t\n"
-		    );
-
-	asm volatile(
-		     "csrr %[retval], mstatus\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
-	asm volatile(
-		     "csrr %[retval], mie\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mip\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-	printf(" retval = %x\n", retval);
-
+	enable_machine_global_interrupts();
 	uart1_prev_tx_isr_count_flag = uart1_tx_isr_count;
 	uart1_prev_rcv_isr_count_flag = uart1_rcv_isr_count;
-
-
 	enable_uart_interrupts(uart_instance[1],  ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL);
 	printf("Before Tx\n");
 	printf("\n Status Register: %x", uart_instance[1]->status);
@@ -136,12 +92,6 @@ int main(void){
 	write_uart_string(uart_instance[0], "\nUART 0 Interrupt TeSt");
 	while(1)
 	{
-#if 0
-		if(i % 2)
-			write_uart_string(uart_instance[1], "TeSt");
-		else
-			write_uart_string(uart_instance[1], "tEsT");
-#endif
 		delay_loop(2000,1000);
 		if(uart1_prev_tx_isr_count_flag != uart1_tx_isr_count)
 		{
@@ -163,7 +113,6 @@ int main(void){
 			//break;
 		}
 	};
-
 
 	return 0;
 }
