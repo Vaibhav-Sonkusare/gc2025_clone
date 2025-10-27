@@ -67,7 +67,7 @@ package DebugSoc ;
   endmodule
 
   (*synthesize*)
-  module mkDebugSoc#(Clock tck_clk, Reset trst)(Ifc_DebugSoc);
+  module mkDebugSoc#(Clock tck_clk, Reset trst, Clock ext_clk)(Ifc_DebugSoc);
     
     let curr_clk<-exposeCurrentClock;
     let curr_reset<-exposeCurrentReset;
@@ -83,7 +83,7 @@ package DebugSoc ;
       hartresets[i] = hart_reset[i].new_rst;
     end
 
-    Ifc_Soc soc <- mkSoc(reset_by system_reset, hartresets);
+    Ifc_Soc soc <- mkSoc(ext_clk, reset_by system_reset, hartresets);
     // null crossing registers to transfer input signals from current_domain to tck domain
     //Wire#(Bit#(1)) tdi      <- mkWire(clocked_by tck_clk, reset_by trst);                                        
     //Wire#(Bit#(1)) tms      <- mkWire(clocked_by tck_clk, reset_by trst);                                        
