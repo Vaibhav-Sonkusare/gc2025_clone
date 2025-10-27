@@ -81,53 +81,11 @@ int main(void){
 #else	
 	//init plic module
 	plic_init();
-
 	//configure interrupt id 7
 	configure_interrupt(PLIC_INTERRUPT_7);
-
 	//set the corresponding isr for interrupt id 7
 	isr_table[PLIC_INTERRUPT_7] = handle_button_press;
-
-	// Enable Global (PLIC) interrupts.
-	asm volatile("li      t0, 8\t\n"
-		     "csrrs   zero, mstatus, t0\t\n"
-		    );
-
-	// Enable Local (PLIC) interrupts.
-	asm volatile("li      t0, 0x800\t\n"
-		     "csrrs   zero, mie, t0\t\n"
-		    );
-
-	asm volatile(
-		     "csrr %[retval], mstatus\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	log_debug("mstatus = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mie\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	log_debug("mie = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mip\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	log_debug("mip = %u\n", retval);
-
+	enable_machine_global_interrupts();
 	while(1){
 		i++;
 
