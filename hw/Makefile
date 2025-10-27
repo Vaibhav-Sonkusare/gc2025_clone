@@ -165,16 +165,10 @@ simulate: run_setup_sim
 
 .PHONY: generate_boot_files
 generate_boot_files:
-ifeq ($(BOARD), arty_a7_yamuna)
+ifeq ($(XLEN_build), 32)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
-else ifeq ($(BOARD), asic_yamuna)
-	@cd boot-code-yamuna; make
-	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
-else ifeq ($(BOARD), nexys_a7)
-	@cd boot-code-yamuna; make
-	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
-else ifeq ($(BOARD), arty_a7_ganga)
+else ifeq ($(XLEN_build), 64)
 	@cd boot-code-ganga; make
 	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
 else
