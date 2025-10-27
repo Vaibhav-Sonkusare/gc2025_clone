@@ -29,13 +29,26 @@
 
 #include <stdio.h>        
 #include "platform.h"
+#define GPIO_V2 1
+#ifndef  GPIO_V2
 #include "gpio.h"         
 #include "button_driver.h"
+#else
+#include "gpiov2.h"
+#endif
 #include "utils.h"
 
+#ifdef GPIO_V2
+#define BTN_0 	GPIO12
+#define BTN_1 	GPIO13
+#define BTN_2 	GPIO14	
+#define BTN_3 	GPIO15
+#endif
+
+
 /*! Define one of the the following macros to read buttons in different ways. */
-#define READ_INDIVIDUAL_BTNS /*! Read each button value */
-//#define READ_ALL_BTNS /*! Read All button values */
+//#define READ_INDIVIDUAL_BTNS /*! Read each button value */
+#define READ_ALL_BTNS 1 /*! Read All button values */
 
 unsigned long read_data = 0;
 
@@ -46,15 +59,19 @@ unsigned long read_data = 0;
  */
 void main()
 {
-
-#if defined(ARTIX7_35T) || defined(ARTIX7_100T)
+#ifdef GPIO_V2	
+	check_gpiov2();
+	printf("\n Read from GPIO Pins\n");
+	gpiov2_init();
+	gpiov2_instance->direction = 0x0;
+#endif
 
 	while (1) {
-
+#ifndef GPIO_V2
 #ifdef READ_INDIVIDUAL_BTNS
 
 		/*! Define any one button from below at a time */
-#define BTN_0  /*! Read BTN0 value */
+        //#define BTN_0  /*! Read BTN0 value */
 		//#define BTN_1 /*! Read BTN1 value */
 		//#define BTN_2 /*! Read BTN2 value */
 		//#define BTN_3 /*! Read BTN3 value */
@@ -76,55 +93,58 @@ void main()
 #endif
 
 #endif
-
 #ifdef READ_ALL_BTNS
 
 		configure_all_btn();
 
 #endif
-
+#endif
 #ifdef READ_INDIVIDUAL_BTNS
 
 #ifdef BTN_0
-		read_data = read_word(GPIO_DATA_REG); /* Copies the GPIO_DATA_REG Register contents */
+#ifndef GPIO_V2	
+				read_data = read_word(GPIO_DATA_REG); /* Copies the GPIO_DATA_REG Register contents */
+#else
+				read_data = gpiov2_instance->data; /* Copies the GPIO_DATA_REG Register contents */
+#endif	
 		printf("\n Read Data is :0x%x", read_data);
 		read_data = (read_data & 0x10000000);
 		printf("\n Read Data is :0x%x", read_data);
-		if(read_data == 0x10000000)
+		if(read_data == BTN_0)
 			printf("\n BTN0: HIGH"); 		
 		else
 			printf("\n BTN0: LOW");
 #endif
 
 #ifdef BTN_1
-		read_data = read_word(GPIO_DATA_REG);
+		read_data = gpiov2_instance->data;
 		printf("\n Read Data is :0x%x", read_data);
 		read_data = (read_data & 0x20000000);
 		printf("\n Read Data is :0x%x", read_data);
-		if(read_data == 0x20000000)
+		if(read_data == BTN_1)
 			printf("\n BTN1: HIGH"); 		
 		else
 			printf("\n BTN1: LOW");
 #endif
 
 #ifdef BTN_2
-		read_data = read_word(GPIO_DATA_REG);
+		read_data = gpiov2_instance->data;
 		printf("\n Read Data is :0x%x", read_data);
 		read_data = (read_data & 0x40000000);
 		printf("\n Read Data is :0x%x", read_data);
-		if(read_data == 0x40000000)
+		if(read_data == BTN_2)
 			printf("\n BTN2: HIGH"); 		
 		else
 			printf("\n BTN2: LOW");
 #endif
 
 #ifdef BTN_3
-		read_data = read_word(GPIO_DATA_REG);
+		read_data = gpiov2_instance->data;
 		printf("\n Read Data is :0x%x", read_data);
 		read_data = (read_data & 0x80000000);
 		printf("\n Read Data is :0x%x", read_data);
 
-		if(read_data == 0x80000000)
+		if(read_data == BTN_3)
 			printf("\n BTN3: HIGH"); 		
 		else
 			printf("\n BTN3: LOW");
@@ -137,11 +157,10 @@ void main()
 #ifdef READ_ALL_BTNS	
 
 		printf("\n Read Data is :0x%x", read_data);
-		read_data = read_word(GPIO_DATA_REG);
+		read_data = gpiov2_instance->data;
 		printf("\n Read Data is :0x%x", read_data);
 
-		switch(read_data)
-		{
+		switch(read_data /*>> 12*/ & 0xF000){
 
 		case 0x00000000:
 			printf("\n BTN0: LOW");
@@ -150,105 +169,105 @@ void main()
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x10000000:
+		case BTN_0:
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x20000000:
+		case BTN_1:
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x30000000:
+		case (BTN_0 | BTN_1):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x40000000:
+		case BTN_2:
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x50000000:
+		case (BTN_0 | BTN_2):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x60000000:
+		case (BTN_1 | BTN_2):
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x70000000:
+		case (BTN_0 | BTN_1 | BTN_2):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: LOW");
 			break;
 
-		case 0x80000000:
+		case BTN_3:
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0x90000000:
+		case (BTN_0 | BTN_3):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0xA0000000:
+		case (BTN_1 | BTN_3):
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0xB0000000:
+		case (BTN_0 | BTN_1 | BTN_3):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: LOW");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0xC0000000:
+		case (BTN_2 | BTN_3):
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0xD0000000:
+		case (BTN_0 | BTN_2 | BTN_3):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: LOW");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0xE0000000:
+		case (BTN_1 | BTN_2 | BTN_3):
 			printf("\n BTN0: LOW");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: HIGH");
 			printf("\n BTN3: HIGH");
 			break;
 
-		case 0xF0000000:
+		case (BTN_0 | BTN_1 | BTN_2 | BTN_3):
 			printf("\n BTN0: HIGH");
 			printf("\n BTN1: HIGH");
 			printf("\n BTN2: HIGH");
@@ -256,10 +275,9 @@ void main()
 			break;
 		}
 
-		delay_loop(500, 500);
+		delay_loop(3000, 2000);
 #endif
 	}
-	delay_loop(500, 500);
-#endif
+	delay_loop(1000, 2000);
 }
 

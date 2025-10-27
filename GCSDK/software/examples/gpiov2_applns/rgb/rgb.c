@@ -27,8 +27,11 @@
 */
 
 #include "platform.h"
+#ifndef GPIO_V2
 #include "gpio.h"
-
+#else
+#include "gpiov2.h"
+#endif
 /** @fn void main()
  * @brief Getting RGB light glow one by one
  * @details By giving HIGH signal RED GREEN and BLUE light glow automatically.
@@ -36,9 +39,15 @@
 void main()
 {
     //Assume  0 for INPUT and  1 for OUTPUT
+    #ifndef GPIO_V2
     write_word(GPIO_DIRECTION_CNTRL_REG, 0x00000FFF);
+    #else
+    gpiov2_init();
+    gpiov2_instance->direction = 0x00000FFF;
+    #endif
 
     while (1) {
+        #ifndef GPIO_V2
         write_word(GPIO_DATA_REG, GPIO0);
 	    delay_loop(1000, 1000);
 	printf("\nRED LIGHT");			//RED LIGHT.
@@ -56,5 +65,23 @@ void main()
 	printf("\nBLUE LIGHT");			//BLUE LIGHT.
         write_word(GPIO_DATA_REG, 0x00);
         delay_loop(1000,1000);
+        #else
+        gpiov2_instance->data = GPIO0;
+        delay_loop(1000, 1000); 
+        printf("\nRED LIGHT");
+        gpiov2_instance->data = 0x00;
+        delay_loop(1000,1000);
+        gpiov2_instance->data = GPIO1;
+        delay_loop(1000, 1000);
+        printf("\nGREEN LIGHT");
+        gpiov2_instance->data = 0x00;   
+        delay_loop(1000,1000);
+        gpiov2_instance->data = GPIO2;
+        delay_loop(1000, 1000);
+        printf("\nBLUE LIGHT");
+        gpiov2_instance->data = 0x00;   
+        delay_loop(1000,1000);
+        #endif                
+        
     }
 }

@@ -95,6 +95,7 @@ void measuring_value()
  */
 int main()
 {
+	gpiov2_init();
 	I2cInit();//configuring data and clocks as output lines
 
 	printf("MPU6050 i2c Init completed\n");

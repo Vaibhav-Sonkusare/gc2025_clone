@@ -60,7 +60,7 @@ void main()
 	unsigned short temp = 0;
 
 	printf("\n\ttemp sensor initiating!");
-
+	gpiov2_init();
 	I2cInit();
 
 	tempRead = Lm75ReadTemperature(DELAY_COUNT);

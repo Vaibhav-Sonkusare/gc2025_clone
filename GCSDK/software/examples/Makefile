@@ -219,9 +219,11 @@ ifeq ($(TARGET),sos)
 	cd ./gpiov2_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./pwmv2_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./sspi_applns && $(MAKE) all TARGET=$(TARGET)
+	cd ./sspi_testcases && $(MAKE) all TARGET=$(TARGET)
 	cd ./uart_testcases && $(MAKE) all TARGET=$(TARGET)
 else
 	cd ./gpio_applns && $(MAKE) all TARGET=$(TARGET)
+	cd ./pwm_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./spi_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./plic_applns && $(MAKE) all TARGET=$(TARGET)
 endif
@@ -293,13 +295,13 @@ ifeq ($(PROGRAM),intruder_detection)
 filepath := gpio_applns/intruder_detection
 else
 ifeq ($(PROGRAM),active_buzzer)
-filepath := gpio_applns/active_buzzer
+filepath := gpiov2_applns/active_buzzer
 else
 ifeq ($(PROGRAM),passive_buzzer)
-filepath := gpio_applns/passive_buzzer
+filepath := gpiov2_applns/passive_buzzer
 else
 ifeq ($(PROGRAM),rgb)
-filepath := gpio_applns/rgb
+filepath := gpiov2_applns/rgb
 else
 ifeq ($(PROGRAM),light_blocking)
 filepath := gpio_applns/light_blocking
@@ -311,10 +313,10 @@ ifeq ($(PROGRAM),relay)
 filepath := gpio_applns/relay
 else
 ifeq ($(PROGRAM),human_detection)
-filepath := gpio_applns/human_detection
+filepath := gpiov2_applns/human_detection
 else
 ifeq ($(PROGRAM),lm75_softi2c)
-filepath := gpio_applns/lm75_softi2c
+filepath := gpiov2_applns/lm75_softi2c
 else
 ifeq ($(PROGRAM),soft_i2c)
 filepath := gpio_applns/soft_i2c
@@ -329,10 +331,10 @@ ifeq ($(PROGRAM),calloc_test)
 filepath := malloc_test/calloc_test
 else
 ifeq ($(PROGRAM),gyroi2c)
-filepath := gpio_applns/gyroi2c
+filepath := gpiov2_applns/gyroi2c
 else
 ifeq ($(PROGRAM),buttons)
-filepath := gpio_applns/buttons
+filepath := gpiov2_applns/buttons
 else
 ifeq ($(PROGRAM),cdce)
 filepath := gpio_applns/cdce
@@ -358,6 +360,12 @@ else
 ifeq ($(PROGRAM),mcp4921_dac)
 filepath := spi_applns/mcp4921_dac
 else
+ifeq ($(PROGRAM),pwmmotor)
+filepath := pwm_applns/pwmmotor
+else
+ifeq ($(PROGRAM),pwmled)
+filepath := pwm_applns/pwmled
+else
 ifeq ($(PROGRAM),test)
 filepath := plic_applns/test
 else
@@ -374,7 +382,7 @@ ifeq ($(PROGRAM),uart01_uart02_interrupt)
 filepath := plic_applns/uart01_uart02_interrupt
 else
 ifeq ($(PROGRAM),switches)
-filepath := gpio_applns/switches
+filepath := gpiov2_applns/switches
 else
 ifeq ($(PROGRAM),switch_mode)
 filepath := uart_applns/switch_mode
@@ -387,9 +395,6 @@ filepath := clint_applns/1_second
 else
 ifeq ($(PROGRAM),min_max_second)
 filepath := clint_applns/min_max_second
-else
-ifeq ($(PROGRAM),gyro_softi2c)
-filepath := gpio_applns/gyro_softi2c
 else
 ifeq ($(PROGRAM),bmp280)
 filepath := i2c_applns/bmp280
@@ -470,43 +475,49 @@ ifeq ($(PROGRAM),txrxlen)
 filepath := uart_testcases/txrxlen
 else
 ifeq ($(PROGRAM),sspi_full_duplex)
-filepath := sspi_applns/sspi_full_duplex
+filepath := sspi_testcases/sspi_full_duplex
 else
 ifeq ($(PROGRAM),adc_dac_test)
 filepath := sspi_applns/adc_dac_test
 else
 ifeq ($(PROGRAM),sspi_MSB_check)
-filepath := sspi_applns/sspi_MSB_check
+filepath := sspi_testcases/sspi_MSB_check
 else
 ifeq ($(PROGRAM),sspi_LSB_check)
-filepath := sspi_applns/sspi_LSB_check
+filepath := sspi_testcases/sspi_LSB_check
+else
+ifeq ($(PROGRAM),sspi_simplex_rx)
+filepath := sspi_testcases/sspi_simplex_rx
+else
+ifeq ($(PROGRAM),sspi_simplex_tx)
+filepath := sspi_testcases/sspi_simplex_tx
 else
 ifeq ($(PROGRAM),sspi_rx_quad_interrupt)
-filepath := sspi_applns/sspi_rx_quad_interrupt
+filepath := sspi_testcases/sspi_rx_quad_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_full_interrupt)
-filepath := sspi_applns/sspi_rx_full_interrupt
+filepath := sspi_testcases/sspi_rx_full_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_quad_interrupt)
-filepath := sspi_applns/sspi_tx_quad_interrupt
+filepath := sspi_testcases/sspi_tx_quad_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_empty_interrupt)
-filepath := sspi_applns/sspi_tx_empty_interrupt
+filepath := sspi_testcases/sspi_tx_empty_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_half_interrupt)
-filepath := sspi_applns/sspi_tx_half_interrupt
+filepath := sspi_testcases/sspi_tx_half_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_full_interrupt)
-filepath := sspi_applns/sspi_tx_full_interrupt
+filepath := sspi_testcases/sspi_tx_full_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_empty_interrupt)
-filepath := sspi_applns/sspi_rx_empty_interrupt
+filepath := sspi_testcases/sspi_rx_empty_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_half_interrupt)
-filepath := sspi_applns/sspi_rx_half_interrupt
+filepath := sspi_testcases/sspi_rx_half_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_overrun_interrupt)
-filepath := sspi_applns/sspi_rx_overrun_interrupt
+filepath := sspi_testcases/sspi_rx_overrun_interrupt
 else
 ifeq ($(PROGRAM),spansion_chk)
 filepath := sspi_applns/spansion_chk
@@ -700,6 +711,10 @@ endif
 endif
 endif
 endif
+endif
+endif
+endif
+
 
 erase: check library
 	@rm -r output

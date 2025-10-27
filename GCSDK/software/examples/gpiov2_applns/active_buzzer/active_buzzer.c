@@ -28,7 +28,11 @@
 */
 
 #include "platform.h"
+#ifndef GPIO_V2
 #include "gpio.h"
+#else 
+#include "gpiov2.h"
+#endif
 #include "utils.h"
 
 /** @fn void main()
@@ -41,11 +45,18 @@ void main()
     write_word(GPIO_DIRECTION_CNTRL_REG, GPIO0);
 
     while (1) {
+        #ifndef GPIO_V2
         write_word(GPIO_DATA_REG, 0x0000);
+        #else
+        gpiov2_instance->data = 0x0000;
+        #endif
 
         delay_loop(1000, 1000);
-
+        #ifndef GPIO_V2
         write_word(GPIO_DATA_REG, GPIO0);
+        #else
+        gpiov2_instance->data = GPIO0;
+        #endif
 
         delay_loop(1000,1000);
 
