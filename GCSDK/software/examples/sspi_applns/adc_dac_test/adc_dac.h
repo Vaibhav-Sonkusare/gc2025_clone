@@ -1,17 +1,28 @@
 /*
 DAC Register Bits
 */
-#define SELECT_DAC0 (~(1 << 7))
-#define SELECT_DAC1 (1 << 7)
+// #define SELECT_DAC0 (~(1 << 7))
+// #define SELECT_DAC1 (1 << 7)
 
-#define BUFFERED (1 << 6)
-#define NON_BUFFERED (~(1 << 6))
+// #define BUFFERED (1 << 14)
+// #define NON_BUFFERED (~(1 << 14))
 
-#define GAIN_1X (1 << 5)
-#define GAIN_2X (~(1 << 5))
+// #define GAIN_1X (1 << 13)
+// #define GAIN_2X (~(1 << 13))
 
-#define SHUT_DOWN (~(1 << 4))
-#define DO_NOT_SHUT_DOWN (1 << 4)
+// #define SHUT_DOWN (~(1 << 12))
+// #define DO_NOT_SHUT_DOWN (1 << 12)
+#define SELECT_DACA       0x0000          // bit 15 = 0 (DAC A)
+#define SELECT_DACB       (1 << 15)       // bit 15 = 1 (DAC B)
+
+#define BUFFERED          (1 << 14)       // bit 14 = 1
+#define NON_BUFFERED      0x0000          // bit 14 = 0
+
+#define GAIN_1X           (1 << 13)       // bit 13 = 1
+#define GAIN_2X           0x0000          // bit 13 = 0
+
+#define DO_NOT_SHUT_DOWN  (1 << 12)       // bit 12 = 1 (output enabled)
+#define SHUT_DOWN         0x0000          // bit 12 = 0 (output disabled)
 
 #define DATA_BITS(x) (x&0x0FFF)
 

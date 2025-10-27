@@ -27,6 +27,7 @@
 */
 
 #include "uart.h"
+
 #include "pinmux.h"
 #include "adc_dac.h"
 #include "gpiov2.h"
@@ -38,11 +39,11 @@
 #define SSPI_SIZE 2
 #define DATA_SIZE 8
 
-#define SSPI_INSTANCE1  1
-// #define SSPI_INSTANCE3  3
+#define SSPI_INSTANCE0  0  //for adc
+#define SSPI_INSTANCE3  3  //for dac
 
-#define GPIO_OUTPUTS ( GPIO8 | GPIO9 | GPIO10 | GPIO11 | GPIO12 | GPIO13 | GPIO14 | GPIO15 ) 
-uint32_t gpio_cntrl = 0;
+
+
 
 /** @fn sspi_configure(sspi_struct *sspi_instance, uint32_t clk_rate, uint8_t clk_pol, uint8_t clk_phase, uint8_t pins_master, uint8_t mas_slv, uint8_t lsb_first, uint8_t setup_time, uint8_t hold_time) 
  * @brief sspi configuration function which configures the SSPI registers
@@ -67,13 +68,9 @@ void sspi_configure(sspi_struct *sspi_instance, uint32_t clk_rate, uint8_t clk_p
 	sspi_configure_clock_pol(sspi_instance, clk_pol);
 	sspi_configure_clock_phase(sspi_instance, clk_phase);	
 	if(pins_master)
-	{
-		sspi_configure_pins(sspi_instance, 1, 0 ,  1 , 1);}
+		sspi_configure_pins(sspi_instance, 1, 0 ,  1 , 1);
 	else
-	{
 		sspi_configure_pins(sspi_instance, 0, 1 ,  0 , 0);
-		//  printf("\n 3333");
-	}
 	if(mas_slv)
 		sspi_configure_mas_slv(sspi_instance, SPI_MASTER);
 	else//added by sugnathi
@@ -85,186 +82,131 @@ void sspi_configure(sspi_struct *sspi_instance, uint32_t clk_rate, uint8_t clk_p
 }
 
 
-/// @brief 
-/// @param data 
-/// @param dac_channel_select 
-/// @param single_differential 
-void adc_read_digital_value(unsigned int *data, unsigned char dac_channel_select, unsigned char single_differential,sspi_struct *sspi_instance)
+/**
+ * @brief Reads a digital value from the ADC via SPI and returns the result.
+ * @details This function communicates with an ADC using SPI in full-duplex mode.
+ * It sends the necessary start and configuration bits to select the channel
+ * and mode (single-ended or differential) and then reads the 10-bit digital
+ * output value from the ADC.
+ * @param[out] data Pointer to a variable where the 10-bit ADC conversion result will be stored.
+ *     The result will be in the range [0, 1023].
+ * @param[in] dac_channel_select  Channel selection for the ADC.
+ * @param[in] single_differential   Mode selection for the ADC.    - `0`: Differential mode   - `1`: Single-ended mode 
+ * @param[in] sspi_instance  Pointer to the SPI interface
+ *  @note - This implementation assumes the DAC (e.g., MCP3008-like) is SPI-compatible.
+ */
+void adc_read_digital_value(unsigned short *data, unsigned char dac_channel_select, unsigned char single_differential, sspi_struct *sspi_instance)
 {
-	unsigned char upper_byte = 0, lower_byte = 0;
-	uint32_t temp = 0;
-	unsigned char temp_data[3] = {'\0'};
-	//printf("the upper byte is %x", upper_byte);
-	sspi_instance->data_tx = 0x01; //Start bit
-	sspi_instance->data_tx = (CHANNEL_SELECT(dac_channel_select) | SINGLE_DIFFERENTIAL_CHANNEL(single_differential) );
-	sspi_instance->data_tx = 0xff;
-	sspi_configure_tx_rx_length(sspi_instance, (SSPI_SIZE +1) * DATA_SIZE, (SSPI_SIZE+1) * DATA_SIZE);
-	sspi_configure_comm_mode(sspi_instance, FULL_DUPLEX );
-	sspi_enable_txrx(sspi_instance, ENABLE);
-	temp = sspi_notbusy(sspi_instance);
-	temp_data[2] = sspi_instance->data_rx;
-	temp_data[1] = sspi_instance->data_rx;
-	temp_data[0] = sspi_instance->data_rx;
-	// printf("\n temp2 %x :temp1 %x : temp0 %x ", temp_data[2],temp_data[1],temp_data[0]);
-	*data = ( (temp_data[1] << 8) & 0x300) | temp_data[0];
-	
+    unsigned char temp_data[3] = {'\0'};
+    sspi_clear_fifo(sspi_instance);
+    sspi_instance->data_tx = 0x01; // Start bit
+    sspi_instance->data_tx = (CHANNEL_SELECT(dac_channel_select) | SINGLE_DIFFERENTIAL_CHANNEL(single_differential));
+    sspi_instance->data_tx = 0xff; // dummy byte for clock out data
+
+    sspi_configure_tx_rx_length(sspi_instance, (SSPI_SIZE + 1) * DATA_SIZE, (SSPI_SIZE + 1) * DATA_SIZE); // tx->24 bit rx ->24 bit
+    sspi_configure_comm_mode(sspi_instance, FULL_DUPLEX);
+    sspi_enable_txrx(sspi_instance, ENABLE);
+    uint8_t temp = sspi_notbusy(sspi_instance);
+    // Read 3 bytes from RX FIFO
+    delay_loop(1000, 1000);                              // Ensure the data is ready
+    temp_data[0] = sspi_instance->data_rx;               // discard
+    temp_data[1] = sspi_instance->data_rx;               // bits 9 & 8
+    temp_data[2] = sspi_instance->data_rx;               // bits 7..0
+    //  printf("RX bytes: %x %x %x\n", temp_data[0], temp_data[1], temp_data[2]);
+    *data = ((temp_data[1] & 0x03) << 8) | temp_data[2]; // Combine into 10-bit value
+                                                         //  printf("ADC Value inside function: %d %x\t ", *data, *data);
 }
-
-
-
-
-void dac_send_digital_value(unsigned short data, unsigned char dac_select, unsigned char buf_contrl, unsigned char gain_value, unsigned char shutdwn_cntrl)
+uint16_t adc_10bit_to_dac_12bit_fast(uint16_t adc_val)
 {
-	unsigned char upper_byte = 0, lower_byte = 0;
-	uint32_t temp = 0;
-	if(dac_select)
-		upper_byte |= SELECT_DAC1;
-	else
-		upper_byte &= SELECT_DAC0;
-
-	if(buf_contrl)
-		upper_byte |= BUFFERED;
-	else
-		upper_byte &= NON_BUFFERED;
-
-	if(gain_value)
-		upper_byte |= GAIN_1X;
-	else
-		upper_byte &= GAIN_2X;
-	if(shutdwn_cntrl)
-		upper_byte |= DO_NOT_SHUT_DOWN;
-	else
-		upper_byte = CHANNEL_SELECT(CHANNEL_0), SINGLE_DIFFERENTIAL_CHANNEL(SINGLE_CHANNEL);
-
-	printf("the upper byte is %x", upper_byte);
-
-	// sspi_instance[SSPI_INSTANCE]->data_tx = (data >> 8 & 0xf) | (upper_byte & 0xf0);
-	// sspi_instance[SSPI_INSTANCE]->data_tx = (data >> 0) & 0xff;
-	sspi_instance[SSPI_INSTANCE1]->data_tx = (0x8f);
-	sspi_instance[SSPI_INSTANCE1]->data_tx = 0xff;
-	printf("\n sspi_instance[SSPI_INSTANCE]->data_tx = (data >> 8 & 0xf) | (upper_byte & 0xf0) :  %x ",sspi_instance[SSPI_INSTANCE1]->data_tx = (data >> 8 & 0xf) | (upper_byte & 0xf0));
-	printf("\n sspi_instance[SSPI_INSTANCE]->data_tx = (data >> 0) & 0xff : %x ",sspi_instance[SSPI_INSTANCE1]->data_tx = (data >> 0) & 0xff);
-	sspi_configure_tx_rx_length(sspi_instance[SSPI_INSTANCE1], SSPI_SIZE * DATA_SIZE, SSPI_SIZE * DATA_SIZE);
-	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE1], FULL_DUPLEX );
-	gpiov2_instance->set = LDAC;
-	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE1], ENABLE);
-	// temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE1]);
-	gpiov2_instance->clear = LDAC;
-	delay_loop(10, 10);
-	gpiov2_instance->set = LDAC;
-	// gpiov2_instance->clear1 = SHUT;
-	// delay_loop(10, 10);
-	// gpiov2_instance->set = SHUT;
-
-
+    return (adc_val << 2) | (adc_val >> 8); // Shift to add 2 LSBs
 }
+/**
+ * @brief Sends a 12-bit digital value to the DAC via SPI.
+ * @details This function constructs a 16-bit command word for the DAC based on the
+ * selected channel, buffer mode, gain setting, and shutdown control. It then
+ * transmits the command over SPI in simplex transmit mode.
+ * @param[in] data 12-bit DAC input value (0–4095).  
+ * @param[in] dac_select  DAC channel selection:- `0` → DAC A - `1` → DAC B
+ * @param[in] buf_contrl   Buffer mode: - `0` → Unbuffered input - `1` → Buffered input
+ * @param[in] gain_value   Output gain:- `0` → Gain = 2×- `1` → Gain = 1×
+ * @param[in] shutdwn_cntrl Output enable/disable  - `0` → Shutdown mode (output off)  - `1` → Normal mode active mode (output on)
+ * @param[in] sspi_instance  Pointer to the SPI interface
+ * @note - This implementation assumes the DAC (e.g., MCP4922-like) is SPI-compatible.
+ */
+void dac_send_digital_value(unsigned short data, unsigned char dac_select, unsigned char buf_contrl, unsigned char gain_value, unsigned char shutdwn_cntrl, sspi_struct *sspi_instance)
+{
+    uint16_t cmd = 0;
+    // Build full 16-bit command
+    if (dac_select)
+        cmd |= SELECT_DACB; // bit 15
+    else
+        cmd &= (~(SELECT_DACB) & 0x7FFF); // bit 15
 
-/** @fn void main()
- * @brief prints hello world
+    if (buf_contrl)
+        cmd |= BUFFERED; // bit 14
+    else
+        cmd &= (~(BUFFERED) & 0xBFFF);
+
+    if (gain_value)
+        cmd |= GAIN_1X; // bit 13
+    else
+        cmd &= (~(GAIN_1X) & 0xDFFF);
+
+    if (shutdwn_cntrl)
+        cmd |= DO_NOT_SHUT_DOWN; // bit 12
+    else
+        cmd &= (~(DO_NOT_SHUT_DOWN) & 0xEFFF);
+
+    cmd |= (data & 0x0FFF); //  // Insert 12-bit DAC data in bits 11-0
+    printf("DAC command word: 0x%x\n", cmd);
+    sspi_configure_tx_rx_length(sspi_instance, 16, 0);   // Configure SPI transfer length: 16 bits
+    sspi_configure_comm_mode(sspi_instance, SIMPLEX_TX); // Set SPI communication mode
+    sspi_instance->data_tx = (cmd >> 8) & 0xFF;          // Send MSB (bits 15-8)
+    sspi_instance->data_tx = cmd & 0xFF;                 // Send LSB (bits 7-0)
+    sspi_enable_txrx(sspi_instance, ENABLE);
+    uint8_t temp = sspi_notbusy(sspi_instance);
+    // printf("DAC command sent\n");
+}
+/**
+ * @brief Main function for ADC-DAC combined test.
+ * @details This program demonstrates reading an analog value from an ADC,
+ * converting it to a digital value, mapping that value to the input
+ * format of a DAC, and then outputting the corresponding analog
+ * voltage via the DAC.
+ * @note - This example assumes:
+ * - ADC provides **10-bit output** over SPI.
+ * - DAC accepts **12-bit input** over SPI.
+ * - Both devices are configured for SPI mode with `CLK_POLARITY_HIGH` and `CLK_PHASE_HIGH`.
+ * - The UART is only used for debugging/log output.
+ * @return
+ * This function never returns. It runs indefinitely.
  */
 void main()
 {
-	uint32_t temp = 0, retval = 0;
-	uint8_t i = 0, j = 0;
-	uint8_t temp_data = 0;
-	uint8_t clk_rate = SSPI_CLOCK_FREQUENCY;
-	uint8_t setup_time = SETUP_TIME_CYCLES, hold_time = HOLD_TIME_CYCLES;
-	uint32_t read_value0 = 0 ,read_value1 = 0, read_value2 = 0, read_value3 = 0 , read_value4 = 0, read_value5 = 0, read_value6 = 0, read_value7 = 0;
-	uint32_t vref = 3.3, div = 1024, result;
-	uint32_t gpio_cntrl = 0, gpio_rd_data  = 0, test_rst[4] = {0};
-	unsigned long temp_ctrl = 0;
-	// gpiov2_instance->direction1 = LDAC | SHUT;
+    uint32_t temp = 0;
+    uint8_t clk_rate = SSPI_CLOCK_FREQUENCY;
+    uint8_t setup_time = SETUP_TIME_CYCLES, hold_time = HOLD_TIME_CYCLES;
+    uint16_t read_value0 = 0;
+    printf("\n***************** ADC - DAC COMBINED TEST*******************/n");
+    printf("\n Configure SSPI/n");
+    sspi_init();
 	*(pinmux_config_reg) = 0x154000;
-	sspi_init();
-	gpiov2_init();
-	sspi_clear_fifo(sspi_instance[SSPI_INSTANCE1]);
-	temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE1]);
-	printf("SSPI1 status: %x \n", temp);
-	sspi_configure(sspi_instance[SSPI_INSTANCE1],  clk_rate, CLK_POLARITY_HIGH, CLK_PHASE_HIGH, MASTER, SPI_MASTER, MSB_FIRST, setup_time, hold_time);
-	// sspi_instance[SSPI_INSTANCE1]->qual=0x00;
-	// temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE0]);
-	// printf("SSPI1 status: %x \n", temp);
+    sspi_clear_fifo(sspi_instance[SSPI_INSTANCE0]);
+    temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE0]);
+    sspi_configure(sspi_instance[SSPI_INSTANCE0], clk_rate, CLK_POLARITY_HIGH, CLK_PHASE_HIGH, MASTER, SPI_MASTER, MSB_FIRST, setup_time, hold_time);
+    temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE0]);
 
-	// sspi_clear_fifo(sspi_instance[SSPI_INSTANCE0]);
-	// temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE0]);
-	// printf("SSPI1 status: %x \n", temp);
-
-	sspi_configure(sspi_instance[SSPI_INSTANCE1],  clk_rate, CLK_POLARITY_HIGH, CLK_PHASE_HIGH, MASTER, SPI_MASTER, MSB_FIRST, setup_time, hold_time);
-
-	// sspi_instance[SSPI_INSTANCE1]->qual=0x00;
-	temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE1]);
-	printf("SSPI1 status: %x \n", temp);
-	printf("GPIO outputs %x ; GPIO8: %x", (uint16_t) GPIO_OUTPUTS, (uint16_t) GPIO8);
-    printf("\n before Direction reg: %x", gpiov2_instance->direction);
-	printf("Gpio_cntl before : %x ",gpio_cntrl);
-	gpio_cntrl = GPIO_OUTPUTS;
-	printf("Gpio_cntl AFTER : %x ",gpio_cntrl);
-	gpiov2_instance->direction = GPIO_OUTPUTS;
-	delay_loop(1000,1000);
- 	printf("\n after Direction reg: %x", gpiov2_instance->direction);
-	// while(1);
-    gpiov2_instance->clear = gpio_cntrl; //Make gpio1 (output) as low
- 	printf("\n Data reg: %x", (gpiov2_instance->data)>>7);
-	printf("\n Data reg: %x", gpiov2_instance->data);
-	//while(1);
-	while(1)
-	{
-//Read ADC value 
-	adc_read_digital_value(&read_value0, CHANNEL_0, SINGLE_CHANNEL, sspi_instance[SSPI_INSTANCE1]);	
-	//printf("\n The read value0 is %x", read_value0);
-	printf("\n The read value0 is %x", read_value0/64);
-	gpio_cntrl = read_value0 / 64;
-
-    gpiov2_instance->set = (gpio_cntrl & 0xf) << 20; //Make gpio1 (output) as high
-
-	gpiov2_instance->clear = (~gpio_cntrl & 0xf) << 20;
-	delay_loop(1000, 2000);
-
-	// adc_read_digital_value(&read_value0, CHANNEL_0, SINGLE_CHANNEL, sspi_instance[SSPI_INSTANCE1]);	
-	// //printf("\n The read value0 is %x", read_value0);
-	// printf("\n The read value1 is %x", read_value0/64);
-	// gpio_cntrl = read_value0 / 64;
-
-    // gpiov2_instance->set = (gpio_cntrl & 0xf) << 24; //Make gpio1 (output) as high
-
-	// gpiov2_instance->clear = (~gpio_cntrl & 0xf) << 24;
-	// delay_loop(1000, 2000);
-
-
-	// adc_read_digital_value(&read_value1, CHANNEL_1, SINGLE_CHANNEL);	
-	// printf("\n The read value1 is %x", read_value1);
-	// delay_loop(1000, 2000);
-	// adc_read_digital_value(&read_value2, CHANNEL_2, SINGLE_CHANNEL);	
-	// printf("\n The read value2 is %x", read_value2);
-	// delay_loop(1000, 2000);
-	// adc_read_digital_value(&read_value3, CHANNEL_3, SINGLE_CHANNEL);	
-	// printf("\n The read value3 is %x", read_value3);
-	// delay_loop(1000, 2000);
-	// adc_read_digital_value(&read_value4, CHANNEL_4, SINGLE_CHANNEL);	
-	// printf("\n The read value4 is %x", read_value4);
-	// delay_loop(1000, 2000);
-	// adc_read_digital_value(&read_value5, CHANNEL_5, SINGLE_CHANNEL);	
-	// printf("\n The read value5 is %x", read_value5);
-	// delay_loop(1000, 2000);
-	// adc_read_digital_value(&read_value6, CHANNEL_6, SINGLE_CHANNEL);	
-	// printf("\n The read value6 is %x", read_value6);
-	// delay_loop(1000, 2000);
-	// adc_read_digital_value(&read_value7, CHANNEL_7, SINGLE_CHANNEL);	
-	// printf("\n The read value7 is %x", read_value7);
-	// delay_loop(1000, 2000);
-
-//Write to DAC A
-		// dac_send_digital_value(0x000, 0, 1, 1, 1);
-		// printf("\n DATA SENT");
-		// delay_loop(2000, 2000);
-		// dac_send_digital_value(0x8F, 0, 0, 0, 0);
-		// printf("\n DATA1 SENT");
-		// delay_loop(2000, 2000);
-
-//Write to DAC B
-		// dac_send_digital_value(0x000, 1, 1, 1, 1);
-		// delay_loop(2000, 2000);
-		// dac_send_digital_value(0xFFF, 1, 1, 1, 1);
-		// delay_loop(2000, 2000);
-	};
+    sspi_clear_fifo(sspi_instance[SSPI_INSTANCE3]);
+    temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE3]);
+    sspi_configure(sspi_instance[SSPI_INSTANCE3], clk_rate, CLK_POLARITY_HIGH, CLK_PHASE_HIGH, MASTER, SPI_MASTER, MSB_FIRST, setup_time, hold_time);
+    temp = sspi_notbusy(sspi_instance[SSPI_INSTANCE3]);
+    while (1)
+    {
+        adc_read_digital_value(&read_value0, CHANNEL_0, SINGLE_CHANNEL, sspi_instance[SSPI_INSTANCE0]); // Read ADC value
+        printf("\n The adc converted value is %d -%x\n", read_value0, read_value0);
+        uint16_t dac_input_value = adc_10bit_to_dac_12bit_fast(read_value0); // converting 12 bit dac input
+        printf(" The DAC input value is %d -  %x\n", dac_input_value, dac_input_value);
+        dac_send_digital_value(dac_input_value, 1, 1, 1, 1, sspi_instance[SSPI_INSTANCE3]); // sending dig input to dac
+        delay_loop(2000, 2000);
+    };
 }
