@@ -92,3 +92,5 @@ set_property -dict { PACKAGE_PIN N19   IOSTANDARD LVCMOS12 } [get_ports { gptime
 set_property -dict { PACKAGE_PIN N18   IOSTANDARD LVCMOS12 } [get_ports { gptimer3_out }]; #IO_L17P_T2_A26_15 Sch=fmc_la_p[03]
 set_property -dict { PACKAGE_PIN M20   IOSTANDARD LVCMOS12 } [get_ports { i2c1_scl     }]; #IO_L18N_T2_A23_15 Sch=fmc_la_n[04]
 set_property -dict { PACKAGE_PIN N20   IOSTANDARD LVCMOS12 } [get_ports { i2c1_sda     }]; #IO_L18P_T2_A24_15 Sch=fmc_la_p[04]
+set_property -dict { PACKAGE_PIN L21   IOSTANDARD LVCMOS12 } [get_ports { gpio_30 }]; #IO_L10N_T1_AD11N_15 Sch=fmc_la_n[05]
+set_property -dict { PACKAGE_PIN M21   IOSTANDARD LVCMOS12 } [get_ports { gpio_31 }]; #IO_L10P_T1_AD11P_15 Sch=fmc_la_p[05]
