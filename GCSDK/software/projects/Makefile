@@ -105,8 +105,31 @@ ifeq ($(TARGET),vajra)  # c-class 100t rv64imacsu
 	@$(eval UPLODER= $(UPLOADER)/spansion)
 	@$(eval INTERFACE = $(bspboard)/ftdi)
 	@$(eval DC=$(FLAGS) $(D))
+ifeq ($(TARGET),yamuna)                         # c-class 100t rv32imacsu
+	@$(eval XLEN = 32)
+	@$(eval WIDTH = 4)
+	@$(eval FLAGS= -D yamuna)
+	@$(eval MARCH=rv32imac_zifencei_zicsr)
+	@$(eval MABI=ilp32)
+	@$(eval UPLOADER=$(UPLOADDIR)/spansion)
+	@$(eval FLASHSPEC=$(bspdri)/sspi/sspi_spansion.c)
+	@$(eval INTERFACE=$(bspboard)/ftdi)
+	@$(eval DC =$(FLAGS) $(D))
+else
+ifeq ($(TARGET),ganga)                         # c-class 100t rv64imacsu
+	@$(eval XLEN = 64)
+	@$(eval WIDTH = 8)
+	@$(eval FLAGS= -D ganga)
+	@$(eval MARCH=rv64imac_zifencei_zicsr)
+	@$(eval MABI=lp64)
+	@$(eval UPLOADER=$(UPLOADDIR)/spansion)
+	@$(eval FLASHSPEC=$(bspdri)/sspi/sspi_spansion.c)
+	@$(eval INTERFACE=$(bspboard)/ftdi)
+	@$(eval DC =$(FLAGS) $(D))
 else
 	@echo -e "$(TARGET) not supported"
+endif
+endif
 endif
 endif
 endif
