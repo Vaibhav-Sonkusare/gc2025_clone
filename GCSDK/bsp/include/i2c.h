@@ -86,7 +86,8 @@
 
 // unsigned char i2c_complete_flag;
 // unsigned int i2c_read_value;
-
+extern unsigned char i2c_complete_flag;
+extern unsigned int i2c_read_value;
 /* Struct to access I2C registers as 32 bit registers */
 typedef struct
 {

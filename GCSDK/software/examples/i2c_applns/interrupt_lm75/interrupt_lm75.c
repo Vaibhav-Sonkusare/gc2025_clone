@@ -1,6 +1,6 @@
  /***********************************************************************************
  * Project           	      : shakti devt board
- * Name of the file	      : lm75.c
+ * Name of the file	          : lm75.c
  * Brief Description of file  : reads current room temperature over i2c interface
  * Name of Author             : Kotteeswaran
  * Email ID                   : kottee.1@gmail.com
@@ -65,24 +65,17 @@ int read_lm75_register(i2c_struct * i2c_instance, unsigned int reg_offset, unsig
 	i2c_write_data(i2c_instance, reg_offset , delay);
 //Stops the I2C transaction to start reading the temperature value.
 	i2c_instance->control = I2C_STOP;
-
-
 //Writes the slave address for read
 	i2c_send_slave_address(i2c_instance, LM75_SLAVE_ADDRESS, I2C_READ, 800);
-
-
 /* Make a dummy read as per spec of the I2C controller */
 	i2c_read_data(i2c_instance, &temp, delay);
-
 //Reads the MSB Byte of temperature [D9 - D1]
 	i2c_read_data(i2c_instance, &read_buf[1], delay);
 	i2c_instance->control = I2C_NACK;
-
 //Reads the MSB Byte of temperature [D9 - D1]
 	i2c_read_data(i2c_instance, &read_buf[0], delay);
 	i2c_instance->control = I2C_STOP;
 	*readTemp = (read_buf[1] << 1) | (read_buf[0] >> 7);
-
 	return 0;
 }
 
@@ -111,8 +104,10 @@ int write_lm75_register(i2c_struct * i2c_instance, unsigned int reg_offset, unsi
 }
 void handle_i2c1_interrupt( uint32_t num)
 {
-	// i2c_complete_flag = 1;
-	log_info("i2c1 interrupt handled: %x\n", num);
+	 i2c_complete_flag = 1;
+	 log_info("\n *");
+	 i2c_instance[1]->control = I2C_IDLE;
+	//log_info("i2c1 interrupt handled: %x\n", num);
 }
 
 /** @fn int main()
@@ -129,49 +124,11 @@ int main()
 //	set_baud_rate(uart_instance[0], 115200);
 	unsigned int retval = 0;
 	plic_init();
-    	configure_interrupt(PLIC_INTERRUPT_24);
-	isr_table[PLIC_INTERRUPT_24] = handle_i2c1_interrupt;
+    configure_interrupt(PLIC_INTERRUPT_28);
+	isr_table[PLIC_INTERRUPT_28] = handle_i2c1_interrupt;
 
-	log_debug("\n\tI2C: LM75 Temperature Sensor I2C read\n");
-	// Enable Global (PLIC) interrupts.
-	asm volatile("li      t0, 8\t\n"
-		     "csrrs   zero, mstatus, t0\t\n"
-		    );
-
-	asm volatile("li      t0, 0x800\t\n"
-		     "csrrs   zero, mie, t0\t\n"
-		    );
-
-	asm volatile(
-		     "csrr %[retval], mstatus\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	log_debug(" mstatus = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mie\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	log_debug("mie = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mip\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	log_debug(" mip  = %x\n", retval);
-
+	log_info("\n\tI2C: LM75 Temperature Sensor I2C interrupt test\n");
+	enable_machine_global_interrupts();
     i2c_init();
 	//Initialises I2C Controller
 		if(config_i2c(I2C, PRESCALER_COUNT,SCLK_COUNT))
