@@ -14,7 +14,6 @@ if { [get_ips -quiet mig_7series_0] eq "" } {
 }
 
 set_property CONFIG.XML_INPUT_FILE [file normalize $home_dir/tcl/video_mig.prj] [get_ips mig_ddr3]
-set_property CONFIG.C0_S_AXI_DATA_WIDTH $bus_width [get_ips mig_ddr3]
 generate_target {instantiation_template} [get_ips mig_ddr3]
 create_ip_run [get_ips mig_ddr3]
 #launch_run mig_7series_0_synth_1
