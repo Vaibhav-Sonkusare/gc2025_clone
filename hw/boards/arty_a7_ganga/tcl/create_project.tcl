@@ -15,6 +15,8 @@ set isa [lindex $argv 2]
 set base_version [string range [version -short] 0 3]
 set jtag_type [lindex $argv 3]
 set verilogdir [lindex $argv 4]
+set axibuswidth [lindex $argv 5]
+
 # create folders
 file mkdir $fpga_dir
 
