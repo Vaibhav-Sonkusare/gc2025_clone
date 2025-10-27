@@ -1,6 +1,6 @@
 c-class:
   url: https://gitlab.com/shaktiproject/cores/c-class
-  checkout: 280-rv32imacsu-support
+  checkout: master
 caches_mmu:
   url: https://gitlab.com/shaktiproject/uncore/caches_mmu
   checkout: 14.4.1
