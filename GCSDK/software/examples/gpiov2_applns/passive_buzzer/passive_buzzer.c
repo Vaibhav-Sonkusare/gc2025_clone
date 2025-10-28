@@ -43,39 +43,42 @@
 void main()
 {
     // Assume 0 for Input and 1 for Output
-    #ifndef GPIO_V2
+#ifndef GPIO_V2
     write_word(GPIO_DIRECTION_CNTRL_REG, GPIO0);	//Connect in a Bit 0
-    #else
+#else
     gpiov2_instance->direction = GPIO0;	//Connect in a Bit 0
-    #endif
+#endif
     int i = 0;
 
-    while (1) {
-        for (i = 0; i < 80; i++) {		       //When a frequency sound 
+    while (1) 
+    {
+        for (i = 0; i < 80; i++) 
+        {		       //When a frequency sound 
             #ifndef GPIO_V2
-            write_word(GPIO_DATA_REG, GPIO0);	       //Sends tone
-            delay_loop(1000,1000);
-            write_word(GPIO_DATA_REG, 0x00);		//No tone
-            delay_loop(1000,1000);
+                write_word(GPIO_DATA_REG, GPIO0);	       //Sends tone
+                delay_loop(1000,1000);
+                write_word(GPIO_DATA_REG, 0x00);		//No tone
+                delay_loop(1000,1000);
             #else
-            gpiov2_instance->data = GPIO0;	       //Sends tone
-            delay_loop(1000,1000);
-            gpiov2_instance->data = 0x00;		//No tone
-            delay_loop(1000,1000);
+                gpiov2_instance->set = GPIO0;	       //Sends tone
+                delay_loop(1000,1000);
+                gpiov2_instance->clear = GPIO0;		//No tone
+                delay_loop(1000,1000);
             #endif
         }
 
-        for (i = 0; i < 80; i++) {
+        for (i = 0; i < 80; i++) 
+        {
             #ifndef GPIO_V2
-            write_word(GPIO_DATA_REG, GPIO0);
-            delay_loop(1000,1000);
-            write_word(GPIO_DATA_REG, 0x00);
-            delay_loop(1000,1000);
+                write_word(GPIO_DATA_REG, GPIO0);
+                delay_loop(1000,1000);
+                write_word(GPIO_DATA_REG, 0x00);
+                delay_loop(1000,1000);
             #else
-            gpiov2_instance->data = GPIO0;
-            delay_loop(1000,1000);
-            gpiov2_instance->data = 0x00;
-            delay_loop(1000,1000);
+                gpiov2_instance->set = GPIO0;
+                delay_loop(1000,1000);
+                gpiov2_instance->clear = GPIO0;
+                delay_loop(1000,1000);
             #endif
         }
         

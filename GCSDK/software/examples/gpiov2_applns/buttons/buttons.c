@@ -32,18 +32,12 @@
 #define GPIO_V2 1
 #ifndef  GPIO_V2
 #include "gpio.h"         
-#include "button_driver.h"
 #else
 #include "gpiov2.h"
 #endif
+#include "button_driver.h"
 #include "utils.h"
 
-#ifdef GPIO_V2
-#define BTN_0 	GPIO12
-#define BTN_1 	GPIO13
-#define BTN_2 	GPIO14	
-#define BTN_3 	GPIO15
-#endif
 
 
 /*! Define one of the the following macros to read buttons in different ways. */
@@ -59,7 +53,7 @@ unsigned long read_data = 0;
  */
 void main()
 {
-#ifdef GPIO_V2	
+#ifdef YAMUNA || GANGA)	
 	check_gpiov2();
 	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
@@ -67,7 +61,7 @@ void main()
 #endif
 
 	while (1) {
-#ifndef GPIO_V2
+#ifndef YAMUNA || GANGA)	
 #ifdef READ_INDIVIDUAL_BTNS
 
 		/*! Define any one button from below at a time */
@@ -102,7 +96,7 @@ void main()
 #ifdef READ_INDIVIDUAL_BTNS
 
 #ifdef BTN_0
-#ifndef GPIO_V2	
+#ifndef (YAMUNA || GANGA)		
 				read_data = read_word(GPIO_DATA_REG); /* Copies the GPIO_DATA_REG Register contents */
 #else
 				read_data = gpiov2_instance->data; /* Copies the GPIO_DATA_REG Register contents */
@@ -155,9 +149,11 @@ void main()
 #endif
 
 #ifdef READ_ALL_BTNS	
-
-		printf("\n Read Data is :0x%x", read_data);
+#ifdef YAMUNA || GANGA	
 		read_data = gpiov2_instance->data;
+#else
+
+#endif
 		printf("\n Read Data is :0x%x", read_data);
 
 		switch(read_data /*>> 12*/ & 0xF000){

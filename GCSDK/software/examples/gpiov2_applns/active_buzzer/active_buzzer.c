@@ -41,6 +41,14 @@
  */
 void main()
 {
+
+#ifdef GPIO_V2	
+	check_gpiov2();
+	printf("\n Read from GPIO Pins\n");
+	gpiov2_init();
+	gpiov2_instance->direction = 0x0;
+#endif
+
     //Assumption 1 ---> output, 0 ---> input
     write_word(GPIO_DIRECTION_CNTRL_REG, GPIO0);
 

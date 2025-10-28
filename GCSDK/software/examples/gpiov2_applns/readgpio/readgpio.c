@@ -22,7 +22,12 @@
 
 *****************************************************************************/
 
+#define GPIO_V2 1
+#ifndef  GPIO_V2
+#include "gpio.h"         
+#else
 #include "gpiov2.h"
+#endif
 #include "utils.h"
 #include "platform.h"
 
@@ -44,14 +49,25 @@ needed
 
 void main () 
 {
+#ifdef YAMUNA || GANGA	
 	check_gpiov2();
 	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
 	gpiov2_instance->direction = 0x0;
+#else
+	write_word(GPIO_DIRECTION_CNTRL_REG, 0x00 );
+
+#endif
+
+printf("\n Read from GPIO Pins\n");
 
 	while(1)
 	{
+#ifdef YAMUNA || GANGA	
 		printf("\n GPIO Read Data: %x", gpiov2_instance->data );
+#else
+		printf("\n GPIO Read Data: %x", read_word(GPIO_DATA_REG) );
+#endif
 		delay_loop(1000, 1000);
 	}
 

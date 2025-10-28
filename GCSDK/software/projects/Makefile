@@ -27,7 +27,7 @@ export filepath
 
 # appln and target board
 PROGRAM ?=all
-TARGET ?=artix7_35t
+TARGET ?=yamuna
 DEBUG ?=
 UPLOAD ?=
 FLASH ?=
@@ -46,7 +46,7 @@ check:
 ifeq ($(DEBUG),DEBUG)
 	@$(eval D = -g)
 endif
-ifeq ($(TARGET),artix7_35t)
+ifeq ($(TARGET),yamuna)
 	@$(eval XLEN = 32)
 	@$(eval FLAGS= -D ARTIX7_35T)
 	@$(eval MARCH=rv32imac)

@@ -170,12 +170,10 @@ clean:
 	@if [ -d software/projects/gen_lib/ ] ; then rm -rf software/projects/gen_lib/; fi
 ifeq ($(PROGRAM),)
 	cd ./software/examples/clint_applns && $(MAKE) clean CLEAR=CLEAR
-	cd ./software/examples/spi_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/sspi_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/uart_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/uart_testcases && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/i2c_applns && $(MAKE) clean CLEAR=CLEAR
-	cd ./software/examples/gpio_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/gpiov2_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/pwmv2_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/plic_applns && $(MAKE) clean CLEAR=CLEAR

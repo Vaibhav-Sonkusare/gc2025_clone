@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>
 
-TARGET = artix7_35t
+TARGET = yamuna
 BSP:=../../../bsp
 #bsp incl file path
 bspinc:=$(BSP)/include

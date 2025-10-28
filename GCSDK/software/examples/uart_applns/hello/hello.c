@@ -26,7 +26,7 @@
 @brief Prints "Hello world !" in the uart terminal.
 */
 
-#include<uart.h>
+#include "uart.h"
 
 /** @fn void main()
  * @brief prints hello world

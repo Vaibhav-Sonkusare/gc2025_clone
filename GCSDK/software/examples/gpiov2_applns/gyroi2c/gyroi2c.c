@@ -27,10 +27,14 @@
 @detail 
 */ 
 
-#include"gpio_i2c.h"
+#define GPIO_V2 1
+#ifndef  GPIO_V2
+#include "gpio.h"         
+#else
+#include "gpiov2.h"
+#endif
+#include "gpio_i2c.h"
 
-#define I2C_WRITE 0
-#define I2C_READ 1
 
 #define MPU6050_SLAVE_ADDRESS      0xD0
 #define MPU_6050_OUTPUT_BEGIN      0x3B
@@ -95,7 +99,12 @@ void measuring_value()
  */
 int main()
 {
+#ifdef YAMUNA || GANGA	
+	check_gpiov2();
+	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
+	gpiov2_instance->direction = 0x0;
+#endif
 	I2cInit();//configuring data and clocks as output lines
 
 	printf("MPU6050 i2c Init completed\n");

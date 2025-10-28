@@ -43,36 +43,38 @@
 void main()
 
 {
-	#ifdef GPIO_V2	
+#ifdef GPIO_V2	
 	check_gpiov2();
 	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
 	gpiov2_instance->direction = 0x0;
 #endif
 	unsigned long readData = 0;
-	#ifndef GPIO_V2
+#ifndef GPIO_V2
     write_word(GPIO_DIRECTION_CNTRL_REG, 0x0);
-	#else
+#else
 	gpiov2_instance->direction = 0x0;	
-	#endif
+#endif
     
-    while (1){
-			#ifndef GPIO_V2
-        	readData = read_word(GPIO_DATA_REG);
-			#else
+    while (1)
+	{
+		#ifndef GPIO_V2
+			readData = read_word(GPIO_DATA_REG);
+		#else
 			readData = gpiov2_instance->data;
-			#endif
-			printf("\n GPIO Read Data: %x", readData );
-	        if ((readData & 0x0001) == 0){
+		#endif
+		printf("\n GPIO Read Data: %x", readData );
+		if ((readData & 0x0001) == 0)
+		{
+			printf("\nHuman Detected");
+		}
 
- 			printf("\nHuman Detected");
-                }
-
-            else{
-				printf("\nNo one detected");
-             	}
-          
-	      		delay_loop(3000, 3000);
-    	      }
+		else
+		{
+			printf("\nNo one detected");
+		}
+		
+			delay_loop(3000, 3000);
+	}
 }
     

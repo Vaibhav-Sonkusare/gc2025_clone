@@ -27,7 +27,14 @@
 @detail Helps to find out temperature of a surrounding with the help of gpio pins.
 */
 
+#define GPIO_V2 1
+#ifndef  GPIO_V2
+#include "gpio.h"         
+#else
+#include "gpiov2.h"
+#endif
 #include "gpio_i2c.h"
+
 
 #define LM75_SLAVE_ADDRESS 0x90
 #define DELAY_COUNT 200
@@ -60,7 +67,12 @@ void main()
 	unsigned short temp = 0;
 
 	printf("\n\ttemp sensor initiating!");
+#ifdef YAMUNA || GANGA	
+	check_gpiov2();
+	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
+	gpiov2_instance->direction = 0x0;
+#endif
 	I2cInit();
 
 	tempRead = Lm75ReadTemperature(DELAY_COUNT);
