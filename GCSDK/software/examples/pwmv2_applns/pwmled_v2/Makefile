@@ -21,11 +21,11 @@ SHELL := /bin/bash # Use bash syntax
 DC ?=
 PROGRAM ?=
 #default target board
-TARGET ?= artix7_35t
+TARGET ?= yamuna
 DEBUG ?=
 MARCH ?= rv32imac
 MABI  ?= ilp32
-XLEN  ?=32
+XLEN  ?= 32
 FLAGS ?=
 
 all: create_dir

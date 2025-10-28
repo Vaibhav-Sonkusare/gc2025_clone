@@ -28,7 +28,12 @@ using gpio pins.
 */
 
 #include "platform.h"
-#include "gpio.h"
+#define GPIO_V2 1
+#ifndef  GPIO_V2
+#include "gpio.h"         
+#else
+#include "gpiov2.h"
+#endif
 #include "gpio_i2c.h"
 
 /** @fn extern void delay_loop(unsigned long , unsigned long)
@@ -47,9 +52,14 @@ extern void delay_loop(unsigned long , unsigned long);
 static void SetSCLAsOutput()
 {
 	unsigned long readData = 0;
+
+#ifndef YAMUNA || GANGA
 	readData = read_word(GPIO_DIRECTION_CNTRL_REG);
 	write_word(GPIO_DIRECTION_CNTRL_REG, (readData | I2C_SCL) );
-	printf("SCL set as output\n");
+#else
+	gpiov2_instance->direction = gpiov2_instance->direction | I2C_SCL;
+#endif
+	log_debug("SCL set as output\n");
 }
 
 /** @fn static void SetSdaDirection(int inOutCntrl)
@@ -62,16 +72,33 @@ static void SetSCLAsOutput()
 static void SetSdaDirection(int inOutCntrl)
 {
 	unsigned long readData = 0;
+
+#ifndef YAMUNA || GANGA
 	readData = read_word(GPIO_DIRECTION_CNTRL_REG);
 
-	if (inOutCntrl) { // output
+	if (inOutCntrl) 
+	{ // output
 		write_word(GPIO_DIRECTION_CNTRL_REG, (readData | I2C_SDA) );
-		printf("\n\tSDA set as output\n");
+		log_debug("\n\tSDA set as output\n");
 	}
-    else {
+    else 
+	{
 		write_word(GPIO_DIRECTION_CNTRL_REG, (readData & ~(I2C_SDA) ) );
-		printf("\n\tSDA set as input\n");
+		log_debug("\n\tSDA set as input\n");
 	}
+#else
+	if (inOutCntrl) 
+	{ // output
+		gpiov2_instance->direction = gpiov2_instance->direction | I2C_SDA;
+		log_debug("\n\tSDA set as output\n");
+	}
+    else 
+	{
+		gpiov2_instance->direction = (gpiov2_instance->direction | ~(I2C_SDA) );
+		log_debug("\n\tSDA set as input\n");
+	}
+
+#endif
 }
 
 /** @fn static void start(unsigned char delay)
@@ -82,9 +109,9 @@ static void SetSdaDirection(int inOutCntrl)
  */
 static void start(unsigned char delay)
 {
+#ifndef YAMUNA || GANGA
 	unsigned long readData = 0;
 	readData = read_word(GPIO_DATA_REG);
-
 //	sda=1;
 	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SDA | I2C_SCL) );
 	delay_loop(delay, delay);
@@ -101,7 +128,24 @@ static void start(unsigned char delay)
 	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SCL) ) );
 	delay_loop(delay, delay);
 
-	printf("\n\tI2C: I2C Start condition sent\n");
+#else
+//	sda=1;
+	gpiov2_instance->set = I2C_SCL | I2C_SDA;
+	delay_loop(delay, delay);
+
+//		scl=1;
+	gpiov2_instance->set = I2C_SCL;
+	delay_loop(delay, delay);
+
+//		sda=0;
+	gpiov2_instance->clear = I2C_SDA;
+	delay_loop(delay, delay);
+
+//		scl=0;
+	gpiov2_instance->clear = I2C_SCL;
+	delay_loop(delay, delay);
+#endif
+	log_debug("\n\tI2C: I2C Start condition sent\n");
 }
 
 /** @fn static void stop(unsigned char delay)
@@ -112,6 +156,7 @@ static void start(unsigned char delay)
  */
 static void stop(unsigned char delay)
 {
+#ifndef YAMUNA || GANGA
 	unsigned long readData = 0;
 	readData = read_word(GPIO_DATA_REG);
 //	sda=0;
@@ -125,8 +170,20 @@ static void stop(unsigned char delay)
 //	sda=1;
 	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SDA) );
 	delay_loop(delay, delay);
-	printf("\n\tI2C: I2C Start condition sent\n");
+#else
+//	sda=0;
+	gpiov2_instance->clear = I2C_SDA;
+	delay_loop(delay, delay);
 
+//	scl=1;
+	gpiov2_instance->set = I2C_SCL;
+	delay_loop(delay, delay);
+
+//	sda=1;
+	gpiov2_instance->set = I2C_SDA;
+	delay_loop(delay, delay);
+#endif
+	log_debug("\n\tI2C: I2C Start condition sent\n");
 }
 
 /** @fn void I2cWriteByte(unsigned char writeData, unsigned char delay)
@@ -140,13 +197,14 @@ static void stop(unsigned char delay)
 void I2cWriteByte(unsigned char writeData, unsigned char delay)
 {
 	unsigned char j = 0,k;
+#ifndef YAMUNA || GANGA
 	unsigned long readData = 0;
 	readData = read_word(GPIO_DATA_REG);
 	while (j < 8)
 	{
 		k = writeData;
 		k = ( k << j ) & 0x80;
-//		printf("\n\r i: %d; j: %d; k: %d", i, j, k);
+//		log_debug("\n\r i: %d; j: %d; k: %d", i, j, k);
 //		sda=CY;
 		if (k == 0) {
 			write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SDA)) );
@@ -166,6 +224,34 @@ void I2cWriteByte(unsigned char writeData, unsigned char delay)
 		delay_loop(delay, delay);
 		++j;
 	}
+#else
+	while (j < 8)
+	{
+		k = writeData;
+		k = ( k << j ) & 0x80;
+//		log_debug("\n\r i: %d; j: %d; k: %d", i, j, k);
+//		sda=CY;
+		if (k == 0) 
+		{
+			gpiov2_instance->clear = I2C_SDA;
+			delay_loop(delay, delay);
+		}
+		else 
+		{
+			gpiov2_instance->set = I2C_SDA;
+			delay_loop(delay, delay);
+		}
+
+	//	scl=1;
+		gpiov2_instance->set = I2C_SCL;
+		delay_loop(delay, delay);
+
+	//	scl=0;
+		gpiov2_instance->clear = I2C_SCL;
+		delay_loop(delay, delay);
+		++j;
+	}
+#endif
 }
 
 /** @fn unsigned char I2cReadByte(unsigned char delay)
@@ -182,11 +268,13 @@ unsigned char I2cReadByte(unsigned char delay)
 	unsigned char bitValue;
 	unsigned char readData = 0;
   unsigned long readGpioData = 0;
+#ifndef YAMUNA || GANGA
 	readData = read_word(GPIO_DATA_REG);
 
 //	sda=1;
 //Make SDA high
-	while (j < 8) {
+	while (j < 8) 
+	{
 	//	scl=1;
 		write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SCL) );
 		delay_loop(delay, delay);
@@ -207,7 +295,34 @@ unsigned char I2cReadByte(unsigned char delay)
 
 		++j;
 	}
+#else
+	readData = gpiov2_instance->data;
 
+//	sda=1;
+//Make SDA high
+	while (j < 8) {
+	//	scl=1;
+		gpiov2_instance->set =  I2C_SCL;
+		delay_loop(delay, delay);
+
+//		d1 = sda;
+		readGpioData = gpiov2_instance->daa  & I2C_SDA;
+		if (readGpioData != 0)
+			bitValue = 1;
+		else
+			bitValue = 0;
+	    readData = readData << 1;
+		readData = readData | bitValue;
+		delay_loop(delay, delay);
+
+	//	scl=0;
+		gpiov2_instance->clear = I2C_SCL;
+		delay_loop(delay, delay);
+
+		++j;
+	}
+
+#endif
 	return readData;
 }
 
@@ -223,23 +338,41 @@ unsigned char I2cReadByte(unsigned char delay)
 void ReadAckForWrite(unsigned char delay)
 {
 	unsigned long readData = 0;
-	printf("\n\tI2C: I2C Read\n");
+	log_debug("\n\tI2C: I2C Read\n");
+
+#ifndef YAMUNA || GANGA
 	readData = read_word(GPIO_DATA_REG);
 	delay_loop(delay, delay);
 //	scl=1;delay
-	printf("\n\tI2C: I2C Write\n");
+	log_debug("\n\tI2C: I2C Write\n");
 	write_word(GPIO_DATA_REG, (readData | I2C_SCL) );
 	delay_loop(delay, delay);
 
-		printf("\n\tI2C: I2C Write\n");
+		log_debug("\n\tI2C: I2C Write\n");
 		readData = read_word(GPIO_DATA_REG)  & I2C_SDA;
 
 //	scl=0;
-	printf("\n\tI2C: I2C Write\n");
+	log_debug("\n\tI2C: I2C Write\n");
 	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SCL) ) );
 	delay_loop(delay, delay);
-	printf("\n\tI2C: I2C ReadNackForWrite sent\n");
+	log_debug("\n\tI2C: I2C ReadNackForWrite sent\n");
+#else
+	readData = read_word(GPIO_DATA_REG);
+	delay_loop(delay, delay);
+//	scl=1;delay
+	log_debug("\n\tI2C: I2C Write\n");
+	gpiov2_instance->set = I2C_SCL;
+	delay_loop(delay, delay);
 
+		log_debug("\n\tI2C: I2C Write\n");
+		readData = gpiov2_instance->data  & I2C_SDA;
+
+//	scl=0;
+	log_debug("\n\tI2C: I2C Write\n");
+	gpiov2_instance->clear = I2C_SCL;
+	delay_loop(delay, delay);
+	log_debug("\n\tI2C: I2C ReadNackForWrite sent\n");
+#endif
 }
 
 /** @fn void SendAckForRead(unsigned char delay)
@@ -258,6 +391,7 @@ void SendAckForRead(unsigned char delay)
 
 //	readData = read_word(GPIO_DATA_REG);
 
+#ifndef YAMUNA || GANGA
 //	sda=0;
 	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SDA)) );
 	delay_loop(delay, delay);
@@ -269,6 +403,20 @@ void SendAckForRead(unsigned char delay)
 //	scl=0;
 	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SCL) ) );
 	delay_loop(delay, delay);
+#else
+//	sda=0;
+	gpiov2_instance->clear = I2C_SDA;
+	delay_loop(delay, delay);
+
+//	scl=1;
+	gpiov2_instance->set = I2C_SCL;
+	delay_loop(delay, delay);
+
+//	scl=0;
+	gpiov2_instance->clear = I2C_SCL;
+	delay_loop(delay, delay);
+
+#endif
 
   SetSdaDirection(GPIOD_IS_IN);
 }
@@ -289,19 +437,33 @@ void SendNackForRead(unsigned char delay)
 
  //	readData = read_word(GPIO_DATA_REG);
 
- //	sda=0;
-  write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG)  | (I2C_SDA)) );
-  delay_loop(delay, delay);
+ #ifndef YAMUNA || GANGA
+	//	sda=0;
+	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG)  | (I2C_SDA)) );
+	delay_loop(delay, delay);
 
- //	scl=1;
-  write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SCL) );
-  delay_loop(delay, delay);
+	//	scl=1;
+	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SCL) );
+	delay_loop(delay, delay);
 
- //	scl=0;
-  write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SCL) ) );
-  delay_loop(delay, delay);
+	//	scl=0;
+	write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) & ~(I2C_SCL) ) );
+	delay_loop(delay, delay);
+#else
+//	sda=0;
+	gpiov2_instance->clear = I2C_SDA;
+	delay_loop(delay, delay);
 
-  SetSdaDirection(GPIOD_IS_IN);
+	//	scl=1;
+	gpiov2_instance->set = I2C_SCL;
+	delay_loop(delay, delay);
+
+	//	scl=0;
+	gpiov2_instance->clear = I2C_SCL;
+	delay_loop(delay, delay);
+
+#endif
+	SetSdaDirection(GPIOD_IS_IN);
  }
 
 /** @fn void I2cInit()
@@ -315,7 +477,7 @@ void I2cInit()
 {
   SetSCLAsOutput();
   SetSdaDirection(GPIOD_IS_OUT);
-  printf("Initialization successfully done");
+  log_debug("Initialization successfully done");
 }
 
 /** @fn void I2cSendSlaveAddress(unsigned char slaveAddress, unsigned char rdWrCntrl, unsigned char delay)
@@ -333,23 +495,27 @@ void I2cSendSlaveAddress(unsigned char slaveAddress, unsigned char rdWrCntrl, un
 {
   SetSdaDirection(GPIOD_IS_OUT);
 
-  printf("\n\tI2C: I2C Start\n");
+  log_debug("\n\tI2C: I2C Start\n");
   start(delay);
-  printf("\n\tI2C: I2C Send Bytes\n");
+  log_debug("\n\tI2C: I2C Send Bytes\n");
   if(rdWrCntrl) {
-     printf("\n\tI2C: I2C Write\n");
+     log_debug("\n\tI2C: I2C Write\n");
     I2cWriteByte( (slaveAddress | I2C_READ), delay);
 	}
   else {
-     printf("\n\tI2C: I2C Write\n");
+	log_debug("\n\tI2C: I2C Write\n");
     I2cWriteByte( (slaveAddress | I2C_WRITE), delay);
 	}
   //	sda=1;
+#ifndef YAMUNA || GANGA
   write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SDA) );
   delay_loop(delay, delay);
+#else
 
-  printf("\n\tI2C: I2C Write Ack\n");
-  SetSdaDirection(GPIOD_IS_IN);
+#endif
+
+	log_debug("\n\tI2C: I2C Write Ack\n");
+	SetSdaDirection(GPIOD_IS_IN);
     ReadAckForWrite(delay);
 }
 
@@ -365,13 +531,18 @@ void I2cSendSlaveAddress(unsigned char slaveAddress, unsigned char rdWrCntrl, un
 void I2cWriteData(unsigned char writeData, unsigned char delay)
 {
   SetSdaDirection(GPIOD_IS_OUT);
-  printf("\n\tI2C: I2C Write\n");
+  log_debug("\n\tI2C: I2C Write\n");
   I2cWriteByte( writeData, delay);
+//This part may not be needed. Need to verify once.
   //	sda=1;
+#ifndef YAMUNA || GANGA
   write_word(GPIO_DATA_REG, (read_word(GPIO_DATA_REG) | I2C_SDA) );
   delay_loop(delay, delay);
+#else
+	gpiov2_instance->set = I2C_SDA;
+#endif
 
-  printf("\n\tI2C: I2C Write Ack\n");
+  log_debug("\n\tI2C: I2C Write Ack\n");
   SetSdaDirection(GPIOD_IS_IN);
   ReadAckForWrite(delay);
 }
@@ -388,10 +559,10 @@ unsigned char I2cReadDataAck(unsigned char delay)
 {
   unsigned char readData = 0;
   SetSdaDirection(GPIOD_IS_IN);
-	printf("\n\tI2C: I2C Read\n");
+	log_debug("\n\tI2C: I2C Read\n");
 	readData = I2cReadByte(delay);
 	SetSdaDirection(GPIOD_IS_OUT);
-	printf("\n\tI2C: I2C Read Ack\n");
+	log_debug("\n\tI2C: I2C Read Ack\n");
 	SendAckForRead(delay);
   return readData;
 }
@@ -409,10 +580,10 @@ unsigned char I2cReadDataNack(unsigned char delay)
 {
   unsigned char readData = 0;
   SetSdaDirection(GPIOD_IS_IN);
- 	printf("\n\tI2C: I2C Read\n");
+ 	log_debug("\n\tI2C: I2C Read\n");
   readData = I2cReadByte(delay);
 	SetSdaDirection(GPIOD_IS_OUT);
-  	printf("\n\tI2C: I2C Read NAck\n");
+  	log_debug("\n\tI2C: I2C Read NAck\n");
   	SendNackForRead(delay);
     return readData;
 }
@@ -425,7 +596,7 @@ unsigned char I2cReadDataNack(unsigned char delay)
  */
 void I2cStart(unsigned char delay)
 {
-  printf("\n\tI2C: I2C start\n");
+  log_debug("\n\tI2C: I2C start\n");
   start(delay);
 }
 
@@ -437,7 +608,7 @@ void I2cStart(unsigned char delay)
  */
 void I2cStop(unsigned char delay)
 {
-  printf("\n\tI2C: I2C stop\n");
+  log_debug("\n\tI2C: I2C stop\n");
   stop(delay);
 }
 
@@ -486,7 +657,7 @@ int I2c_Read_byte(unsigned char slave_address,unsigned char reg_address, unsigne
  */
 int I2c_shakti_readbytes(char *buf, int count, int last, unsigned char delay)
 {
-	printf("start reading the slave device\n");
+	log_debug("start reading the slave device\n");
 	int i = 0;
 #ifdef PCF8584
 	for (i = 0; i <= count; i++) {

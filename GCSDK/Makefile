@@ -84,7 +84,6 @@ GPIO_APPS := $(shell cd ./software/examples/gpio_applns/ && ls -d * | grep -v Ma
 GPIOV2_APPS := $(shell cd ./software/examples/gpiov2_applns/ && ls -d * | grep -v Makefile )
 UART_APPS := $(shell cd ./software/examples/uart_applns/ && ls -d * | grep -v Makefile )
 I2C_APPS := $(shell cd software/examples/i2c_applns/ && ls -d * | grep -v Makefile )
-PWM_APPS := $(shell cd software/examples/pwm_applns/ && ls -d * | grep -v Makefile )
 PWMV2_APPS := $(shell cd software/examples/pwmv2_applns/ && ls -d * | grep -v Makefile )
 SPI_APPS := $(shell cd software/examples/spi_applns/ && ls -d * | grep -v Makefile )
 PLIC_APPS := $(shell cd software/examples/plic_applns/ && ls -d * | grep -v Makefile )

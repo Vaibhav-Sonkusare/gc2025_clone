@@ -25,6 +25,10 @@
 Set up Stop bits -1, No parity for both UARTs
 UART0 Miniterm - change the baud rate as required
 UART1 Miniterm baud rate is set as 19200 
+Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
+Run the code and type in the UART1 Miniterm window
+The typed char will be displayed in the UART0 Miniterm window along with "The received char: "
 */
 
 #include "uart.h"
@@ -32,17 +36,17 @@ UART1 Miniterm baud rate is set as 19200
 
 void main()
 {
-    *(pinmux_config_reg) =  0x55;
-
-    int t;
+	*pinmux_config_reg = 0x55;
+//    *(pinmux_config_reg) =  0x55;
 	set_baud_rate(uart_instance[0], 19200); // Set the required baudrate from 300 to 540,000
-	//set_baud_rate(uart_instance[1], 500000);
-  write_uart_string (uart_instance[0], "\nHello World from UART0");
-  write_uart_string (uart_instance[1], "\nHello World from UART1");
-  while(1)
-    {
-        while( 0 == (uart_instance[1]->status & STS_RX_NOT_EMPTY ) );
-        write_uart_string (uart_instance[0], "\n The received char: ");
-        write_uart_character(uart_instance[0], uart_instance[1]->rcv_reg);
-    }
+	set_baud_rate(uart_instance[1], 19200); // Set baudrate to 19200
+
+	write_uart_string (uart_instance[0], "\nHello World from UART0");
+	write_uart_string (uart_instance[1], "\nHello World from UART1");
+	while(1)
+	{
+	    while( 0 == (uart_instance[1]->status & STS_RX_NOT_EMPTY ) );
+	    write_uart_string (uart_instance[0], "\n The received char: ");
+	    write_uart_character(uart_instance[0], uart_instance[1]->rcv_reg);
+	}
 }

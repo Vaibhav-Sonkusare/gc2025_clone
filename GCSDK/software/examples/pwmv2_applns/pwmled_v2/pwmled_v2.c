@@ -44,7 +44,7 @@
 int main()
 {
 	check_pwmv2();
-	//*pinmux_config_reg = 0x2aa80;
+	*pinmux_config_reg = 0x2aa80;
 	pwm_init();
 
 	//Uncomment this for testing PWM 0

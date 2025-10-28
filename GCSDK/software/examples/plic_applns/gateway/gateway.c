@@ -347,13 +347,12 @@ int main(void){
 	// printf("\n UART 2 Status Register: %x", uart_instance[2]->status);
 	enable_uart_interrupts(uart_instance[1],  ENABLE_RX_NOT_EMPTY );//| ENABLE_RX_FULL);
 	// enable_uart_interrupts(uart_instance[2],  ENABLE_RX_NOT_EMPTY );//| ENABLE_RX_FULL);
-enable_machine_global_interrupts();
+	enable_machine_global_interrupts();
 
    int j=0;
    int k=0;
 	while(1)
 	{
-			
 		//write_uart_string(uart_instance[1],"mnopqrstuvwx");
 		for(int tt=0;tt<10;tt++){
 			delay_loop(2000,1000);	

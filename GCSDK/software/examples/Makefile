@@ -27,7 +27,7 @@ export filepath
 
 # appln and target board
 PROGRAM ?=all
-TARGET ?=artix7_35t
+TARGET ?=yamuna
 DEBUG ?=
 UPLOAD ?=
 FLASH ?=
@@ -47,29 +47,11 @@ ifeq ($(DEBUG),DEBUG)
 	@$(eval D = -g)
 endif
 
-ifeq ($(TARGET),artix7_35t)
-	@$(eval XLEN = 32)
-	@$(eval WIDTH = 4)
-	@$(eval FLAGS=-Wall -Wextra -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wunused  -D ARTIX7_35T)
-	@$(eval MARCH=rv32imac)
-	@$(eval MABI=ilp32)
-	@$(eval INTERFACE=$(bspboard)/ftdi)
-	@$(eval DC =$(FLAGS) $(D) )
-else
-ifeq ($(TARGET),artix7_100t)
-	@$(eval XLEN = 64)
-	@$(eval WIDTH = 8)
-	@$(eval FLAGS= -D ARTIX7_100T)
-	@$(eval MARCH=rv64imac)
-	@$(eval MABI=lp64)
-	@$(eval INTERFACE=$(bspboard)/ftdi)
-	@$(eval DC =$(FLAGS) $(D))
-else
 ifeq ($(TARGET),moushik)
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval WIDTH = 4)
 	@$(eval FLAGS= -D AARDONYX)
-	@$(eval MARCH=rv32imac)
+	@$(eval MARCH=rv32imac_zifencei_zicsr)
 	@$(eval MABI=ilp32)
 	@$(eval UPLOADER=$(UPLOADDIR)/micron)
 	@$(eval FLASHSPEC=$(bspdri)/qspi/qspi_micron.c)
@@ -77,20 +59,20 @@ ifeq ($(TARGET),moushik)
 	@$(eval DC =$(FLAGS) $(D) )
 else
 ifeq ($(TARGET),pinaka)                         # e-class 35t rv32imac
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval WIDTH = 4)
 	@$(eval FLAGS= -D pinaka)
-	@$(eval MARCH=rv32imac)
+	@$(eval MARCH=rv32imac_zifencei_zicsr)
 	@$(eval MABI=ilp32)
 	@$(eval UPLOADER=$(UPLOADDIR)/spansion)
 	@$(eval INTERFACE=$(bspboard)/ftdi)
 	@$(eval DC =$(FLAGS) $(D))
 else
 ifeq ($(TARGET),parashu)                         # e-class 100t rv32imac
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval WIDTH = 4)
 	@$(eval FLAGS= -D parashu)
-	@$(eval MARCH=rv32imac)
+	@$(eval MARCH=rv32imac_zifencei_zicsr)
 	@$(eval MABI=ilp32)
 	@$(eval UPLOADER=$(UPLOADDIR)/spansion)
 	@$(eval INTERFACE=$(bspboard)/ftdi)
@@ -100,7 +82,7 @@ ifeq ($(TARGET),vajra)                         # c-class 100t rv64imacsu
 	@$(eval XLEN = 64)
 	@$(eval WIDTH = 8)
 	@$(eval FLAGS= -D vajra)
-	@$(eval MARCH=rv64imac)
+	@$(eval MARCH=rv64imac_zifencei_zicsr)
 	@$(eval MABI=lp64)
 	@$(eval UPLOADER=$(UPLOADDIR)/spansion)
 	@$(eval FLASHSPEC=$(bspdri)/sspi/sspi_spansion.c)
@@ -118,7 +100,7 @@ ifeq ($(TARGET),sos)                         # c-class 100t rv64imacsu
 	@$(eval DC =$(FLAGS) $(D))
 else
 ifeq ($(TARGET),yamuna)                         # c-class 100t rv32imacsu
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval WIDTH = 4)
 	@$(eval FLAGS= -D yamuna)
 	@$(eval MARCH=rv32imac_zifencei_zicsr)
@@ -147,8 +129,6 @@ endif
 endif
 endif
 endif
-endif
-endif
 
 library:
 ifeq ($(CLEAR),)
@@ -161,7 +141,6 @@ compile:
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -c $(bspcore)/traps.c -o ./gen_lib/traps.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -c $(bspdri)/qspi/qspi_micron.c -o ./gen_lib/qspi_micron.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/xadc/xadc_driver.c -o ./gen_lib/xadc_driver.o -lm -lgcc
-#	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/uart/uart.c -o ./gen_lib/uart.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/i2c/i2c_driver.c -o ./gen_lib/i2c_driver.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-common -fno-builtin-printf -D__ASSEMBLY__=1 -I$(bspinc) -c $(bspcore)/start.S -o ./gen_lib/start.o
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-common -fno-builtin-printf -D__ASSEMBLY__=1 -I$(bspinc) -c $(bspcore)/trap.S -o ./gen_lib/trap.o
@@ -189,7 +168,9 @@ else ifeq ($(TARGET),ganga)
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/pinmux/pinmux.c -o ./gen_lib/pinmux.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/sspi/sspi_driver.c -o ./gen_lib/sspi_driver.o -lm -lgcc
 else
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/uart/uart.c -o ./gen_lib/uart.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/pwm/pwm_driver.c -o ./gen_lib/pwm_driver.o -lm -lgcc
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/pinmux/pinmux.c -o ./gen_lib/pinmux.o -lm -lgcc
 endif
 build:
 ifeq ($(TARGET),sos)
@@ -202,7 +183,7 @@ else ifeq ($(TARGET),yamuna)
 else ifeq ($(TARGET),ganga)
 	@riscv$(XLEN)-unknown-elf-ar rcs ./gen_lib/libshakti$(XLEN).a ./gen_lib/start.o ./gen_lib/trap.o ./gen_lib/util.o ./gen_lib/traps.o ./gen_lib/log.o ./gen_lib/printf.shakti ./gen_lib/qspi_micron.o ./gen_lib/uart.o ./gen_lib/i2c_driver.o ./gen_lib/clint_driver.o ./gen_lib/plic_driver.o ./gen_lib/init.o ./gen_lib/sspi_driver.o ./gen_lib/xadc_driver.o ./gen_lib/pwmv2.o ./gen_lib/gpiov2.o ./gen_lib/gpt.o ./gen_lib/pinmux.o 
 else
-	@riscv$(XLEN)-unknown-elf-ar rcs ./gen_lib/libshakti$(XLEN).a ./gen_lib/start.o ./gen_lib/trap.o ./gen_lib/util.o ./gen_lib/traps.o ./gen_lib/log.o ./gen_lib/printf.shakti ./gen_lib/qspi_micron.o ./gen_lib/uart.o ./gen_lib/i2c_driver.o ./gen_lib/clint_driver.o ./gen_lib/plic_driver.o ./gen_lib/init.o  ./gen_lib/xadc_driver.o ./gen_lib/pwm_driver.o 
+	@riscv$(XLEN)-unknown-elf-ar rcs ./gen_lib/libshakti$(XLEN).a ./gen_lib/start.o ./gen_lib/trap.o ./gen_lib/util.o ./gen_lib/traps.o ./gen_lib/log.o ./gen_lib/printf.shakti ./gen_lib/qspi_micron.o ./gen_lib/uart.o ./gen_lib/i2c_driver.o ./gen_lib/clint_driver.o ./gen_lib/plic_driver.o ./gen_lib/init.o  ./gen_lib/xadc_driver.o ./gen_lib/pwm_driver.o  ./gen_lib/pinmux.o 
 endif
 
 
@@ -219,6 +200,7 @@ ifeq ($(TARGET),sos)
 	cd ./gpiov2_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./pwmv2_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./sspi_applns && $(MAKE) all TARGET=$(TARGET)
+	cd ./sspi_testcases && $(MAKE) all TARGET=$(TARGET)
 	cd ./uart_testcases && $(MAKE) all TARGET=$(TARGET)
 else
 	cd ./gpio_applns && $(MAKE) all TARGET=$(TARGET)
@@ -294,13 +276,13 @@ ifeq ($(PROGRAM),intruder_detection)
 filepath := gpio_applns/intruder_detection
 else
 ifeq ($(PROGRAM),active_buzzer)
-filepath := gpio_applns/active_buzzer
+filepath := gpiov2_applns/active_buzzer
 else
 ifeq ($(PROGRAM),passive_buzzer)
-filepath := gpio_applns/passive_buzzer
+filepath := gpiov2_applns/passive_buzzer
 else
 ifeq ($(PROGRAM),rgb)
-filepath := gpio_applns/rgb
+filepath := gpiov2_applns/rgb
 else
 ifeq ($(PROGRAM),light_blocking)
 filepath := gpio_applns/light_blocking
@@ -312,10 +294,10 @@ ifeq ($(PROGRAM),relay)
 filepath := gpio_applns/relay
 else
 ifeq ($(PROGRAM),human_detection)
-filepath := gpio_applns/human_detection
+filepath := gpiov2_applns/human_detection
 else
 ifeq ($(PROGRAM),lm75_softi2c)
-filepath := gpio_applns/lm75_softi2c
+filepath := gpiov2_applns/lm75_softi2c
 else
 ifeq ($(PROGRAM),soft_i2c)
 filepath := gpio_applns/soft_i2c
@@ -330,10 +312,10 @@ ifeq ($(PROGRAM),calloc_test)
 filepath := malloc_test/calloc_test
 else
 ifeq ($(PROGRAM),gyroi2c)
-filepath := gpio_applns/gyroi2c
+filepath := gpiov2_applns/gyroi2c
 else
 ifeq ($(PROGRAM),buttons)
-filepath := gpio_applns/buttons
+filepath := gpiov2_applns/buttons
 else
 ifeq ($(PROGRAM),cdce)
 filepath := gpio_applns/cdce
@@ -381,7 +363,7 @@ ifeq ($(PROGRAM),uart01_uart02_interrupt)
 filepath := uart_testcases/uart01_uart02_interrupt
 else
 ifeq ($(PROGRAM),switches)
-filepath := gpio_applns/switches
+filepath := gpiov2_applns/switches
 else
 ifeq ($(PROGRAM),switch_mode)
 filepath := uart_applns/switch_mode
