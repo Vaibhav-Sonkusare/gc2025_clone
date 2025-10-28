@@ -319,7 +319,7 @@ package Soc;
     Ifc_spi_cluster spi_cluster <- mkspi_cluster;
     Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster(ext_clk);
     Ifc_err_slave_axi4lite#(`paddr,`buswidth,0) err_slave <- mkerr_slave_axi4lite;
-    Ifc_bram_axi4#(`paddr, `axi4_id_width, XLEN, USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
+    Ifc_bram_axi4#(`paddr, `axi4_id_width, `buswidth, USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();
     `endif
