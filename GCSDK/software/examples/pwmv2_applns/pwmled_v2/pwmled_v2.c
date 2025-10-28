@@ -35,7 +35,7 @@
 #define PWM_2 2 
 #define PWM_3 3
 #define PWM_4 4 
-#define PWM_5 2
+#define PWM_5 5
 
 /** @fn int main()
  * @brief main function that runs the code
