@@ -30,7 +30,7 @@
 
 #include<stdlib.h>
 /*By default SPI0 is enabled at initialization.
-  SPI0 is not available externally in TARGET=artix7_35t*/
+  SPI0 is not available externally in TARGET=yamuna*/
 #define SPI0_OFFSET 0x00000000
 #define SPI1_OFFSET 0x00000100
 #define SPI2_OFFSET 0x00000200

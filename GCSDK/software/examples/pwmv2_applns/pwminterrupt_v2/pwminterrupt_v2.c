@@ -36,7 +36,6 @@ volatile unsigned int* pinmux_config_reg = (volatile unsigned int* ) PINMUX_CONF
 void handle_pwm_interrupt( uint32_t num)
 {
 	printf("\nhi\n");
-	*pinmux_config_reg = 0x0;
 	gpiov2_init();
 	gpiov2_instance->direction = 0x10000;
 	gpiov2_instance->toggle = 0x10000;
@@ -61,10 +60,10 @@ int main()
 	configure_interrupt(PLIC_INTERRUPT_6);
 
 	/* For checking PWM Interrupt by toggling one board LED */
-	// isr_table[PLIC_INTERRUPT_6] = handle_pwm_interrupt;
+	isr_table[PLIC_INTERRUPT_6] = handle_pwm_interrupt;
 
 	/* For checking all the test case*/
-	isr_table[PLIC_INTERRUPT_6] = pwm_isr_handler0;
+	// isr_table[PLIC_INTERRUPT_6] = pwm_isr_handler0;
 
 
 	/**we need to set the period, duty cycle and the clock divisor in order
@@ -127,7 +126,7 @@ int main()
 #endif
 
 	/* Enable when halfperiod_interrupt  */
-#if 0
+#if 1
 	pwm_init();
     pwm_set_prescalar_value(PWM_0, 0xf2);
  	pwm_configure(PWM_0, 0xff, 80, halfperiod_interrupt, 0x1, false);

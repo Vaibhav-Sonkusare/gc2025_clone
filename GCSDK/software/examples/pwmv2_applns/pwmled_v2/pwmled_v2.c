@@ -35,7 +35,7 @@
 #define PWM_2 2 
 #define PWM_3 3
 #define PWM_4 4 
-#define PWM_5 2
+#define PWM_5 5
 
 /** @fn int main()
  * @brief main function that runs the code
@@ -44,7 +44,7 @@
 int main()
 {
 	check_pwmv2();
-	//*pinmux_config_reg = 0x2aa80;
+	*pinmux_config_reg = 0x2aa80;
 	pwm_init();
 
 	//Uncomment this for testing PWM 0
@@ -58,34 +58,34 @@ int main()
 	pwm_show_frequency(PWM_0, 5000, 10000);
 
 	//Uncomment this for testing PWM 1
-	pwm_set_prescalar_value(PWM_1, 5000);
+	pwm_set_prescalar_value(PWM_1, 4000);
 	pwm_clear(PWM_1);
 	pwm_stop(PWM_1);
 	pwm_configure(PWM_1, 10000, 5000, no_interrupt, 0x1, false);
 	pwm_start(PWM_1);
 	pwm_set_control(PWM_1, (PWM_ENABLE | PWM_UPDATE_ENABLE |PWM_OUTPUT_ENABLE | PWM_RISE_INTERRUPT_ENABLE | PWM_OUTPUT_POLARITY ));
 	pwm_show_values(PWM_1);
-	pwm_show_frequency(PWM_1, 5000, 10000);
+	pwm_show_frequency(PWM_1, 4000, 10000);
 
 	//Uncomment this for testing PWM 2
-	pwm_set_prescalar_value(PWM_2, 5000);
+	pwm_set_prescalar_value(PWM_2, 3000);
 	pwm_clear(PWM_2);
 	pwm_stop(PWM_2);
 	pwm_configure(PWM_2, 10000, 5000, no_interrupt, 0x1, false);
 	pwm_start(PWM_2);
 	pwm_set_control(PWM_2, (PWM_ENABLE | PWM_UPDATE_ENABLE |PWM_OUTPUT_ENABLE | PWM_RISE_INTERRUPT_ENABLE | PWM_OUTPUT_POLARITY ));
 	pwm_show_values(PWM_2);
-	pwm_show_frequency(PWM_2, 5000, 10000);
+	pwm_show_frequency(PWM_2, 3000, 20000);
 
 	//Uncomment this for testing PWM 3
-	pwm_set_prescalar_value(PWM_3, 5000);
+	pwm_set_prescalar_value(PWM_3, 1000);
 	pwm_clear(PWM_3);
 	pwm_stop(PWM_3);
 	pwm_configure(PWM_3, 10000, 5000, no_interrupt, 0x1, false);
 	pwm_start(PWM_3);
 	pwm_set_control(PWM_3, (PWM_ENABLE | PWM_UPDATE_ENABLE |PWM_OUTPUT_ENABLE | PWM_RISE_INTERRUPT_ENABLE | PWM_OUTPUT_POLARITY ));
 	pwm_show_values(PWM_3);
-	pwm_show_frequency(PWM_3, 5000, 10000);
+	pwm_show_frequency(PWM_3, 1000, 10000);
 
 
 	//Uncomment this for testing PWM 4
@@ -96,7 +96,7 @@ int main()
 	pwm_start(PWM_4);
 	pwm_set_control(PWM_4, (PWM_ENABLE | PWM_UPDATE_ENABLE |PWM_OUTPUT_ENABLE | PWM_RISE_INTERRUPT_ENABLE | PWM_OUTPUT_POLARITY ));
 	pwm_show_values(PWM_4);
-	pwm_show_frequency(PWM_3, 5000, 10000);
+	pwm_show_frequency(PWM_4, 5000, 10000);
 
 
 	//Uncomment this for testing PWM 5
@@ -111,14 +111,14 @@ int main()
 
 
 
-	//Uncomment this for testing PWM 0 as disabling output 
-	pwm_set_prescalar_value(PWM_0, 50000);
-	pwm_clear(PWM_0);
-	pwm_stop(PWM_0);
-	pwm_configure(PWM_0, 0xf0, 0x80, no_interrupt, 0x1, false);
-	pwm_start(PWM_0);
-	pwm_set_control(PWM_0, (PWM_ENABLE | PWM_UPDATE_ENABLE | PWM_OUTPUT_POLARITY ));
-	pwm_show_values(PWM_0);
-	pwm_show_frequency(PWM_0, 50000, 0xf0);
-	return 0;
+	// //Uncomment this for testing PWM 0 as disabling output 
+	// pwm_set_prescalar_value(PWM_0, 50000);
+	// pwm_clear(PWM_0);
+	// pwm_stop(PWM_0);
+	// pwm_configure(PWM_0, 0xf0, 0x80, no_interrupt, 0x1, false);
+	// pwm_start(PWM_0);
+	// pwm_set_control(PWM_0, (PWM_ENABLE | PWM_UPDATE_ENABLE | PWM_OUTPUT_POLARITY ));
+	// pwm_show_values(PWM_0);
+	// pwm_show_frequency(PWM_0, 50000, 0xf0);
+	// return 0;
 }

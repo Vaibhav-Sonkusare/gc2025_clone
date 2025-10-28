@@ -1,5 +1,5 @@
 /*
-platform.h - header file for pinaka E class SoC on artix7_35t
+platform.h - header file for pinaka E class SoC on yamuna
 
 * Name of Author : Sathya Narayanan N
 * Email ID       : sathya281@gmail.com

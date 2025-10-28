@@ -21,9 +21,12 @@
 
 ***************************************************************************/
 /*
+Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
+Run the code and type in the UART1 Miniterm window
 UART0: 19200, stop bit=1 No parity; (miniterm)
 UART1: 19200, Stop bit1, odd parity (miniterm)
-Try sending chars from UART1 to UART0
+Try sending chars from UART1 to UART0 if there is any odd parity error it will be indicated in UART0
 */
 
 #include "uart.h"

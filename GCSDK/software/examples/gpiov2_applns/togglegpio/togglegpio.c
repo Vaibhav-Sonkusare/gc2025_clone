@@ -28,42 +28,41 @@
 
 #include "platform.h"
 #include "utils.h" 
-#include "gpiov2.h" 
+#define GPIO_V2 1
+#ifndef  GPIO_V2
+#include "gpio.h"         
+#else
+#include "gpiov2.h"
+#endif
 
 /** @fn main
  * @brief Initiates writing to gpio pins by calling tglgpio
  */ 
 void main()
 {
+#ifdef YAMUNA || GANGA	
 	check_gpiov2();
-	printf("\n Starting Toggle GPIO tests \n");
+	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
-	gpiov2_instance->direction = 0xff0fffff;
-
-#if 0	
-		/* Toggling All the pins using set and clear register  */
-
-	while(1)
-	{
-		gpiov2_instance->set = 0xff0fffff;
-		delay_loop(3000, 1000);
-		gpiov2_instance->set = 0;
-		gpiov2_instance->clear = 0xff0fffff;
-		delay_loop(3000, 1000);
-		gpiov2_instance->clear = 0;
-	}
-
+	gpiov2_instance->direction = 0xFFFFFFFF;
+#else
+	write_word(GPIO_DIRECTION_CNTRL_REG, 0xFFFFFFFF );
 #endif
 
-#if 1
+
 		/* Toggling by giving specific pins number*/
 
 	while (1)
 	{
-		gpiov2_instance->toggle = 0xff0fffff; 			// Toggling all pins together for checking
+/* Toggling All the pins using set and clear register  */
+#ifdef YAMUNA || GANGA	
+		gpiov2_instance->toggle = 0xFFFFFFFF; 			// Toggling all pins together for checking
+#else
+		write_word(GPIO_DIRECTION_CNTRL_REG, 0xFFFFFFFF );
+		delay_loop(3000, 1000);
+		write_word(GPIO_DIRECTION_CNTRL_REG, 0x00 );
+#endif
 		delay_loop(3000, 1000);
 	}
-#endif
-
 }
 

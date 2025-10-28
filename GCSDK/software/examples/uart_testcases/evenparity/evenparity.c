@@ -22,9 +22,11 @@
 
 ***************************************************************************/
 /*
+Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
 UART0: 19200, stop bit=1 No parity; (miniterm)
 UART1: 19200, Stop bit1, even parity (miniterm)
-Try sending chars from UART1 to UART0
+Try sending chars from UART1 to UART0 if there is any even parity error it will be indicated in UART0
 */
 
 
@@ -36,7 +38,7 @@ Try sending chars from UART1 to UART0
 void main()
 {
     int value = 0;
-      *(pinmux_config_reg) =  0x55;
+    *(pinmux_config_reg) =  0x55;
 
     set_baud_rate(uart_instance[0], 19200);
     set_baud_rate(uart_instance[1], 19200);
@@ -48,10 +50,10 @@ void main()
     {
         while( 0 == (uart_instance[1]->status & STS_RX_NOT_EMPTY ) );
         if(uart_instance[1]->status & PARITY_ERROR)
-	{
-        write_uart_string (uart_instance[0], "\n Even Parity error with UART 0");
-	break;
-	}
+        {
+            write_uart_string (uart_instance[0], "\n Even Parity error with UART 0");
+        break;
+        }
         else
         {
             write_uart_string (uart_instance[0], "\n The received char: ");

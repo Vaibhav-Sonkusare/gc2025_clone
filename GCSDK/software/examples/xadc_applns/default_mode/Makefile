@@ -20,7 +20,7 @@ SHELL := /bin/bash # Use bash syntax
 DC ?=
 PROGRAM ?= default_mode
 #default target board
-TARGET ?= artix7_35t
+TARGET ?= yamuna
 DEBUG ?=
 MARCH ?= rv32imac
 MABI ?= ilp32
