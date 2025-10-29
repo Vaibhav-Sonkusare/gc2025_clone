@@ -150,8 +150,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 28)
   wire [2:0]                        m_axi_awprot;
   wire                              m_axi_awvalid;
   wire                              m_axi_awready;    
-  wire [31:0]                       m_axi_wdata;
-  wire [3:0]                        m_axi_wstrb;
+  wire [63:0]                       m_axi_wdata;
+  wire [7:0]                        m_axi_wstrb;
   wire                              m_axi_wlast;
   wire                              m_axi_wvalid;
   wire                              m_axi_wready;   
@@ -186,8 +186,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 28)
   wire [2:0]                        s_axi_awprot;
   wire                              s_axi_awvalid;
   wire                              s_axi_awready;    
-  wire [31:0]                       s_axi_wdata;
-  wire [3:0]                        s_axi_wstrb;
+  wire [63:0]                       s_axi_wdata;
+  wire [7:0]                        s_axi_wstrb;
   wire                              s_axi_wlast;
   wire                              s_axi_wvalid;
   wire                              s_axi_wready;
@@ -307,8 +307,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 28)
     wire [13-1 : 0] eth_master_awaddr;
     wire eth_master_m_awready_awready;
     wire eth_master_wvalid;
-    wire [32-1 : 0] eth_master_wdata;
-    wire [(32/8)-1 : 0] eth_master_wstrb;
+    wire [64-1 : 0] eth_master_wdata;
+    wire [(64/8)-1 : 0] eth_master_wstrb;
     wire eth_master_m_wready_wready;
     wire eth_master_m_bvalid_bvalid;
     wire [1:0] eth_master_m_bvalid_bresp;
@@ -318,7 +318,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 28)
     wire eth_master_m_arready_arready;
     wire eth_master_m_rvalid_rvalid;
     wire [1 : 0] eth_master_m_rvalid_rresp;
-    wire [32-1 : 0] eth_master_m_rvalid_rdata;
+    wire [64-1 : 0] eth_master_m_rvalid_rdata;
     wire eth_master_rready;
   // --------- Address width truncation and Reset generation for SoC ------------ //
   wire [31:0] temp_s_axi_awaddr, temp_s_axi_araddr;
