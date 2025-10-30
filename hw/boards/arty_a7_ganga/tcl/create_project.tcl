@@ -67,7 +67,10 @@ if {[string equal [get_runs -quiet core_synth_1] ""]} {
     -strategy "Vivado Synthesis Defaults" -constrset constrs_1 core_synth_1
 #    -strategy "Flow_AreaOptimized_high" -constrset constrs_1 core_synth_1
 } else {
-    set_property strategy "Vivado Synthesis Defaults" [get_runs core_synth_1]
+#    set_property strategy "Vivado Synthesis Defaults" [get_runs core_synth_1]
+    set_property strategy Flow_AreaOptimized_high [get_runs core_synth_1]
+    set_property STEPS.SYNTH_DESIGN.TCL.PRE {} [get_runs core_synth_1]
+    set_property STEPS.SYNTH_DESIGN.TCL.POST {} [get_runs core_synth_1]
 #    set_property strategy "Flow_AreaOptimized_high" [get_runs core_synth_1]
     set_property flow "Vivado Synthesis $base_version" [get_runs core_synth_1]
 }
@@ -75,7 +78,7 @@ if {[string equal [get_runs -quiet core_synth_1] ""]} {
 #set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs core_synth_1]
 
 ## Add the verilog define argument to the string
-set verilog_define_args " -verilog_define BSV_RESET_FIFO_HEAD -verilog_define BSV_RESET_FIFO_ARRAY"
+set verilog_define_args " -verilog_define BSV_RESET_FIFO_HEAD -verilog_define BSV_RESET_FIFO_ARRAY -verilog_define BSV_ASYNC_RESET"
 if { $jtag_type eq "JTAG_BSCAN2E" } {
 	append verilog_define_args " -verilog_define JTAG_BSCAN2E"
 }
@@ -97,7 +100,12 @@ current_run -synthesis [get_runs core_synth_1]
 # Create 'impl_1' run (if not found)
 if {[string equal [get_runs -quiet core_impl_1] ""]} {
   create_run -flow "Vivado Implementation $base_version" -strategy\
- "Vivado Implementation Defaults" -constrset constrs_1 -parent_run core_synth_1 core_impl_1
+ "Area_Explore" -constrset constrs_1 -parent_run core_synth_1 core_impl_1
+set_property strategy Area_Explore [get_runs core_impl_1]
+set_property STEPS.PLACE_DESIGN.ARGS.DIRECTIVE ExtraPostPlacementOpt [get_runs core_impl_1]
+set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs core_impl_1]
+set_property STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE MoreGlobalIterations [get_runs core_impl_1]
+set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs core_impl_1]
 } else {
   set_property strategy "Vivado Implementation Defaults" [get_runs core_impl_1]
   set_property flow "Vivado Implementation $base_version" [get_runs core_impl_1]
