@@ -105,8 +105,8 @@ if {[string equal [get_runs -quiet core_impl_1] ""]} {
   create_run -flow "Vivado Implementation $base_version" -strategy\
  "Area_Explore" -constrset constrs_1 -parent_run core_synth_1 core_impl_1
 set_property strategy Area_Explore [get_runs core_impl_1]
-set_property STEPS.PLACE_DESIGN.ARGS.DIRECTIVE ExtraPostPlacementOpt [get_runs core_impl_1]
-set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs core_impl_1]
+set_property STEPS.PLACE_DESIGN.ARGS.DIRECTIVE ExtraTimingOpt [get_runs core_impl_1]
+set_property STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE RuntimeOptimized [get_runs core_impl_1]
 set_property STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE AdvancedSkewModeling [get_runs core_impl_1]
 set_property STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE AggressiveExplore [get_runs core_impl_1]
 } else {
