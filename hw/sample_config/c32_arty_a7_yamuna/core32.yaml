@@ -8,8 +8,8 @@ num_harts: 1
 hardfloat: False
 merged_rf: False
 s_extension:
-  itlb_size: 4
-  dtlb_size: 4
+  itlb_size: 2
+  dtlb_size: 2
 total_events : 32
 iepoch_size: 2
 m_extension:
