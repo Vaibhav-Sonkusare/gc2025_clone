@@ -68,8 +68,7 @@ MOREDEFINES=$(addprefix -D , $(BSC_DEFINES))
 
 # ------------------------------------- Makefile TARGETS ----------------------------------------- #
 default: quick_build_xilinx
-build_ganga:  quick_ganga_build 
-build_yamuna:  quick_yamuna_build 
+build:  quick_build
 yamuna_asic: quick_asic_build
 build_hyp: quick_build_xilinx_hyp
 build: ## To start bitstream and MCS file generation for boards (passed through BOARD parameter)
@@ -106,11 +105,11 @@ run_setup_fpga: ## Run command to setup all dependant files for FPGA.
 	@mkdir build/hw/intermediate
 	@mkdir build/hw/verilog
 
-.PHONY: run_setup_ganga
-run_setup_ganga: ## Run command to setup all dependant files for FPGA.
-	@pip3 uninstall -r requirements_ganga.txt -y
+.PHONY: run_setup_build
+run_setup_build: ## Run command to setup all dependant files for FPGA.
+	@pip3 uninstall -r requirements.txt -y
 	@pip uninstall soc_config -y
-	@pip install -r requirements_ganga.txt
+	@pip install -r requirements.txt
 	@cp -r boards/$(BOARD)/. .
 	@repomanager --yaml deps.yaml --clean 
 	@repomanager --yaml deps.yaml -cup
@@ -126,25 +125,6 @@ run_setup_ganga: ## Run command to setup all dependant files for FPGA.
 	@mkdir build/hw/intermediate
 	@mkdir build/hw/verilog
 
-.PHONY: run_setup_yamuna
-run_setup_yamuna: ## Run command to setup all dependant files for FPGA.
-	@pip3 uninstall -r requirements_yamuna.txt -y
-	@pip uninstall soc_config -y
-	@pip install -r requirements_yamuna.txt
-	@cp -r boards/$(BOARD)/. .
-	@repomanager --yaml deps.yaml --clean 
-	@repomanager --yaml deps.yaml -cup
-	@soc_config --ispec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_isa.yaml \
-	--customspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_custom.yaml \
-	--cspec sample_config/c$(XLEN_build)_$(BOARD)/core$(XLEN_build).yaml \
-	--gspec sample_config/c$(XLEN_build)_$(BOARD)/csr_grouping$(XLEN_build).yaml \
-	--dspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_debug.yaml
-# ifeq ($(BOARD), arty_a7)
-# endif
-	@mkdir build
-	@mkdir build/hw
-	@mkdir build/hw/intermediate
-	@mkdir build/hw/verilog
 
 .PHONY: run_setup_fpga_hyp
 run_setup_fpga_hyp: ## Run command to setup all dependant files for FPGA.
@@ -186,12 +166,8 @@ else
 	@cp boot-code/outputs/boot.mem $(VERILOGDIR)/
 endif
 
-.PHONY: quick_ganga_build
-quick_ganga_build: run_setup_ganga
-	@make generate_verilog -j && make generate_boot_files ip_build board_build
-
-.PHONY: quick_yamuna_build
-quick_yamuna_build: run_setup_yamuna
+.PHONY: quick_build
+quick_build: run_setup_build
 	@make generate_verilog -j && make generate_boot_files ip_build board_build
 
 .PHONY: quick_asic_build
