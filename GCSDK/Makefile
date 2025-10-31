@@ -181,6 +181,7 @@ ifeq ($(PROGRAM),)
 	cd ./software/examples/xadc_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/eth_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/gpt_applns && $(MAKE) clean CLEAR=CLEAR
+	cd ./software/benchmarking && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/projects && $(MAKE) clean CLEAR=CLEAR
 else
 	cd ./software/examples && $(MAKE) PROGRAM=$(PROGRAM) CLEAR=CLEAR
