@@ -9,7 +9,7 @@ common_bsv:
   checkout: 3.0.0
 devices:
   url: https://gitlab.com/shaktiproject/uncore/devices
-  checkout: 117-128-buswidth-support-gpio-plic
+  checkout: 116-plic-strobe-fix-for-32-bit-data-width
 fabrics:
   url: https://gitlab.com/shaktiproject/uncore/fabrics
   checkout: 20-128-buswidth-support-axi2axilite
