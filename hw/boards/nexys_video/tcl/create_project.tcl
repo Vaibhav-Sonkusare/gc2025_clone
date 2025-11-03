@@ -3,7 +3,7 @@ source $curdir/env.tcl
 
 if { $argc != 6 } {
   puts "Please pass the top modu le name that needs to be synthesized along with the fpga part"
-  puts " -tclargs <top-module> <xcvu095-ffva2104-2-e> <riscv-isa> <jtag_type> <verilogdir> <axibuswidth>"
+  puts " -tclargs <top-module> <xc7a200tsbg484-1> <riscv-isa> <jtag_type> <verilogdir> <axibuswidth>"
   exit 2
 } else {
   puts "Synthesizing with Top Module: [lindex $argv 0] for ISA: [lindex $argv 2] with Jtag: [lindex $argv 3] with AXI Bus Width: [lindex $argv 5]"
