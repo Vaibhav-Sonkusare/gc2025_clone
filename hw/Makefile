@@ -3,7 +3,6 @@
 XLEN_build ?= 64
 BOARD ?= asic_yamuna
 SYNTHTOP ?= fpga_top
-debug_bus_sz := $(word 2,$(subst =, ,$(filter debug_bus_sz=%,$(BSC_DEFINES))))
 ISA=RV$(XLEN_build)IMAFDCSU
 JOBS:=$(shell nproc)
 buswidth := $(word 2,$(subst =, ,$(filter buswidth=%,$(BSC_DEFINES))))
@@ -19,9 +18,6 @@ else
 	JTAG_TYPE:=JTAG_EXTERNAL
 endif
 
-ifeq ($(debug_bus_sz), 64)
-	override BSC_DEFINES += debug_datawidth64=True
-endif
 
 ifeq ($(BOARD), arty_a7)
 	FPGA:=xc7a100tcsg324-1
@@ -81,7 +77,6 @@ build_program: ## To start bitstream and MCS file generation  for boards (passed
 
 %.bo:
 	 $(info building $@)
-	 $(info debug_bus_sz = $(debug_bus_sz))
 	 $(info BSC_DEFINES = $(MOREDEFINES))
 	 @$(BSCCMD) $(MOREDEFINES) -p $(BSVINCDIR) $<
 
