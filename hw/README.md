@@ -22,16 +22,18 @@ For more SoC related details please view README.rst
 ```
   $ git clone https://gitlab.com/shaktiproject/gc2025.git
   $ cd gc2025/hw
-  $ make build_yamuna BOARD=arty_a7_yamuna XLEN_build=32
+  $ make build BOARD=arty_a7_yamuna XLEN_build=32
 ```
+For nexys_video support pass BOARD=nexys_video 
 
 <b>To Build MCS File for Ganga:</b>
 
 ```
   $ git clone https://gitlab.com/shaktiproject/gc2025.git
   $ cd gc2025/hw
-  $ make build_ganga BOARD=arty_a7_ganga
+  $ make build BOARD=arty_a7_ganga
 ```
+For nexys_video support pass BOARD=nexys_video 
 
 <b>To Build MCS File for Nexys A7:</b>
 
