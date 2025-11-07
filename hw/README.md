@@ -1,4 +1,4 @@
-# <b>Shakti on Shakti</b>
+# <b>GC2025</b>
 
 ### <b>Maintained by : RISE/Shakti Lab, Indian Institute of Technology, Madras</b>
 
