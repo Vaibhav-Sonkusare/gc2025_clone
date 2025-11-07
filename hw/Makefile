@@ -179,10 +179,11 @@ link_verilator: ## Generate simulation executable using Verilator
 	@mkdir -p $(BSVOUTDIR) obj_dir
 	@echo "#define TOPMODULE V$(TOP_MODULE)" > sim_main.h                                             
 	@echo '#include "V$(TOP_MODULE).h"' >> sim_main.h                                                 
-	verilator $(VERILATOR_FLAGS) --cc $(TOP_MODULE).v -y $(VERILOGDIR) -y $(BS_VERILOG_LIB) -y common_verilog --exe        
+	verilator $(VERILATOR_FLAGS) --cc $(TOP_MODULE).v -y $(VERILOGDIR) \
+	-y $(BS_VERILOG_LIB) -y common_verilog --exe        
 	@ln -f -s sim_main.cpp obj_dir/sim_main.cpp                                                       
 	@ln -f -s sim_main.h obj_dir/sim_main.h                                                           
-	@make -j8 -C obj_dir -f V$(TOP_MODULE).mk                                                         
+	@make $(VERILATOR_SPEED) VM_PARALLEL_BUILDS=1 -j8 -C obj_dir -f V$(TOP_MODULE).mk                                                         
 	@cp obj_dir/V$(TOP_MODULE) $(BSVOUTDIR)/out
 
 .PHONY: link_verilator_gdb
