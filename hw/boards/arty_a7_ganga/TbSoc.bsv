@@ -125,7 +125,7 @@ package TbSoc;
 
     Ifc_bram_axi4#(`paddr,`axi4_id_width, `buswidth, USERSPACE, `Addr_space) bram <- mkbram_axi4(`MemoryBase,
                                                 "code.mem", "MainMEM");
-    Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  15) eth0 <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
+    Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  15) eth0 <- mkbram_axi4lite(`EthBase, "boot1.mem","BRAM");
   
   `ifdef rtldump
     `include "csr_probe.bsv"
