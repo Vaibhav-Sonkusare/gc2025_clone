@@ -72,7 +72,7 @@ bsc_compile_options:
   build_dir: build/hw/intermediate
   top_module: mkTbSoc
   top_file: TbSoc.bsv
-  top_dir: test_soc/c64_c32
+  top_dir: ./
   open_ocd: True
   cocotb_sim: False
   static_check: True
