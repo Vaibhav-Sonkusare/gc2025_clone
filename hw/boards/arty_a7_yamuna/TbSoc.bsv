@@ -275,6 +275,8 @@ package TbSoc;
     rule rl_drive_consts_i2c;
       soc.chip_io.i2c0_out.scl_in(0);
       soc.chip_io.i2c0_out.sda_in(0);
+      soc.chip_io.i2c1_out.scl_in(0);
+      soc.chip_io.i2c1_out.sda_in(0);
     endrule: rl_drive_consts_i2c
 
     rule rl_connect_interrupts;

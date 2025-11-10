@@ -65,6 +65,8 @@ MOREDEFINES=$(addprefix -D , $(BSC_DEFINES))
 # ------------------------------------- Makefile TARGETS ----------------------------------------- #
 default: quick_build_xilinx
 build:  quick_build
+build_sim: quick_build_sim
+build_sim_gdb: quick_build_sim_gdb
 yamuna_asic: quick_asic_build
 build_hyp: quick_build_xilinx_hyp
 build: ## To start bitstream and MCS file generation for boards (passed through BOARD parameter)
@@ -120,6 +122,45 @@ run_setup_build: ## Run command to setup all dependant files for FPGA.
 	@mkdir build/hw/intermediate
 	@mkdir build/hw/verilog
 
+.PHONY: run_setup_simulate
+run_setup_simulate: ## Run command to setup all dependant files for FPGA.
+	@pip3 uninstall -r requirements.txt -y
+	@pip uninstall soc_config -y
+	@pip install -r requirements.txt
+	@cp -r boards/$(BOARD)/. .
+	@repomanager --yaml deps.yaml --clean 
+	@repomanager --yaml deps.yaml -cup
+	@soc_config --ispec sample_config/c$(XLEN_build)_$(BOARD)_sim/rv$(XLEN_build)i_isa.yaml \
+	--customspec sample_config/c$(XLEN_build)_$(BOARD)_sim/rv$(XLEN_build)i_custom.yaml \
+	--cspec sample_config/c$(XLEN_build)_$(BOARD)_sim/core$(XLEN_build).yaml \
+	--gspec sample_config/c$(XLEN_build)_$(BOARD)_sim/csr_grouping$(XLEN_build).yaml \
+	--dspec sample_config/c$(XLEN_build)_$(BOARD)_sim/rv$(XLEN_build)i_debug.yaml
+# ifeq ($(BOARD), arty_a7)
+# endif
+	@mkdir build
+	@mkdir build/hw
+	@mkdir build/hw/intermediate
+	@mkdir build/hw/verilog
+
+.PHONY: run_setup_simulate_gdb
+run_setup_simulate_gdb: ## Run command to setup all dependant files for FPGA.
+	@pip3 uninstall -r requirements.txt -y
+	@pip uninstall soc_config -y
+	@pip install -r requirements.txt
+	@cp -r boards/$(BOARD)/. .
+	@repomanager --yaml deps.yaml --clean 
+	@repomanager --yaml deps.yaml -cup
+	@soc_config --ispec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/rv$(XLEN_build)i_isa.yaml \
+	--customspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/rv$(XLEN_build)i_custom.yaml \
+	--cspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/core$(XLEN_build).yaml \
+	--gspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/csr_grouping$(XLEN_build).yaml \
+	--dspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/rv$(XLEN_build)i_debug.yaml
+# ifeq ($(BOARD), arty_a7)
+# endif
+	@mkdir build
+	@mkdir build/hw
+	@mkdir build/hw/intermediate
+	@mkdir build/hw/verilog
 
 .PHONY: run_setup_fpga_hyp
 run_setup_fpga_hyp: ## Run command to setup all dependant files for FPGA.
@@ -164,6 +205,18 @@ endif
 .PHONY: quick_build
 quick_build: run_setup_build
 	@make generate_verilog -j && make generate_boot_files ip_build board_build
+
+.PHONY: quick_build_sim
+quick_build_sim: run_setup_simulate
+	@make generate_verilog -j && make generate_boot_files_sim link_verilator
+
+.PHONY: quick_build_sim_gdb
+quick_build_sim_gdb: run_setup_simulate_gdb
+	@make generate_verilog -j && make generate_boot_files_sim link_verilator_gdb
+
+.PHONY: quick_build
+quick_build: run_setup_simulate_gdb
+	@make generate_verilog -j && make generate_boot_files_sim link_verilator_gdb
 
 .PHONY: quick_asic_build
 quick_asic_build: run_setup_fpga
@@ -297,16 +350,12 @@ update_xlen:
 .PHONY: generate_boot_files_sim
 generate_boot_files_sim: ## to generate boot files for simulation
 generate_boot_files_sim: update_xlen
+	@echo "XLEN=$(XLEN)" > boot/Makefile.inc
 	@mkdir -p bin
-	@cd verification/dts/; make;
-	@head -n 4096 verification/dts/boot.hex > bin/boot.mem
-	@rm -rf bin/boot1.mem
-	@for number in $$(seq 1 8192) ; do \
-    echo "00000000" >> bin/boot1.mem; \
-  done;
-	@cut -c1-8 verification/dts/boot.hex > bin/boot.MSB
+	@cd boot/; make;
+	@cut -c1-8 boot/boot.hex > bin/boot.MSB
 	@if [ "$(XLEN)" = "64" ]; then\
-	  cut -c9-16 verification/dts/boot.hex > bin/boot.LSB;\
+	  cut -c9-16 boot/boot.hex > bin/boot.LSB;\
     else cp bin/boot.MSB bin/boot.LSB;\
   fi
 
