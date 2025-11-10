@@ -35,6 +35,42 @@ For nexys_video support pass BOARD=nexys_video
 ```
 For nexys_video support pass BOARD=nexys_video 
 
+<b>Simulation for Yamuna SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim BOARD=arty_a7_yamuna XLEN_build=32
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>GDB Simulation for Yamuna SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim_gdb BOARD=arty_a7_yamuna XLEN_build=32
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>Simulation for Ganga SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim BOARD=arty_a7_ganga
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>GDB Simulation for Ganga SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim_gdb BOARD=arty_a7_ganga
+```
+For nexys_video support pass BOARD=nexys_video 
+
 <b>To Build MCS File for Nexys A7:</b>
 
 ```
