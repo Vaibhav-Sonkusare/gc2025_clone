@@ -29,33 +29,34 @@ Details:
 --------------------------------------------------------------------------------------------------
 */
 package TbSoc;
-  import Vector :: *;
   import Soc:: *;
-  import DebugSoc :: *;
   import Clocks::*;
   import GetPut:: *;
 	import Semi_FIFOF:: *;
 	import AXI4_Types:: *;
 	import AXI4_Fabric:: *;
   import uart::*;
-	import ccore_types::*;
+  import ccore_types::*;
+  import csr_types :: *;
+  import csrbox_decoder :: *;
+  import csrbox :: *;
+  import Vector :: * ;
   `include "ccore_params.defines"
   `include "Logger.bsv"
   `include "Soc.defines"
   `include "csrbox.defines"
   import device_common::*;
   import DReg :: *;
-  import bram :: *;
   import Connectable :: *;
+  import bram :: *;
   import bootrom :: *;
   import i2c :: * ;
   import pinmux :: * ;
   import sspi :: * ;
-  import csrbox_decoder :: *;
-  import csrbox :: *;
-  import csr_types :: *;
-
   import TriState :: * ;
+`ifdef debug
+  import DebugSoc     :: * ;
+`endif
 
 `define limit 'd10000000
 
@@ -64,7 +65,6 @@ package TbSoc;
   import "BDPI" function ActionValue #(Bit #(8))get_frame(int client_fd);
   import "BDPI" function Action send_tdo(Bit #(1) tdo , int client_fd);
 `endif
-
     function Bit#(`xlen) fn_atomic_op (Bit#(5) op,  Bit#(`xlen) rs2,  Bit#(`xlen) loaded);
       Bit#(`xlen) op1 = loaded;
       Bit#(`xlen) op2 = rs2;
@@ -104,50 +104,41 @@ package TbSoc;
         return False;
     endfunction
   `endif
-
-
   (*synthesize*)
   module mkTbSoc(Empty);
 
-  `ifdef debug
+    let def_clk <- exposeCurrentClock;
+    let def_rst <- exposeCurrentReset;
+
     MakeClockIfc#(Bit#(1)) tck_clk <-mkUngatedClock(1);
     MakeResetIfc trst <- mkReset(0,False,tck_clk.new_clk);
-  `endif
 
-    Ifc_bram_axi4#(`paddr, XLEN, 0,  25) bram <- mkbram_axi4('h8000_0000, "code.mem","BRAM");
+
+    Ifc_bram_axi4#(`paddr, `buswidth, 0,  25) bram <- mkbram_axi4('h8000_0000, "code.mem","BRAM");
     Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  12) xbram <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
     Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  12) eth0 <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
-
-    /*doc:wire: */
-    Wire#(Bit#(32)) wr_reset_pc <- mkDWire(`MemoryBase);
-    rule set_reset_pc;
-      let bootmode <- $test$plusargs("debugmode");
-      if(bootmode)
-        wr_reset_pc <= `DebugBase;
-    endrule
 
 
   `ifdef debug
     Ifc_DebugSoc soc <- mkDebugSoc(tck_clk.new_clk, trst.new_rst);
   `else
-    Ifc_Soc soc <- mkSoc;
+    Ifc_Soc soc <- mkSoc();
   `endif
 
   `ifdef rtldump
     `include "csr_probe.bsv"
   `endif
 
-		// ------------------- SDRAM connections ----------------------------------//
-    mkConnection(soc.chip_io.mem_master, bram.slave);
-    mkConnection(soc.chip_io.xadc_master, xbram.slave);
-    mkConnection(soc.chip_io.eth_master, eth0.slave);
-
     UserInterface#(`paddr,XLEN,16) uart0 <- mkuart_user(5,0,0);
     UserInterface#(`paddr,XLEN,16) uart1 <- mkuart_user(5,0,0);
     UserInterface#(`paddr,XLEN,16) uart2 <- mkuart_user(5,0,0);
     Reg#(Bool) rg_read_rx<- mkDRegA(False);
-
     Reg#(Bit#(5)) rg_cnt <-mkRegA(0);
+
+		// ------------------- SDRAM connections ----------------------------------//
+    mkConnection(soc.chip_io.mem_master, bram.slave);
+    mkConnection(soc.chip_io.xadc_master, xbram.slave);
+    mkConnection(soc.chip_io.eth_master, eth0.slave);
 
     Vector#(100, String) string_field;
     for (Integer i = 0; i<100; i = i + 1) begin
@@ -165,6 +156,7 @@ package TbSoc;
   `ifdef rtldump
   Reg#(Bit#(`xlen)) rg_prev_mstatus <- mkReg(0);
   Reg#(Bool) rg_prev_mstatus_valid <- mkReg(False);
+
   Bit#(XLEN) lv_misa_init = 0;
   `ifdef RV64
     lv_misa_init[63:62] = 2'b10;
@@ -255,7 +247,7 @@ package TbSoc;
         rg_read_rx<=True;
     endrule
 
-    rule write_received_character(rg_cnt>=5 && rg_read_rx);
+    rule write_received_character(rg_cnt>=1 && rg_read_rx);
       let {data,err}<-uart0.read_req('h8,Byte);
       $fwrite(dump1,"%c",data);
     endrule
@@ -317,7 +309,7 @@ package TbSoc;
 
       let generate_dump <- $test$plusargs("rtldump");
       let stime <- $stime;
-      if (soc.commitlog matches tagged Valid .idump) begin
+      if (soc.soc_sb.commitlog matches tagged Valid .idump) begin
     `ifndef openocd `ifndef cocotb_sim
       if(idump.instruction=='h00006f||idump.instruction =='h00a001)
         $finish(0);
@@ -331,9 +323,9 @@ package TbSoc;
         rg_inst_count <= rg_inst_count + 1;
 
         if (idump.instruction[1:0] == 'b11)
-        	$fwrite(dump, "core   0: ", idump.mode, `ifdef hypervisor " %1d", idump.v, `endif " 0x%16h", idump.pc, " (0x%8h", idump.instruction, ")");
+        	$fwrite(dump, "core   0: ", idump.mode, `ifdef hypervisor " %1d", idump.v, `endif `ifdef RV32 " 0x%8h" `else " 0x%16h" `endif , idump.pc, " (0x%8h", idump.instruction, ")");
         else
-          $fwrite(dump, "core   0: ", idump.mode, `ifdef hypervisor " %1d", idump.v, `endif " 0x%16h", idump.pc, " (0x%4h", idump.instruction[15:0], ")");
+          $fwrite(dump, "core   0: ", idump.mode, `ifdef hypervisor " %1d", idump.v, `endif `ifdef RV32 " 0x%8h" `else " 0x%16h" `endif , idump.pc, " (0x%4h", idump.instruction[15:0], ")");
 
         if (idump.inst_type matches tagged REG .d) begin
 
@@ -405,11 +397,18 @@ package TbSoc;
               $fwrite(dump, " c1536_hstatus 0x%16h", hstatus);
             end
             `endif
-            if (csr_address != `FCSR && csr_address != `MISA ) begin
+            if ( `ifdef spfpu csr_address != `FCSR && `endif csr_address != `MISA ) begin
             if (valueOf(`xlen) == 64) 
               $fwrite(dump, " ", fn_csr_to_str(csr_address), " 0x%16h", wdata);
-            if (valueOf(`xlen) == 32)
+            if (valueOf(`xlen) == 32) begin
+	     `ifdef RV32
+                if (csr_address == `MSTATUS && idump.instruction == 'h30200073 ) begin //mret
+		Bit#(`xlen) wdata1 = fn_probe_csr(`MSTATUSH);
+		$fwrite(dump, " " , fn_csr_to_str(`MSTATUSH), " 0x%8h", wdata1);
+	        end
+      	     `endif
               $fwrite(dump, " " , fn_csr_to_str(csr_address), " 0x%8h", wdata);
+		end
 
             if (csr_address == `MSTATUS) begin
               rg_prev_mstatus <= wdata;
@@ -450,6 +449,7 @@ package TbSoc;
         end
           if (csr_address == `FCSR || csr_address == `FRM || csr_address == `FFLAGS)begin
             csr_address = `MSTATUS;
+            Bit#(`xlen) wdata = fn_probe_csr(csr_address);
             if ( !rg_prev_mstatus_valid || (wdata!=rg_prev_mstatus)   ) begin 
             if (!(d.op==2'b10 && idump.instruction[19:15] == 0)) begin
               if (valueOf(`xlen) == 64) 
@@ -500,9 +500,6 @@ package TbSoc;
 
           if (d.access == Store  `ifdef atomic || (d.access == Atomic && d.atomic_op[3:0] != 5) `endif ) begin
             if (d.size == 0) begin
-              if (store_data[7:4]==0)
-                $fwrite(dump, " 0x%1h", store_data[3:0]);
-              else
                 $fwrite(dump, " 0x%2h", store_data[7:0]);
             end
             if (d.size == 1)
@@ -521,8 +518,6 @@ package TbSoc;
   `endif
 
   `ifdef debug
-    //Wire#(Bit#(1)) wr_tdi <-mkWire(clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Wire#(Bit#(1)) wr_tms <-mkWire(clocked_by tck_clk.new_clk, reset_by trst.new_rst);
     Wire#(Bit#(1)) wr_tdi <- mkWire();
     Wire#(Bit#(1)) wr_tms <- mkWire();
     rule connect_jtag_io;
@@ -532,25 +527,19 @@ package TbSoc;
   `endif
   `ifdef openocd
     Wire#(Bit#(1)) wr_tdo <-mkWire();
+    Wire#(Bit#(1)) wr_tck <-mkWire();
+    Wire#(Bit#(1)) wr_trst <-mkWire();
     rule rl_wr_tdo;
       wr_tdo <= soc.wire_tdo();
     endrule
     Reg#(Bit#(1)) rg_initial <- mkRegA(0);
     Reg#(Bit#(1)) rg_end_sim <- mkRegA(0);
     Reg#(int) rg_client_fd <- mkRegA(32'hffffffff);
-    Reg#(Bit#(5)) delayed_actor <- mkRegA(0);
-    Reg#(Bit#(5)) delayed_actor2 <- mkRegA(0);
-    Reg#(Bit#(5)) delayed_actor3 <- mkRegA(0);
-    Reg#(Bit#(5)) delayed_actor4 <- mkRegA(0);
-    Reg#(Bit#(5)) delayed_actor5 <- mkRegA(0);
-    //Reg#(Bit#(1)) rg_initial <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(Bit#(1)) rg_end_sim <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(int) rg_client_fd <- mkRegA(32'hffffffff, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(Bit#(5)) delayed_actor <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(Bit#(5)) delayed_actor2 <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(Bit#(5)) delayed_actor3 <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(Bit#(5)) delayed_actor4 <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
-    //Reg#(Bit#(5)) delayed_actor5 <- mkRegA(0, clocked_by tck_clk.new_clk, reset_by trst.new_rst);
+    Reg#(Bit#(5)) delayed_actor <- mkReg(0);
+    Reg#(Bit#(5)) delayed_actor2 <- mkReg(0);
+    Reg#(Bit#(5)) delayed_actor3 <- mkReg(0);
+    Reg#(Bit#(5)) delayed_actor4 <- mkReg(0);
+    Reg#(Bit#(5)) delayed_actor5 <- mkReg(0);
     rule rl_initial(rg_initial == 0);
       let x <- init_rbb_jtag(0);
       if(x != 32'hffffffff)begin
