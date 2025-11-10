@@ -54,6 +54,7 @@ package TbSoc;
   import pinmux :: * ;
   import pinmux_axi4lite :: * ;
   import sspi :: * ;
+  import gptimer::*;
   import TriState :: * ;
 `ifdef debug
   import DebugSoc     :: * ;
@@ -117,7 +118,7 @@ package TbSoc;
     MakeResetIfc trst <- mkReset(0,False,tck_clk.new_clk);
 
   `ifdef debug
-    Ifc_DebugSoc soc <- mkDebugSoc(tck_clk.new_clk, trst.new_rst);
+    Ifc_DebugSoc soc <- mkDebugSoc(tck_clk.new_clk, trst.new_rst, def_clk);
   `else
     Ifc_Soc soc <- mkSoc();
   `endif
@@ -240,9 +241,41 @@ package TbSoc;
     rule connect_spi_connection;
       soc.chip_io.spi0_io.miso_in(1'b1);
       soc.chip_io.spi0_io.mosi_in(1'b1);
-      soc.chip_io.spi0_io.ncs_in(1'b1);
+      soc.chip_io.spi0_io.ncs_in0(1'b1);
       soc.chip_io.spi0_io.sclk_in(1'b1);
     endrule
+
+    rule connect_gpio_connection;
+      soc.chip_io.gpio_14(1'b0);
+      soc.chip_io.gpio_15(1'b0);
+      soc.chip_io.gpio_16(1'b0);
+      soc.chip_io.gpio_17(1'b0);
+      soc.chip_io.gpio_18(1'b0);
+      soc.chip_io.gpio_19(1'b0);
+      soc.chip_io.gpio_20(1'b0);
+      soc.chip_io.gpio_21(1'b0);
+      soc.chip_io.gpio_22(1'b0);
+      soc.chip_io.gpio_23(1'b0);
+      soc.chip_io.gpio_24(1'b0);
+      soc.chip_io.gpio_25(1'b0);
+      soc.chip_io.gpio_26(1'b0);
+      soc.chip_io.gpio_27(1'b0);
+      soc.chip_io.gpio_28(1'b0);
+      soc.chip_io.gpio_29(1'b0);
+      soc.chip_io.gpio_30(1'b0);
+      soc.chip_io.gpio_31(1'b0);
+      soc.chip_io.gpio_4(1'b0);
+      soc.chip_io.gpio_7(1'b0);
+      soc.chip_io.gpio_8(1'b0);
+    endrule
+
+    rule connect_gpt_connection;
+      soc.chip_io.gptimer0_io.input_signal(1'b0);
+      soc.chip_io.gptimer1_io.input_signal(1'b0);
+      soc.chip_io.gptimer2_io.input_signal(1'b0);
+      soc.chip_io.gptimer3_io.input_signal(1'b0);
+    endrule
+
     // -------- when uart1 is enabled through pinmux ----------//
     rule connect_uart1_out(soc.chip_io.iocell_io.io7_cell_outen==1);
       soc.chip_io.iocell_io.io8_cell_in(uart1.io.sout);
