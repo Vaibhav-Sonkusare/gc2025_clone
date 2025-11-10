@@ -233,6 +233,7 @@ package TbSoc;
       soc.chip_io.iocell_io.io20_cell_in(1'b1);
       soc.chip_io.iocell_io.io7_cell_in(1'b0);
       soc.chip_io.iocell_io.io9_cell_in(1'b0);
+      soc.chip_io.iocell_io.io10_cell_in(1'b0);
     endrule
 
     rule connect_spi_connection;
