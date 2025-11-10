@@ -52,12 +52,15 @@ package TbSoc;
   import bootrom :: *;
   import i2c :: * ;
   import pinmux :: * ;
+  import pinmux_axi4lite :: * ;
   import sspi :: * ;
   import TriState :: * ;
 `ifdef debug
   import DebugSoc     :: * ;
 `endif
 
+  import pipe_ifcs::*;
+  
 `define limit 'd10000000
 
 `ifdef openocd
@@ -113,32 +116,31 @@ package TbSoc;
     MakeClockIfc#(Bit#(1)) tck_clk <-mkUngatedClock(1);
     MakeResetIfc trst <- mkReset(0,False,tck_clk.new_clk);
 
-
-    Ifc_bram_axi4#(`paddr, `buswidth, 0,  25) bram <- mkbram_axi4('h8000_0000, "code.mem","BRAM");
-    Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  12) xbram <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
-    Ifc_bram_axi4lite#(`paddr, `buswidth, 0,  12) eth0 <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
-
-
   `ifdef debug
     Ifc_DebugSoc soc <- mkDebugSoc(tck_clk.new_clk, trst.new_rst);
   `else
     Ifc_Soc soc <- mkSoc();
   `endif
 
+    Ifc_bram_axi4#(`paddr,`axi4_id_width, `buswidth, USERSPACE, `Addr_space) bram <- mkbram_axi4(`MemoryBase,
+                                                "code.mem", "MainMEM");
+    Ifc_bram_axi4lite#(`paddr, 32, 0,  15) xbram <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
+    Ifc_bram_axi4lite#(`paddr, 32, 0,  15) eth0 <- mkbram_axi4lite('h4_1000, "boot1.mem","BRAM");
+  
   `ifdef rtldump
     `include "csr_probe.bsv"
   `endif
-
-    UserInterface#(`paddr,XLEN,16) uart0 <- mkuart_user(5,0,0);
-    UserInterface#(`paddr,XLEN,16) uart1 <- mkuart_user(5,0,0);
-    UserInterface#(`paddr,XLEN,16) uart2 <- mkuart_user(5,0,0);
-    Reg#(Bool) rg_read_rx<- mkDRegA(False);
-    Reg#(Bit#(5)) rg_cnt <-mkRegA(0);
-
 		// ------------------- SDRAM connections ----------------------------------//
     mkConnection(soc.chip_io.mem_master, bram.slave);
     mkConnection(soc.chip_io.xadc_master, xbram.slave);
     mkConnection(soc.chip_io.eth_master, eth0.slave);
+
+    UserInterface#(`paddr,`buswidth,16) uart0 <- mkuart_user(5,0,0);
+    UserInterface#(`paddr,`buswidth,16) uart1 <- mkuart_user(5,0,0);
+    UserInterface#(`paddr,`buswidth,16) uart2 <- mkuart_user(5,0,0);
+    Reg#(Bool) rg_read_rx<- mkDRegA(False);
+
+    Reg#(Bit#(5)) rg_cnt <-mkRegA(0);
 
     Vector#(100, String) string_field;
     for (Integer i = 0; i<100; i = i + 1) begin
@@ -223,6 +225,24 @@ package TbSoc;
       uart0.io.sin(soc.chip_io.uart0_io.sout);
     endrule
    
+    rule connect_io_pins;
+      soc.chip_io.iocell_io.io12_cell_in(1'b0);
+      soc.chip_io.iocell_io.io13_cell_in(1'b0);
+      soc.chip_io.iocell_io.io16_cell_in(1'b0);
+      soc.chip_io.iocell_io.io17_cell_in(1'b1);
+      soc.chip_io.iocell_io.io18_cell_in(1'b1);
+      soc.chip_io.iocell_io.io19_cell_in(1'b1);
+      soc.chip_io.iocell_io.io20_cell_in(1'b1);
+      soc.chip_io.iocell_io.io7_cell_in(1'b0);
+      soc.chip_io.iocell_io.io9_cell_in(1'b0);
+    endrule
+
+    rule connect_spi_connection;
+      soc.chip_io.spi0_io.miso_in(1'b1);
+      soc.chip_io.spi0_io.mosi_in(1'b1);
+      soc.chip_io.spi0_io.ncs_in(1'b1);
+      soc.chip_io.spi0_io.sclk_in(1'b1);
+    endrule
     // -------- when uart1 is enabled through pinmux ----------//
     rule connect_uart1_out(soc.chip_io.iocell_io.io7_cell_outen==1);
       soc.chip_io.iocell_io.io8_cell_in(uart1.io.sout);
@@ -231,8 +251,8 @@ package TbSoc;
       uart1.io.sin(soc.chip_io.iocell_io.io8_cell_out);
     endrule
     // --------------------------------------------------------//
-    
-    // -------- when uart1 is enabled through pinmux ----------//
+
+    // -------- when uart2 is enabled through pinmux ----------//
     rule connect_uart2_out(soc.chip_io.iocell_io.io9_cell_outen==1);
       soc.chip_io.iocell_io.io10_cell_in(uart2.io.sout);
     endrule
@@ -252,52 +272,10 @@ package TbSoc;
       $fwrite(dump1,"%c",data);
     endrule
 
-    rule drive_constants;
-      soc.chip_io.gpio_14(0);
-      soc.chip_io.gpio_15(0);
-      soc.chip_io.gpio_16(0);
-      soc.chip_io.gpio_17(0);
-      soc.chip_io.gpio_18(0);
-      soc.chip_io.gpio_19(0);
-      soc.chip_io.gpio_20(0);
-      soc.chip_io.gpio_21(0);
-      soc.chip_io.gpio_22(0);
-      soc.chip_io.gpio_23(0);
-      soc.chip_io.gpio_24(0);
-      soc.chip_io.gpio_25(0);
-      soc.chip_io.gpio_26(0);
-      soc.chip_io.gpio_27(0);
-      soc.chip_io.gpio_28(0);
-      soc.chip_io.gpio_29(0);
-      soc.chip_io.gpio_30(0);
-      soc.chip_io.gpio_31(0);
-      soc.chip_io.gpio_4(0);
-      soc.chip_io.gpio_7(0);
-      soc.chip_io.gpio_8(0);
-      soc.chip_io.iocell_io.io7_cell_in(0);
-      soc.chip_io.iocell_io.io9_cell_in(0);
-      soc.chip_io.iocell_io.io12_cell_in(0);
-      soc.chip_io.iocell_io.io13_cell_in(0);
-      soc.chip_io.iocell_io.io16_cell_in(0);
-      soc.chip_io.iocell_io.io17_cell_in(0);
-      soc.chip_io.iocell_io.io18_cell_in(0);
-      soc.chip_io.iocell_io.io19_cell_in(0);
-      soc.chip_io.iocell_io.io20_cell_in(0);
-    endrule
-
     rule rl_drive_consts_i2c;
       soc.chip_io.i2c0_out.scl_in(0);
-      soc.chip_io.i2c1_out.scl_in(0);
       soc.chip_io.i2c0_out.sda_in(0);
-      soc.chip_io.i2c1_out.sda_in(0);
     endrule: rl_drive_consts_i2c
-    rule rl_drive_consts_sspi;
-      soc.chip_io.spi0_io.mosi_in(0);
-      soc.chip_io.spi0_io.sclk_in(0);
-      soc.chip_io.spi0_io.miso_in(0);
-      soc.chip_io.spi0_io.ncs_in(0);
-    endrule
-
 
     rule rl_connect_interrupts;
       soc.chip_io.ext_interrupts(0);
