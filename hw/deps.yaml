@@ -12,7 +12,7 @@ devices:
   checkout: 117-128-buswidth-support-gpio-plic
 fabrics:
   url: https://gitlab.com/shaktiproject/uncore/fabrics
-  checkout: 20-128-buswidth-support-axi2axilite
+  checkout: 1.3.6
 common_verilog:
   url: https://gitlab.com/shaktiproject/common_verilog
   checkout: 3.2.0
