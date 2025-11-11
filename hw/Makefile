@@ -214,9 +214,6 @@ quick_build_sim: run_setup_simulate
 quick_build_sim_gdb: run_setup_simulate_gdb
 	@make generate_verilog -j && make generate_boot_files_sim link_verilator_gdb
 
-.PHONY: quick_build
-quick_build: run_setup_simulate_gdb
-	@make generate_verilog -j && make generate_boot_files_sim link_verilator_gdb
 
 .PHONY: quick_asic_build
 quick_asic_build: run_setup_fpga
