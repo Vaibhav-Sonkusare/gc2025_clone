@@ -119,26 +119,34 @@ void main()
 	printf("\n count value: %x", count);
 	while(1);
 	*/
-	read_address += 4;
-	for(int i = 1; i < count; i++)
+	if(0xFFFFFFFF != count)
 	{
-		data = flash_read(read_address);
-		// printf("\n read data[%x]: %x", read_address, data);
-//		printf("\n Addr: %x; wdata: %x; rdata: %x", read_address, write_data[i], data);
-		delay_loop(10, 5);
-#if 0
-		if(data != write_data[i])
-			{
-				printf("\n Error in read data @ Address: %x", read_address);
-				return 1;
-			}
-#endif			
-				*(bram_address) = data;
-	bram_address++;
-	read_address += 4;
+		printf("\n Valid data in flash. Read count: %x", count);
+		read_address += 4;
+		for(int i = 1; i < count; i++)
+		{
+			data = flash_read(read_address);
+			// printf("\n read data[%x]: %x", read_address, data);
+	//		printf("\n Addr: %x; wdata: %x; rdata: %x", read_address, write_data[i], data);
+			delay_loop(10, 5);
+	#if 0
+			if(data != write_data[i])
+				{
+					printf("\n Error in read data @ Address: %x", read_address);
+					return 1;
+				}
+	#endif			
+		*(bram_address) = data;
+		bram_address++;
+		read_address += 4;
+		}
+		printf("\n\nread complete.\n");
+		jumpToRAM();
 	}
-
-	printf("\n\nread complete.\n");
-	jumpToRAM();
+	else
+	{
+		printf("\n No valid data in flash");
+		while(1);
+	}
 
 }
