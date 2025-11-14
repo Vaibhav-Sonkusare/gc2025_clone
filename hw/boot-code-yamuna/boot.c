@@ -146,6 +146,7 @@ void main()
 	else
 	{
 		printf("\n No valid data in flash");
+		printf("\n Upload application data to flash using flash_write application");
 		while(1);
 	}
 
