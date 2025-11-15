@@ -126,13 +126,16 @@ void main()
 	printf("\n count value: %x", count);
 	while(1);
 	*/
+	if(0xFFFFFFFF != count)
+	{
+		printf("\n Valid data in flash. Read count: %x", count);
 	read_address += 4;
 	for(int i = 1; i < count; i++)
 	{
 		data = flash_read(read_address);
 		// printf("\n read data[%x]: %x", read_address, data);
 //		printf("\n Addr: %x; wdata: %x; rdata: %x", read_address, write_data[i], data);
-		delay_loop(20, 10);
+			delay_loop(10, 5);
 #if 0
 		if(data != write_data[i])
 			{
@@ -144,8 +147,14 @@ void main()
 	bram_address++;
 	read_address += 4;
 	}
-
 	printf("\n\nread complete.\n");
 	jumpToRAM();
+	}
+	else
+	{
+		printf("\n No valid data in flash");
+		printf("\n Upload application data to flash using flash_write application");
+		while(1);
+	}
 
 }
