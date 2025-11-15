@@ -48,7 +48,7 @@ ifeq ($(DEBUG),DEBUG)
 endif
 ifeq ($(TARGET),moushik)
 	@echo $(filepath)
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval FLAGS= -D AARDONYX)
 	@$(eval MARCH=rv32imac_zifencei_zicsr)
 	@$(eval MABI=ilp32)
@@ -59,7 +59,7 @@ ifeq ($(TARGET),moushik)
 else
 ifeq ($(TARGET),pinaka)     # e-class 35t rv32imac
 	@echo $(filepath)
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval WIDTH = 4)
 	@$(eval FLAGS= -D pinaka )
 	@$(eval MARCH=rv32imac_zifencei_zicsr)
@@ -70,7 +70,7 @@ ifeq ($(TARGET),pinaka)     # e-class 35t rv32imac
 else
 ifeq ($(TARGET),parashu)  # e-class 100t rv32imac
 	@echo $(filepath)
-	@$(eval XLEN = 32)
+	@$(eval XLEN = 64)
 	@$(eval WIDTH = 4)
 	@$(eval FLAGS = -D parashu )
 	@$(eval MARCH=rv32imac_zifencei_zicsr)
@@ -128,8 +128,6 @@ compile:
 	@mkdir -p ./gen_lib
 	@echo "Compiling $(bspdri)"
 	@echo $(bspboard)
-	@echo "XLEN: "
-	@echo $(XLEN)
 	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf  $(FLAGS) -I$(bspinc) -c $(bspdri)/qspi/qspi_micron.c -o ./gen_lib/qspi_micron.o -march=$(MARCH) -mabi=$(MABI) -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bspinc) -I$(bspboard) -c $(bspdri)/pwm/pwm_driver.c -o ./gen_lib/pwm_driver.o -march=$(MARCH) -mabi=$(MABI) -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf  $(FLAGS) -I$(bspinc) -I$(bspboard) -c $(bspdri)/uart/uart.c -o ./gen_lib/uart.o -march=$(MARCH)  -mabi=$(MABI) -lm -lgcc
@@ -137,7 +135,6 @@ compile:
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI)  -mcmodel=medany -static -std=gnu99 -fno-common -fno-builtin-printf $(FLAGS) -D__ASSEMBLY__=1 -I$(bspinc) -c $(bspcore)/start.S -o ./gen_lib/start.o
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI)  -mcmodel=medany -static -std=gnu99 -fno-common -fno-builtin-printf $(FLAGS) -D__ASSEMBLY__=1 -I$(bspinc) -c $(bspcore)/trap.S -o ./gen_lib/trap.o
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH)  -mabi=$(MABI) -mcmodel=medany -static -std=gnu99 -fno-common -fno-builtin-printf $(FLAGS) -I$(bspinc) -I$(bspboard) -c $(bsplib)/printf.c -o ./gen_lib/printf.shakti
-	@echo "Compiling log"
 	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf  $(FLAGS)  -I$(bspinc)  -I$(bspboard) -c $(bsplib)/log.c -o ./gen_lib/log.o -march=$(MARCH) -mabi=$(MABI) -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf   $(FLAGS) -I$(bspinc) -c $(bsplib)/util.c -o ./gen_lib/util.o -march=$(MARCH) -mabi=$(MABI)  -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf   $(FLAGS) -I$(bspinc) -c $(bspcore)/traps.c -o ./gen_lib/traps.o -march=$(MARCH) -mabi=$(MABI)  -lm -lgcc

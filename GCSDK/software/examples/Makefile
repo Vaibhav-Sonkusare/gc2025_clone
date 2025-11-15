@@ -459,43 +459,49 @@ ifeq ($(PROGRAM),txrxlen)
 filepath := uart_testcases/txrxlen
 else
 ifeq ($(PROGRAM),sspi_full_duplex)
-filepath := sspi_applns/sspi_full_duplex
+filepath := sspi_testcases/sspi_full_duplex
 else
 ifeq ($(PROGRAM),adc_dac_test)
 filepath := sspi_applns/adc_dac_test
 else
 ifeq ($(PROGRAM),sspi_MSB_check)
-filepath := sspi_applns/sspi_MSB_check
+filepath := sspi_testcases/sspi_MSB_check
 else
 ifeq ($(PROGRAM),sspi_LSB_check)
-filepath := sspi_applns/sspi_LSB_check
+filepath := sspi_testcases/sspi_LSB_check
+else
+ifeq ($(PROGRAM),sspi_simplex_rx)
+filepath := sspi_testcases/sspi_simplex_rx
+else
+ifeq ($(PROGRAM),sspi_simplex_tx)
+filepath := sspi_testcases/sspi_simplex_tx
 else
 ifeq ($(PROGRAM),sspi_rx_quad_interrupt)
-filepath := sspi_applns/sspi_rx_quad_interrupt
+filepath := sspi_testcases/sspi_rx_quad_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_full_interrupt)
-filepath := sspi_applns/sspi_rx_full_interrupt
+filepath := sspi_testcases/sspi_rx_full_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_quad_interrupt)
-filepath := sspi_applns/sspi_tx_quad_interrupt
+filepath := sspi_testcases/sspi_tx_quad_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_empty_interrupt)
-filepath := sspi_applns/sspi_tx_empty_interrupt
+filepath := sspi_testcases/sspi_tx_empty_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_half_interrupt)
-filepath := sspi_applns/sspi_tx_half_interrupt
+filepath := sspi_testcases/sspi_tx_half_interrupt
 else
 ifeq ($(PROGRAM),sspi_tx_full_interrupt)
-filepath := sspi_applns/sspi_tx_full_interrupt
+filepath := sspi_testcases/sspi_tx_full_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_empty_interrupt)
-filepath := sspi_applns/sspi_rx_empty_interrupt
+filepath := sspi_testcases/sspi_rx_empty_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_half_interrupt)
-filepath := sspi_applns/sspi_rx_half_interrupt
+filepath := sspi_testcases/sspi_rx_half_interrupt
 else
 ifeq ($(PROGRAM),sspi_rx_overrun_interrupt)
-filepath := sspi_applns/sspi_rx_overrun_interrupt
+filepath := sspi_testcases/sspi_rx_overrun_interrupt
 else
 ifeq ($(PROGRAM),spansion_chk)
 filepath := sspi_applns/spansion_chk
@@ -568,6 +574,12 @@ filepath := gpt_applns/gpt_capture_all_low
 else
 ifeq ($(PROGRAM),gptpwm_interrupt)
 filepath := gpt_applns/gptpwm_interrupt
+else
+ifeq ($(PROGRAM),coremarks)
+filepath := ../benchmarking/coremarks
+else
+ifeq ($(PROGRAM),dhrystone)
+filepath := ../benchmarking/dhrystone
 else
 	@echo "Entry for $(PROGRAM) not present"
 endif
@@ -691,6 +703,12 @@ endif
 endif
 endif
 endif
+endif
+endif
+endif
+endif
+
+
 
 erase: check library
 	@rm -r output

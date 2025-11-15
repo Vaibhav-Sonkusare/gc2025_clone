@@ -48,10 +48,10 @@ void main()
     {
         while( 0 == (uart_instance[1]->status & STS_RX_NOT_EMPTY ) );
         if(uart_instance[1]->status & PARITY_ERROR)
-	{
-        write_uart_string (uart_instance[0], "\n Even Parity error with UART 0");
-	break;
-	}
+        {
+            write_uart_string (uart_instance[0], "\n Even Parity error with UART 0");
+        	break;
+        }
         else
         {
             write_uart_string (uart_instance[0], "\n The received char: ");

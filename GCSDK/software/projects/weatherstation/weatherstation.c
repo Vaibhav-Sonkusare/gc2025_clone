@@ -219,7 +219,7 @@ void main()
 	int transmit_count = 0;
 	char data[200];
    	printf("\n setting PIN MUX config to 2 .... \n");
-    	*pinmux_config_reg = 0x5;
+   	*(pinmux_config_reg) = 0x5;
    	printf("\n set PIN MUX config to 2 .... \n");
 	set_baud_rate(ESP_UART,baudrate);	
 	printf("\n Sending temperature data to cloud server!....\n");

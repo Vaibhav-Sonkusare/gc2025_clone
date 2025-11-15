@@ -1,6 +1,7 @@
 /*
 DAC Register Bits
 */
+/* Not used now */
 // #define SELECT_DAC0 (~(1 << 7))
 // #define SELECT_DAC1 (1 << 7)
 

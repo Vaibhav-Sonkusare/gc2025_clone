@@ -25,6 +25,17 @@ TARGET ?= yamuna
 DEBUG ?=
 PROGRAM=irrigationsystem
 
+ifeq ($(TARGET),yamuna)
+	XLEN=64
+	flags= -D ARTIX7_35T
+	MARCH=rv32imac
+	MABI=ilp32
+endif
+
+ifeq ($(TARGET),artix7_100t)
+	XLEN=64
+	flags= -D ARTIX7_100T
+endif
 
 ifeq ($(DEBUG),DEBUG)
 	DC=-g

@@ -36,8 +36,9 @@ The typed char will be displayed in the UART0 Miniterm window along with "The re
 
 void main()
 {
-	*pinmux_config_reg = 0x55;
-//    *(pinmux_config_reg) =  0x55;
+    *(pinmux_config_reg) =  0x55;
+
+    int t;
 	set_baud_rate(uart_instance[0], 19200); // Set the required baudrate from 300 to 540,000
 	set_baud_rate(uart_instance[1], 19200); // Set baudrate to 19200
 
