@@ -571,7 +571,15 @@ else
 ifeq ($(PROGRAM),gptpwm_interrupt)
 filepath := gpt_applns/gptpwm_interrupt
 else
+ifeq ($(PROGRAM),coremarks)
+filepath := ../benchmarking/coremarks
+else
+ifeq ($(PROGRAM),dhrystone)
+filepath := ../benchmarking/dhrystone
+else
 	@echo "Entry for $(PROGRAM) not present"
+endif
+endif
 endif
 endif
 endif
