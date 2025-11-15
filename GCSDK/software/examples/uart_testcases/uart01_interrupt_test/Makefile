@@ -18,19 +18,22 @@
 
 SHELL := /bin/bash # Use bash syntax
 DC ?=
-PROGRAM ?= uart00_interrupt_test
+PROGRAM ?=
 #default target board
+TARGET ?= yamuna
+DEBUG ?=
+MARCH ?=rv32imac
+MABI  ?=ilp32
+XLEN  ?= 32
 FLAGS ?=
 
 all: create_dir
-	make $(PROGRAM).riscv 
+	make uart01_interrupt_test.riscv 
 
-$(PROGRAM).riscv: create_dir
-	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -g -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bsplib) -I$(bspinc) -I$(bspboard) -I$(bspdri)/include -c ./$(PROGRAM).c -o ./output/$(PROGRAM).o 
-	@riscv$(XLEN)-unknown-elf-gcc -w $(DC) -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bsplib) -I$(bspinc) -I$(bspboard)  -c $(bspdri)/pwm/pwm_driver.c -o ./output/pwm_driver.o  -lm -lgcc
-	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/$(PROGRAM).o $(GENLIB)/gen_lib/libshakti$(XLEN).a   -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
+uart01_interrupt_test.riscv: create_dir
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bsplib) -I$(bspinc) -I$(bspboard) -I$(bspdri)/plic -c ./uart01_interrupt_test.c -o ./output/uart01_interrupt_test.o -lm -lgcc
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/uart01_interrupt_test.o $(GENLIB)/gen_lib/libshakti$(XLEN).a -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-objdump -D ./output/$(PROGRAM).shakti > ./output/$(PROGRAM).dump
 
 create_dir:
 	@mkdir -p ./output
-

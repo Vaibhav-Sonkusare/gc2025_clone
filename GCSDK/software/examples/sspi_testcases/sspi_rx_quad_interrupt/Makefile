@@ -27,7 +27,17 @@ all: create_dir
 
 $(PROGRAM).riscv: create_dir
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -g -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bsplib) -I$(bspinc) -I$(bspboard) -I$(bspdri)/include -c ./$(PROGRAM).c -o ./output/$(PROGRAM).o 
+<<<<<<< HEAD
+<<<<<<<< HEAD:GCSDK/software/examples/sspi_testcases/sspi_rx_quad_interrupt/Makefile
+========
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspboard) -I$(bspinc) -c $(bspdri)/pinmux/pinmux.c -o ./output/pinmux.o -lm -lgcc
+>>>>>>>> main:GCSDK/software/examples/sspi_testcases/sspi_rx_half_interrupt/Makefile
+=======
+<<<<<<<< HEAD:GCSDK/software/examples/sspi_testcases/sspi_rx_half_interrupt/Makefile
+========
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspboard) -I$(bspinc) -c $(bspdri)/pinmux/pinmux.c -o ./output/pinmux.o -lm -lgcc
+>>>>>>>> main:GCSDK/software/examples/sspi_testcases/sspi_rx_quad_interrupt/Makefile
+>>>>>>> main
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/$(PROGRAM).o ./output/pinmux.o $(GENLIB)/gen_lib/libshakti$(XLEN).a   -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-objdump -D ./output/$(PROGRAM).shakti > ./output/$(PROGRAM).dump
 

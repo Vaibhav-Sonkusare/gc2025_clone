@@ -170,6 +170,7 @@ else ifeq ($(TARGET),ganga)
 else
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/uart/uart.c -o ./gen_lib/uart.o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/pwm/pwm_driver.c -o ./gen_lib/pwm_driver.o -lm -lgcc
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf -I$(bspinc) -I$(bspboard) -c $(bspdri)/pinmux/pinmux.c -o ./gen_lib/pinmux.o -lm -lgcc
 endif
 build:
 ifeq ($(TARGET),sos)
@@ -182,7 +183,7 @@ else ifeq ($(TARGET),yamuna)
 else ifeq ($(TARGET),ganga)
 	@riscv$(XLEN)-unknown-elf-ar rcs ./gen_lib/libshakti$(XLEN).a ./gen_lib/start.o ./gen_lib/trap.o ./gen_lib/util.o ./gen_lib/traps.o ./gen_lib/log.o ./gen_lib/printf.shakti ./gen_lib/qspi_micron.o ./gen_lib/uart.o ./gen_lib/i2c_driver.o ./gen_lib/clint_driver.o ./gen_lib/plic_driver.o ./gen_lib/init.o ./gen_lib/sspi_driver.o ./gen_lib/xadc_driver.o ./gen_lib/pwmv2.o ./gen_lib/gpiov2.o ./gen_lib/gpt.o ./gen_lib/pinmux.o 
 else
-	@riscv$(XLEN)-unknown-elf-ar rcs ./gen_lib/libshakti$(XLEN).a ./gen_lib/start.o ./gen_lib/trap.o ./gen_lib/util.o ./gen_lib/traps.o ./gen_lib/log.o ./gen_lib/printf.shakti ./gen_lib/qspi_micron.o ./gen_lib/uart.o ./gen_lib/i2c_driver.o ./gen_lib/clint_driver.o ./gen_lib/plic_driver.o ./gen_lib/init.o  ./gen_lib/xadc_driver.o ./gen_lib/pwm_driver.o 
+	@riscv$(XLEN)-unknown-elf-ar rcs ./gen_lib/libshakti$(XLEN).a ./gen_lib/start.o ./gen_lib/trap.o ./gen_lib/util.o ./gen_lib/traps.o ./gen_lib/log.o ./gen_lib/printf.shakti ./gen_lib/qspi_micron.o ./gen_lib/uart.o ./gen_lib/i2c_driver.o ./gen_lib/clint_driver.o ./gen_lib/plic_driver.o ./gen_lib/init.o  ./gen_lib/xadc_driver.o ./gen_lib/pwm_driver.o  ./gen_lib/pinmux.o 
 endif
 
 
@@ -353,13 +354,13 @@ ifeq ($(PROGRAM),interrupt_demo)
 filepath := plic_applns/interrupt_demo
 else
 ifeq ($(PROGRAM),uart00_interrupt_test)
-filepath := plic_applns/uart00_interrupt_test
+filepath := uart_testcases/uart00_interrupt_test
 else
 ifeq ($(PROGRAM),uart01_interrupt_test)
-filepath := plic_applns/uart01_interrupt_test
+filepath := uart_testcases/uart01_interrupt_test
 else
 ifeq ($(PROGRAM),uart01_uart02_interrupt)
-filepath := plic_applns/uart01_uart02_interrupt
+filepath := uart_testcases/uart01_uart02_interrupt
 else
 ifeq ($(PROGRAM),switches)
 filepath := gpiov2_applns/switches
@@ -702,6 +703,11 @@ endif
 endif
 endif
 endif
+<<<<<<< HEAD
+endif
+
+=======
+>>>>>>> main
 
 
 erase: check library

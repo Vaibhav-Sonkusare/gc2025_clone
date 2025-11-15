@@ -1,6 +1,6 @@
 /**************************************************************************
- * Project           		: shakti devt board
- * Name of the file	     	: i2c_driver.c
+ * Project           		    : shakti devt board
+ * Name of the file	     	    : i2c_driver.c
  * Brief Description of file    : Demonstartes the working of i2c protocol.
  * Name of Author               : Kotteeswaran
  * Email id                     : kottee.1@gmail.com
@@ -32,11 +32,14 @@
 #include "log.h"
 #include "utils.h"
 
-/* Enable these bits only when corresponding interrupt is needed.*/
+/* Enable below MACROS only when corresponding interrupt is needed.*/
 
 //#define USE_SA_WRITE_I2C_INTERRUPT 1
-//#define USE_WRITE_I2C_INTERRUPT 1
-//#define USE_READ_I2C_INTERRUPT 1
+// #define USE_WRITE_I2C_INTERRUPT 1
+// #define USE_READ_I2C_INTERRUPT 1
+
+unsigned char i2c_complete_flag = 0;
+unsigned int i2c_read_value = 0;
 
 i2c_struct *i2c_instance[MAX_I2C_COUNT];
 
@@ -337,15 +340,12 @@ int i2c_send_slave_address(i2c_struct * instance, unsigned char slaveAddress, un
 		log_error("\n There is some issue in AXI interface. Please check.");
 		return EAXI_ERROR;
 	}
-
 	//Waits till the bus becomes free.
 	while(wait_till_I2c_bus_free(instance))
 	{
 		log_error("\tError in Waiting for BB\n");
 		return EI2C_BUS_ERROR;
 	}
-
-
 	//Send the start condition and slave address to slave
 #ifndef USE_SA_WRITE_I2C_INTERRUPT
 	instance->control = I2C_START; //Sending the slave address to the I2C slave
@@ -366,7 +366,6 @@ int i2c_send_slave_address(i2c_struct * instance, unsigned char slaveAddress, un
 
 #else
 	i2c_complete_flag = 0;
-
 	instance->control = I2C_START_ENI; //Sending the slave address to the I2C slave
 	while(!i2c_complete_flag);
 	log_info("\n Slave Address Write Operation is complete.");
@@ -390,9 +389,7 @@ int i2c_write_data(i2c_struct * instance, unsigned char writeData, unsigned char
 	int timeout;
 	int status = 0;
 	delay = delay;
-
 	instance->data= writeData;
-
 #ifndef USE_WRITE_I2C_INTERRUPT
 	timeout = wait_till_txrx_operation_Completes(instance, &status);
 	if (timeout) {

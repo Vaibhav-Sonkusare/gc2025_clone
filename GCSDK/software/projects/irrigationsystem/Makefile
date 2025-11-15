@@ -26,7 +26,11 @@ DEBUG ?=
 PROGRAM=irrigationsystem
 
 ifeq ($(TARGET),yamuna)
+<<<<<<< HEAD
+	XLEN=64
+=======
 	XLEN=32
+>>>>>>> main
 	flags= -D ARTIX7_35T
 	MARCH=rv32imac
 	MABI=ilp32

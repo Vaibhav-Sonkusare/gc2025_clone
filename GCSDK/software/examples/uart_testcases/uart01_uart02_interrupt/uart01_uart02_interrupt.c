@@ -108,46 +108,7 @@ int main(void){
 	printf("\n UART 2 Status Register: %x", uart_instance[2]->status);
 	enable_uart_interrupts(uart_instance[1],  ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL);
 	enable_uart_interrupts(uart_instance[2],  ENABLE_RX_NOT_EMPTY | ENABLE_RX_FULL);
-
-	// Enable Global (PLIC) interrupts.
-	asm volatile("li      t0, 8\t\n"
-		     "csrrs   zero, mstatus, t0\t\n"
-		    );
-
-	asm volatile("li      t0, 0x800\t\n"
-		     "csrrs   zero, mie, t0\t\n"
-		    );
-
-	asm volatile(
-		     "csrr %[retval], mstatus\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
-	asm volatile(
-		     "csrr %[retval], mie\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-
-	printf(" retval = %x\n", retval);
-
-	asm volatile(
-		     "csrr %[retval], mip\n"
-		     :
-		     [retval]
-		     "=r"
-		     (retval)
-		    );
-	printf(" retval = %x\n", retval);
-
-
-
+	enable_machine_global_interrupts();
 	i = 0;
 	write_uart_string(uart_instance[1], uart1_buf);
 	write_uart_string(uart_instance[2], uart2_buf);

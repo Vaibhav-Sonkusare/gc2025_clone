@@ -25,7 +25,7 @@ TARGET ?= yamuna
 DEBUG ?=
 MARCH ?= rv32imac
 MABI  ?= ilp32
-XLEN  ?=32
+XLEN  ?= 32
 FLAGS ?=
 
 all: create_dir

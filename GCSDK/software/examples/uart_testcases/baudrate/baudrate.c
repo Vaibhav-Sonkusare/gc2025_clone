@@ -29,7 +29,10 @@ Connection Details:
 Take a UART Module and connect the TX to RX of other module and vice versa
 Run the code and type in the UART1 Miniterm window
 The typed char will be displayed in the UART0 Miniterm window along with "The received char: "
+<<<<<<< HEAD
+=======
 
+>>>>>>> main
 */
 
 #include "uart.h"
@@ -42,6 +45,17 @@ void main()
     int t;
 	set_baud_rate(uart_instance[0], 19200); // Set the required baudrate from 300 to 540,000
 	set_baud_rate(uart_instance[1], 19200); // Set baudrate to 19200
+<<<<<<< HEAD
+
+	write_uart_string (uart_instance[0], "\nHello World from UART0");
+	write_uart_string (uart_instance[1], "\nHello World from UART1");
+	while(1)
+	{
+	    while( 0 == (uart_instance[1]->status & STS_RX_NOT_EMPTY ) );
+	    write_uart_string (uart_instance[0], "\n The received char: ");
+	    write_uart_character(uart_instance[0], uart_instance[1]->rcv_reg);
+	}
+=======
   write_uart_string (uart_instance[0], "\nHello World from UART0");
   write_uart_string (uart_instance[1], "\nHello World from UART1");
   while(1)
@@ -50,4 +64,5 @@ void main()
         write_uart_string (uart_instance[0], "\n The received char: ");
         write_uart_character(uart_instance[0], uart_instance[1]->rcv_reg);
     }
+>>>>>>> main
 }

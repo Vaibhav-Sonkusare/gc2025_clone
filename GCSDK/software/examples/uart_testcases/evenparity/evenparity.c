@@ -52,7 +52,11 @@ void main()
         if(uart_instance[1]->status & PARITY_ERROR)
         {
             write_uart_string (uart_instance[0], "\n Even Parity error with UART 0");
+<<<<<<< HEAD
+        	break;
+=======
         break;
+>>>>>>> main
         }
         else
         {

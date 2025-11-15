@@ -171,6 +171,7 @@ clean:
 ifeq ($(PROGRAM),)
 	cd ./software/examples/clint_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/sspi_applns && $(MAKE) clean CLEAR=CLEAR
+	cd ./software/examples/sspi_testcases && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/uart_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/uart_testcases && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/i2c_applns && $(MAKE) clean CLEAR=CLEAR

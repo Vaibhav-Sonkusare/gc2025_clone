@@ -31,15 +31,18 @@
 #include "pwmv2.h"
 #include "plic_driver.h"
 #include "gpiov2.h"
+
 #define PWM_0 5
 volatile unsigned int* pinmux_config_reg = (volatile unsigned int* ) PINMUX_CONFIGURE_REG;
 void handle_pwm_interrupt( uint32_t num)
 {
+<<<<<<< HEAD
+=======
 	printf("\nhi\n");
+>>>>>>> main
 	gpiov2_init();
 	gpiov2_instance->direction = 0x10000;
 	gpiov2_instance->toggle = 0x10000;
-
     pwm_set_control((6-num),0x80);
 	log_info("pwm interrupt handled\n");
 }
@@ -48,21 +51,17 @@ int main()
 {
 	*pinmux_config_reg = 0x2aa80;
 	printf("\n====================================================\n");
-
-    register unsigned int retval;
-	int i;
-
 	plic_init();
-
-	/*
-	   Configure pwm module interrupt
-	*/
 	configure_interrupt(PLIC_INTERRUPT_6);
 
 	/* For checking PWM Interrupt by toggling one board LED */
 	isr_table[PLIC_INTERRUPT_6] = handle_pwm_interrupt;
 
 	/* For checking all the test case*/
+<<<<<<< HEAD
+	isr_table[PLIC_INTERRUPT_6] = pwm_isr_handler0;
+	enable_machine_global_interrupts();
+=======
 	// isr_table[PLIC_INTERRUPT_6] = pwm_isr_handler0;
 
 
@@ -104,6 +103,7 @@ int main()
 	log_info("mip = %x\n", retval);
 
 
+>>>>>>> main
     check_pwmv2();
 	/* Enable when need rise interrupt */
 #if 1	

@@ -91,9 +91,9 @@ int main(void) {
 
   printf("\n UART char size set to 22");
   control = value | 8 << 5;
-  set_uart_control(uart1,control);
+   uart_instance[1]->control  = control;
   printf("\n UART control is set to %d",control);
-  write_uart_string(uart1,"Hello World abc");
+  write_uart_string(uart1, "Hello World abc");
   //read_uart_string(uart1,readString);
   //printf("\n read from uart1 %s",readString);
   //write_uart_character(uart1,"W");
