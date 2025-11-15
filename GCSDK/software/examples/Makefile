@@ -377,9 +377,6 @@ else
 ifeq ($(PROGRAM),min_max_second)
 filepath := clint_applns/min_max_second
 else
-ifeq ($(PROGRAM),gyro_softi2c)
-filepath := gpio_applns/gyro_softi2c
-else
 ifeq ($(PROGRAM),bmp280)
 filepath := i2c_applns/bmp280
 else
@@ -706,8 +703,11 @@ endif
 endif
 endif
 endif
+<<<<<<< HEAD
 endif
 
+=======
+>>>>>>> main
 
 
 erase: check library

@@ -36,6 +36,10 @@
 volatile unsigned int* pinmux_config_reg = (volatile unsigned int* ) PINMUX_CONFIGURE_REG;
 void handle_pwm_interrupt( uint32_t num)
 {
+<<<<<<< HEAD
+=======
+	printf("\nhi\n");
+>>>>>>> main
 	gpiov2_init();
 	gpiov2_instance->direction = 0x10000;
 	gpiov2_instance->toggle = 0x10000;
@@ -51,11 +55,55 @@ int main()
 	configure_interrupt(PLIC_INTERRUPT_6);
 
 	/* For checking PWM Interrupt by toggling one board LED */
-	// isr_table[PLIC_INTERRUPT_6] = handle_pwm_interrupt;
+	isr_table[PLIC_INTERRUPT_6] = handle_pwm_interrupt;
 
 	/* For checking all the test case*/
+<<<<<<< HEAD
 	isr_table[PLIC_INTERRUPT_6] = pwm_isr_handler0;
 	enable_machine_global_interrupts();
+=======
+	// isr_table[PLIC_INTERRUPT_6] = pwm_isr_handler0;
+
+
+	/**we need to set the period, duty cycle and the clock divisor in order
+	 *to set it to the frequency required. Base clock is 50MHz
+	 **/
+	asm volatile("li      t0, 8\t\n"
+			"csrrs   zero, mstatus, t0\t\n"
+		    );
+
+	asm volatile("li      t0, 0x800\t\n"
+			"csrrs   zero, mie, t0\t\n"
+		    );
+
+	asm volatile("csrr %[retval], mstatus\n"
+			:
+			[retval]
+			"=r"
+			(retval)
+		    );
+
+	log_info("mstatus = %x\n", retval);
+	asm volatile("csrr %[retval], mie\n"
+			:
+			[retval]
+			"=r"
+			(retval)
+		    );
+
+	log_info("mie = %x\n", retval);
+
+	asm volatile("csrr %[retval], mip\n"
+			:
+			[retval]
+			"=r"
+			(retval)
+		    );
+
+	log_info("mip = %x\n", retval);
+
+
+>>>>>>> main
     check_pwmv2();
 	/* Enable when need rise interrupt */
 #if 1	
@@ -78,7 +126,7 @@ int main()
 #endif
 
 	/* Enable when halfperiod_interrupt  */
-#if 0
+#if 1
 	pwm_init();
     pwm_set_prescalar_value(PWM_0, 0xf2);
  	pwm_configure(PWM_0, 0xff, 80, halfperiod_interrupt, 0x1, false);

@@ -147,7 +147,6 @@ void main()
 	bram_address++;
 	read_address += 4;
 	}
-
 	printf("\n\nread complete.\n");
 	jumpToRAM();
 	}

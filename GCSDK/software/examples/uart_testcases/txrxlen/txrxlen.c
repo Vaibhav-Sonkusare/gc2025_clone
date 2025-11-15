@@ -54,7 +54,9 @@ We will get an framing error bit set.*/
  * @param[Out]
  */
 
-
+void set_uart_control(uart_struct *uart_instance, uint16_t uart_control){
+        uart_instance->control = uart_control;
+}
 int main(void) {
 
 	unsigned int int_id = 1;

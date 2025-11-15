@@ -46,6 +46,25 @@ check:
 ifeq ($(DEBUG),DEBUG)
 	@$(eval D = -g)
 endif
+<<<<<<< HEAD
+=======
+ifeq ($(TARGET),yamuna)
+	@$(eval XLEN = 32)
+	@$(eval FLAGS= -D ARTIX7_35T)
+	@$(eval MARCH=rv32imac)
+	@$(eval MABI=ilp32)
+	@$(eval INTERFACE=$(bspboard)/ftdi)
+	@$(eval DC =$(FLAGS) $(D) )
+else
+ifeq ($(TARGET),artix7_100t)
+	@$(eval XLEN = 64)
+	@$(eval FLAGS= -D ARTIX7_100T)
+	@$(eval MARCH=rv64imafdc)
+	@$(eval MABI=lp64d)
+	@$(eval INTERFACE=$(bspboard)/ftdi)
+	@$(eval DC =$(FLAGS) $(D) )
+else
+>>>>>>> main
 ifeq ($(TARGET),moushik)
 	@echo $(filepath)
 	@$(eval XLEN = 64)

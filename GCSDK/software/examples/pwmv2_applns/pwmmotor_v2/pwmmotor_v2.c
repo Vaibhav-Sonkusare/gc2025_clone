@@ -1,7 +1,7 @@
 #include "pwmv2.h"
 #include <stdio.h>
-
-#define PWM_0 0
+#include "pinmux.h"
+#define PWM_0 2
 
 #define PERIOD 15685
 
