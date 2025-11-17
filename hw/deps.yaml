@@ -1,6 +1,6 @@
 c-class:
   url: https://gitlab.com/shaktiproject/cores/c-class
-  checkout: master
+  checkout: 285-userspace-width-upd
 caches_mmu:
   url: https://gitlab.com/shaktiproject/uncore/caches_mmu
   checkout: 14.4.1
