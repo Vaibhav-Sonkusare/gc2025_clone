@@ -371,9 +371,12 @@ package Soc;
 		rule rl_core_plic_connection;
 			ccore.sb_plic_meip(mixed_cluster.sb_ext_interrupt[0]);
 		endrule
+		
+	`ifdef supervisor
 		rule rl_core_plic_c1_connection;
 			ccore.sb_plic_seip(mixed_cluster.sb_ext_interrupt[1]);
 		endrule
+	`endif
 
     rule connect_interrupt_lines;
       mixed_cluster.interrupts({spi_cluster.spi1_sb_interrupt,
