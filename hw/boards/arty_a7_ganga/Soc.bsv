@@ -122,9 +122,9 @@ package Soc;
     interface RS232 uart0_io;
 		method I2C_out i2c0_out;									//I2c IO interface
     (*always_ready, always_enabled*)
-    // interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, 0) xadc_master;
-    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, 0) eth_master;
-    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, 0) mem_master;
+    // interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) xadc_master;
+    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) eth_master;
+    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) mem_master;
     interface IOCellSide iocell_io;
 
     (*always_ready,always_enabled*)
@@ -270,8 +270,8 @@ package Soc;
     method Maybe#(CommitLogPacket) commitlog;
   `endif
   `ifdef debug
-    interface AXI4_Slave_IFC#(`paddr, `axi4_id_width, `buswidth, USERSPACE) to_debug_master;
-    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, USERSPACE) to_debug_slave;
+    interface AXI4_Slave_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) to_debug_master;
+    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) to_debug_slave;
     method Action ma_hart_interrupts (Bit#(`num_harts) i);
     method Bit#(`num_harts) mv_harts_have_reset;
     method Bit#(`num_harts) mv_core_debugenable;
@@ -304,22 +304,22 @@ package Soc;
 
     Ifc_ccore_axi4 ccore <- mkccore_axi4(`resetpc, 0);
 
-    AXI4_Fabric_IFC #(`Num_Fast_Masters, `Num_Fast_Slaves, `paddr, `axi4_id_width, `buswidth, USERSPACE) 
+    AXI4_Fabric_IFC #(`Num_Fast_Masters, `Num_Fast_Slaves, `paddr, `axi4_id_width, `buswidth, `USERSPACE) 
                                                     fabric <- mkAXI4_Fabric(fn_slave_map_fast);
-    Ifc_clint_axi4#(`paddr, `axi4_id_width, `buswidth, USERSPACE, 1, 512) clint <- mkclint_axi4();
+    Ifc_clint_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE, 1, 512) clint <- mkclint_axi4();
   //`ifdef debug
-    //Ifc_debug_halt_loop_axi4#(`paddr, ELEN, USERSPACE) debug_memory <- mkdebug_halt_loop_axi4;
+    //Ifc_debug_halt_loop_axi4#(`paddr, ELEN, `USERSPACE) debug_memory <- mkdebug_halt_loop_axi4;
   //`endif
-    Ifc_err_slave_axi4#(`paddr, `axi4_id_width, `buswidth, USERSPACE) fast_err_slave <- mkerr_slave_axi4;
+    Ifc_err_slave_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) fast_err_slave <- mkerr_slave_axi4;
 
-    AXI4_Lite_Fabric_IFC #(`Num_Masters, `Num_Slaves, `paddr, `buswidth, USERSPACE) 
+    AXI4_Lite_Fabric_IFC #(`Num_Masters, `Num_Slaves, `paddr, `buswidth, `USERSPACE) 
                                                         slow_fabric <- mkAXI4_Lite_Fabric(fn_slave_map);
 //    Ifc_pwm_cluster pwm_cluster <- mkpwm_cluster;
     Ifc_uart_cluster uart_cluster <- mkuart_cluster;
     Ifc_spi_cluster spi_cluster <- mkspi_cluster;
     Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster(ext_clk);
-    Ifc_err_slave_axi4lite#(`paddr,`buswidth,0) err_slave <- mkerr_slave_axi4lite;
-    Ifc_bram_axi4#(`paddr, `axi4_id_width, `buswidth, USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
+    Ifc_err_slave_axi4lite#(`paddr,`buswidth,`USERSPACE) err_slave <- mkerr_slave_axi4lite;
+    Ifc_bram_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();
     `endif

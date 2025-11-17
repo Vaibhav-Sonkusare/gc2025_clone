@@ -60,12 +60,12 @@ package mixed_cluster;
     interface PeripheralSide pinmuxtop_peripheral_side;
     (*always_ready, always_enabled*)
 		method Action interrupts(Bit#(13) inp);
-    interface AXI4_Lite_Slave_IFC#(`paddr, `buswidth, 0) slave;
-//    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, 0) xadc_master;
+    interface AXI4_Lite_Slave_IFC#(`paddr, `buswidth, `USERSPACE) slave;
+//    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) xadc_master;
   endinterface
 
   (*synthesize*)
-  module mki2c (Ifc_i2c_axi4lite#(`paddr, `buswidth, 0));
+  module mki2c (Ifc_i2c_axi4lite#(`paddr, `buswidth, `USERSPACE));
 	  let core_clock<-exposeCurrentClock;
   	let core_reset<-exposeCurrentReset;
     let ifc();
@@ -74,28 +74,28 @@ package mixed_cluster;
   endmodule
 
   (*synthesize*)
-module mkgptimer#(Clock ext_clk)(Ifc_gptimer_axi4lite#(`paddr, `buswidth, 0,32)); 
+module mkgptimer#(Clock ext_clk)(Ifc_gptimer_axi4lite#(`paddr, `buswidth, `USERSPACE,32)); 
   let ifc();
   mkgptimer_axi4lite#(ext_clk) _temp(ifc);
   return ifc;
 endmodule
 
   (*synthesize*)
-  module mkgpio(Ifc_gpio_axi4lite#(`paddr, `buswidth, 0, 16));
+  module mkgpio(Ifc_gpio_axi4lite#(`paddr, `buswidth, `USERSPACE, 16));
     let ifc();
     mkgpio_axi4lite _temp(ifc);
     return ifc;
   endmodule
 
   (*synthesize*)
-  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, 0, 35, 2, 7));
+  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, `USERSPACE, 35, 2, 7));
     let ifc();
     mkplic_axi4lite#(`PLICBase)_temp(ifc);
     return ifc;
   endmodule
 
   (*synthesize*)
-  module mkpinmuxtop(Ifc_pinmux_axi4lite#(`paddr, `buswidth, 0));
+  module mkpinmuxtop(Ifc_pinmux_axi4lite#(`paddr, `buswidth, `USERSPACE));
     let ifc();
     mkpinmux_axi4lite _temp(ifc);
     return ifc;
@@ -126,9 +126,9 @@ endmodule
   (*synthesize*)
   module mkmixed_cluster#(Clock ext_clk)(Ifc_mixed_cluster);
 	
-		AXI4_Lite_Master_Xactor_IFC #(`paddr, `buswidth, 0) c2m_xactor <- mkAXI4_Lite_Master_Xactor;
-		AXI4_Lite_Slave_Xactor_IFC #(`paddr, `buswidth, 0) c2s_xactor <- mkAXI4_Lite_Slave_Xactor;
-    AXI4_Lite_Fabric_IFC #(`MixedCluster_Num_Masters, `MixedCluster_Num_Slaves, `paddr, `buswidth,0) 
+		AXI4_Lite_Master_Xactor_IFC #(`paddr, `buswidth, `USERSPACE) c2m_xactor <- mkAXI4_Lite_Master_Xactor;
+		AXI4_Lite_Slave_Xactor_IFC #(`paddr, `buswidth, `USERSPACE) c2s_xactor <- mkAXI4_Lite_Slave_Xactor;
+    AXI4_Lite_Fabric_IFC #(`MixedCluster_Num_Masters, `MixedCluster_Num_Slaves, `paddr, `buswidth,`USERSPACE) 
                                                     fabric <- mkAXI4_Lite_Fabric(fn_slave_map);
     
     
@@ -141,7 +141,7 @@ endmodule
     let gptimer0 <- mkgptimer(ext_clk);
     let gptimer1 <- mkgptimer(ext_clk);
     let pinmuxtop <- mkpinmuxtop();
-    Ifc_err_slave_axi4lite#(`paddr, `buswidth, 0 ) err_slave <- mkerr_slave_axi4lite;
+    Ifc_err_slave_axi4lite#(`paddr, `buswidth, `USERSPACE ) err_slave <- mkerr_slave_axi4lite;
 		Wire#(Bit#(13)) wr_external_interrupts <- mkDWire('d0);
     Wire#(Bit#(2)) wr_sb_ext_interrupt <- mkDWire(0);
 
