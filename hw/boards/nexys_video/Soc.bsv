@@ -59,6 +59,13 @@ package Soc;
   import csrbox :: * ;
   import bram :: *;
   import BUtils::*;
+
+`ifndef axi4_128b
+  import bootrom :: *;
+`else
+  import bootrom_axi4 :: *;
+`endif
+
 `ifdef debug
   import debug_types::*;     
 `endif
@@ -325,7 +332,11 @@ package Soc;
     Ifc_spi_cluster spi_cluster <- mkspi_cluster;
     Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster(ext_clk);
     Ifc_err_slave_axi4lite#(`paddr,`buswidth,`USERSPACE) err_slave <- mkerr_slave_axi4lite;
+  `ifndef simulate
     Ifc_bram_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
+  `else
+    Ifc_bootrom_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE, `ifdef axi4_128b 12 `else 13 `endif ) boot <-mkbootrom_axi4(`BootBase);
+  `endif
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();
     `endif
