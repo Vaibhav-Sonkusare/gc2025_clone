@@ -71,8 +71,9 @@ For nexys_video support pass BOARD=nexys_video
 ```
 For nexys_video support pass BOARD=nexys_video 
 
-To Perform Simulation (code.mem):
-^^^^^^^^^^^^^^^^^^^^^^^
+<b>To Perform Simulation (code.mem):</b>
+
+```
 After building Simulation for Ganga/Yamuna SoC, to generate the code.mem follow the steps below,
 
 .. code-block:: shell-session
@@ -87,6 +88,7 @@ Place the generated code.mem in the bin directory, then follow the below steps,
   $ ./out +trace  #to enable waveform dumping in the logs directory
 
 The print statements in the code will be printed in the app_log file in the bin directory
+```
 
 <b>To Build MCS File for Nexys A7:</b>
 
