@@ -206,10 +206,6 @@ u16 IpHeaderInfo[IP_HEADER_INFO_LEN] =
 static u8 RxFrame[XEL_MAX_FRAME_SIZE];
 static u8 TxFrame[XEL_MAX_FRAME_SIZE];
 
-/*
- * Variable used to indicate the length of the received frame.
- */
-extern volatile u32 RecvFrameLength;
 
 /*
  * Variable used to indicate the sequence number of the ICMP(echo) packet.

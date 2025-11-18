@@ -93,9 +93,6 @@ extern XEmacLite EmacLiteInstance;	/* Instance of the EmacLite */
 extern u8 TxFrame[XEL_MAX_FRAME_SIZE];
 extern u8 RxFrame[XEL_MAX_FRAME_SIZE];
 
-extern volatile u32 RecvFrameLength;	/* Indicates the length of the
-					 * Received packet
-					 */
 extern volatile int TransmitComplete;	/* Flag to indicate that the
 					 * Transmission is complete
 					 */
