@@ -75,15 +75,12 @@ For nexys_video support pass BOARD=nexys_video
 
 ```
 After building Simulation for Ganga/Yamuna SoC, to generate the code.mem follow the steps below,
-
-.. code-block:: shell-session
   
   $ elf2hex 4 32768 hello.shakti 2147483648 > code.mem #Only for Yamuna SoC 
   $ elf2hex 8 32768 hello.shakti 2147483648 > code.mem #Only for Ganga SoC
 
 Place the generated code.mem in the bin directory, then follow the below steps,
 
-.. code-block:: shell-session
   $ cd bin
   $ ./out +trace  #to enable waveform dumping in the logs directory
 
