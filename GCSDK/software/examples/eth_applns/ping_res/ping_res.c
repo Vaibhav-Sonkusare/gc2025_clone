@@ -157,11 +157,6 @@ static u8 RxFrame[XEL_MAX_FRAME_SIZE];
 static u8 TxFrame[XEL_MAX_FRAME_SIZE];
 
 /*
- * Variable used to indicate the length of the received frame.
- */
-extern volatile u32 RecvFrameLength = 0;
-
-/*
  * Variable used to indicate the number of Ping replies sent.
  */
 u32 NumOfPingReplies;

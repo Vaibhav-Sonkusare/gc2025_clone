@@ -27,7 +27,6 @@
   setup each plic registers, isr routine and plic interrupt handler are here.
  */
 #define ETH_VARI 1
-
 #include "eth_driver.h"
 #include "plic_driver.h"
 #include "platform.h"
@@ -36,17 +35,6 @@
 #include "gpio.h"
 #include "utils.h"
 
-/*
- * Variable used to indicate the length of the received frame.
- */
-volatile u32 RecvFrameLength;
-UINTPTR TxBuffPtr;
-UINTPTR RxBuffPtr;
-volatile int FramesTx;
-volatile int FramesRx;
-volatile int TxCount;
-volatile int RxCount;
-volatile int Padding;	/* For 1588 Packets we need to pad 8 bytes time stamp value */
 
 /*
  * Set up valid local MAC addresses. This loop back test uses the LocalAddress
@@ -62,8 +50,6 @@ XEmacLite EmacLiteInstance;	/* Instance of the EmacLite */
 u8 TxFrame[XEL_MAX_FRAME_SIZE];
 u8 RxFrame[XEL_MAX_FRAME_SIZE];
 
-volatile u32 RecvFrameLength;	/* Indicates the length of the Received packet
-				 */
 volatile int TransmitComplete;	/* Flag to indicate that the Transmission
 				 * is complete
 				 */
