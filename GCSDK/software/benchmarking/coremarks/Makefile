@@ -20,9 +20,9 @@ target ?= CUSTOM
 # Target-based configuration
 # -----------------------------------------------------------------------------
 ifeq ($(TARGET),yamuna)
-	MARCH = rv32imac_zicsr_ziencei
+	MARCH = rv32imac_zicsr_zifencei
 	MABI  = ilp32
-	XLEN  = 32
+	XLEN  = 64
 	target = YAMUNA
 endif
 
