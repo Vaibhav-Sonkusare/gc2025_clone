@@ -79,7 +79,7 @@ bsc_compile_options:
   verbosity: 0
 verilator_configuration:
   coverage: none
-  trace: false
+  trace: True
   threads: 1
   verbosity: true
   opt_fast: "-O3"
