@@ -18,7 +18,7 @@
 
 SHELL := /bin/bash # Use bash syntax
 DC ?=
-PROGRAM ?= default_mode
+PROGRAM ?= xadc_test
 #default target board
 TARGET ?= yamuna
 DEBUG ?=

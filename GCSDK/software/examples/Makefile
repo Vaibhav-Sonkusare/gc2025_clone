@@ -374,8 +374,8 @@ else
 ifeq ($(PROGRAM),bmp280)
 filepath := i2c_applns/bmp280
 else
-ifeq ($(PROGRAM),default_mode)
-filepath := xadc_applns/default_mode
+ifeq ($(PROGRAM),xadc_test)
+filepath := xadc_applns/xadc_test
 else
 ifeq ($(PROGRAM),self_test)
 filepath := eth_applns/self_test
