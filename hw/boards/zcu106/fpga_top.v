@@ -351,7 +351,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   proc_sys_reset_0 proc_reset_inst (
       .slowest_sync_clk (core_clk),
       .ext_reset_in     (sys_rst),
-      .aux_reset_in     (init_calib_complete),
+      //.aux_reset_in     (init_calib_complete), //For DDR
+      .aux_reset_in     (1'b1), //For TCM
       .mb_debug_sys_rst (0),
       .dcm_locked       (locked),
       .mb_reset         (soc_reset),
