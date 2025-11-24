@@ -30,7 +30,7 @@ set_property -dict [list \
                         CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
                         CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {100.000} \
                         CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {300.12} \
-                        CONFIG.RESET_TYPE {ACTIVE_LOW} \
+                        CONFIG.RESET_TYPE {ACTIVE_HIGH} \
                         CONFIG.MMCM_DIVCLK_DIVIDE {1} \
                         CONFIG.MMCM_CLKOUT0_DIVIDE_F {24.000} \
                         CONFIG.MMCM_CLKOUT1_DIVIDE {12} \

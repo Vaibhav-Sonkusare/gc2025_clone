@@ -70,10 +70,10 @@ set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer1_out"] ;# Bank  66 VCCO - 
 # set_property IOSTANDARD  LVCMOS12 [get_ports "spi0_sclk"] ;# Bank  66 VCCO - VCC1V2   - IO_L1P_T0L_N0_DBC_66
 
 ### UART
-# set_property PACKAGE_PIN AH17      [get_ports "uart0_SOUT"] ;# Bank  64 VCCO - VCC1V2   - IO_L13N_T2L_N1_GC_QBC_64
-# set_property IOSTANDARD  LVCMOS12  [get_ports "uart0_SOUT"] ;# Bank  64 VCCO - VCC1V2   - IO_L13N_T2L_N1_GC_QBC_64
-# set_property PACKAGE_PIN AL17      [get_ports "uart0_SIN"] ;# Bank  64 VCCO - VCC1V2   - IO_T1U_N12_64
-# set_property IOSTANDARD  LVCMOS12  [get_ports "uart0_SIN"] ;# Bank  64 VCCO - VCC1V2   - IO_T1U_N12_64
+set_property PACKAGE_PIN AH17      [get_ports "uart0_SIN"] ;# Bank  64 VCCO - VCC1V2   - IO_L13N_T2L_N1_GC_QBC_64
+set_property IOSTANDARD  LVCMOS12  [get_ports "uart0_SIN"] ;# Bank  64 VCCO - VCC1V2   - IO_L13N_T2L_N1_GC_QBC_64
+set_property PACKAGE_PIN AL17      [get_ports "uart0_SOUT"] ;# Bank  64 VCCO - VCC1V2   - IO_T1U_N12_64
+set_property IOSTANDARD  LVCMOS12  [get_ports "uart0_SOUT"] ;# Bank  64 VCCO - VCC1V2   - IO_T1U_N12_64
 
 
 
