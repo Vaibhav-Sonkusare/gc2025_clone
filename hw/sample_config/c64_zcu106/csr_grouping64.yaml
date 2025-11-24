@@ -26,6 +26,9 @@ grp1:
     - PMPADDR2
     - PMPADDR3
     - CUSTOMCONTROL
+    - FCSR
+    - FFLAGS
+    - FRM
     - SSCRATCH
     - SSTATUS
     - SATP
