@@ -143,7 +143,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
     input         sys_rst,	//Active High reset
 
     // ---- System Clock ------//
-    input         sys_clk
+    input         sys_clk_p,
+    input         sys_clk_n
    );
 
   reg aresetn ;
@@ -364,11 +365,12 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    // ---------------------------------------------------------------------------- //
    // ---------- Clock divider ----------------//
    clk_divider clk_div (
-                       .clk_in1(sys_clk),
+                       .clk_in1_p(sys_clk_p),    // input clk_in1_p
+                       .clk_in1_n(sys_clk_n),
                        .clk_out1(core_clk),
                     // .clk_out2(ddr3_main),
                     // .clk_out3(ddr3_ref),
-    .resetn   (1'b1),  //Can pass sys_rst ?
+    .resetn   (sys_rst),  //Can pass sys_rst ?
     .locked   (locked)
   );
    // ----------------------------------------- //

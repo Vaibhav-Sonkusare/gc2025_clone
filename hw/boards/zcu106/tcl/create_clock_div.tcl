@@ -14,6 +14,13 @@ if { [get_ips -quiet clk_divider] eq "" } {
 }
 
 set_property -dict [list \
+                        CONFIG.CLK_IN1_BOARD_INTERFACE {user_si570_sysclk} \
+                        CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
+                        CONFIG.PRIM_IN_FREQ {300.000} \
+                        CONFIG.CLKIN1_JITTER_PS {33.330000000000005} \
+                        CONFIG.MMCM_CLKFBOUT_MULT_F {4.000} \
+                        CONFIG.MMCM_CLKIN1_PERIOD {3.333} \
+                        CONFIG.MMCM_CLKIN2_PERIOD {10.0} \
                         CONFIG.CLKOUT1_USED {true} \
                         CONFIG.CLKOUT2_USED {true} \
                         CONFIG.CLKOUT3_USED {true} \
@@ -30,11 +37,13 @@ set_property -dict [list \
                         CONFIG.MMCM_CLKOUT2_DIVIDE {4} \
                         CONFIG.NUM_OUT_CLKS {3} \
                         CONFIG.RESET_PORT {resetn} \
-                        CONFIG.CLKOUT1_JITTER {132.683} \
-                        CONFIG.CLKOUT2_JITTER {115.831} \
-                        CONFIG.CLKOUT2_PHASE_ERROR {87.180} \
-                        CONFIG.CLKOUT3_JITTER {94.862} \
-                        CONFIG.CLKOUT3_PHASE_ERROR {87.180}] [get_ips clk_divider]
+                        CONFIG.CLKOUT1_JITTER {116.415} \
+                        CONFIG.CLKOUT2_JITTER {101.475} \
+                        CONFIG.CLKOUT3_JITTER {81.814} \
+                        CONFIG.CLKOUT1_PHASE_ERROR {77.836} \
+                        CONFIG.CLKOUT2_PHASE_ERROR {77.836} \
+                        CONFIG.CLKOUT3_PHASE_ERROR {77.836}] [get_ips clk_divider]
+
 
 generate_target {instantiation_template} [get_ips clk_divider]
 create_ip_run [get_ips clk_divider]
