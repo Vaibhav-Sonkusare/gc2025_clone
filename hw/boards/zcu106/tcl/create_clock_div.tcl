@@ -36,7 +36,7 @@ set_property -dict [list \
                         CONFIG.MMCM_CLKOUT1_DIVIDE {12} \
                         CONFIG.MMCM_CLKOUT2_DIVIDE {4} \
                         CONFIG.NUM_OUT_CLKS {3} \
-                        CONFIG.RESET_PORT {resetn} \
+                        CONFIG.RESET_PORT {reset} \
                         CONFIG.CLKOUT1_JITTER {116.415} \
                         CONFIG.CLKOUT2_JITTER {101.475} \
                         CONFIG.CLKOUT3_JITTER {81.814} \
