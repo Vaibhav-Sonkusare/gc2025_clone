@@ -64,6 +64,11 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   inout phy_mdio,
   output phy_mdc,*/
   // ---- JTAG ports ------- //
+    input pin_tck,
+    input pin_trst,
+    input pin_tdi,
+    input pin_tms,
+    output pin_tdo,
    // ---- UART ports --------//
     input         uart0_SIN,
     output        uart0_SOUT,
@@ -543,9 +548,10 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
        // Main Clock and Reset to the SoC
         .CLK(core_clk),
         .RST_N(~soc_reset),
+        .CLK_ext_clk(external_clk),
+        /*
         .CLK_tck_clk(wire_tck_clk),
         .RST_N_trst(~wire_trst),
-        .CLK_ext_clk(external_clk),
         .wire_capture_capture_in(wire_capture),
         .wire_run_test_run_test_in(wire_run_test),
         .wire_sel_sel_in(wire_sel),
@@ -554,6 +560,13 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
         .wire_tms_tms_in(wire_tms),
         .wire_update_update_in(wire_update),
         .wire_tdo(wire_tdo),
+        */
+
+        .CLK_tck_clk(pin_tck),
+        .RST_N_trst(pin_trst),
+        .wire_tdi_tdi_in(pin_tdi),
+        .wire_tms_tms_in(pin_tms),
+        .wire_tdo(pin_tdo),
 
       // SPI ports
         .spi0_io_mosi_out(spi0_io_mosi_out),
@@ -613,7 +626,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 		   .mem_master_RREADY(s_axi_rready),
 
        */
-       
+
 			  //I2C ports
         .i2c0_out_scl_out (i2c0_scl_out),
         .i2c0_out_scl_in_in(i2c0_scl_in),
