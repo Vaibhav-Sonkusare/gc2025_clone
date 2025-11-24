@@ -370,7 +370,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
                        .clk_out1(core_clk),
                     // .clk_out2(ddr3_main),
                     // .clk_out3(ddr3_ref),
-    .resetn   (sys_rst),  //Can pass sys_rst ?
+    .reset   (sys_rst),  //Can pass sys_rst ?
     .locked   (locked)
   );
    // ----------------------------------------- //
