@@ -796,7 +796,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
              .I(i2c0_sda_out),
              .T(~i2c0_sda_out_en)
          );
-
+/*
    ////---- IOBUF FOR I2C -----//
    IOBUF i2c1_scl_inst(
              .O(i2c1_scl_in),
@@ -941,6 +941,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    IOBUF spi0_inst_nss(.O(spi0_io_nss_in_val) ,.IO(spi0_nss) ,.I(spi0_io_nss_out) ,.T(~spi0_io_nss_outen));
    IOBUF spi0_inst_sclk(.O(spi0_io_sclk_in_val) ,.IO(spi0_sclk) ,.I(spi0_io_sclk_out) ,.T(~spi0_io_sclk_outen));
 
-
+*/
 
 endmodule

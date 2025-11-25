@@ -32,9 +32,9 @@ set_property "target_language" "Verilog" [current_project]
 set_property board_part xilinx.com:zcu106:part0:2.3 [current_project]
 
 # source IP tcls
-#source $home_dir/tcl/create_axi_converter.tcl
+source $home_dir/tcl/create_axi_converter.tcl
 source $home_dir/tcl/create_clock_div.tcl
-#source $home_dir/tcl/create_mig.tcl
+source $home_dir/tcl/create_ddr.tcl
 source $home_dir/tcl/create_proc_reset.tcl
 #source $home_dir/tcl/create_xadc.tcl
 #source $home_dir/tcl/create_ethlite.tcl
