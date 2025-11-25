@@ -76,9 +76,11 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 //   // ---- I2C ports --------//
     inout         i2c0_sda,
     inout         i2c0_scl,
+
+  /*
     inout         i2c1_sda,
     inout         i2c1_scl,
-
+  
 //   // ---- SPI ports ---------//
    inout       spi0_mosi,
 // output       spi0_sclk,// if external flash enable this or disable if onboard flash
@@ -122,21 +124,21 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
     inout gpio_29,
     inout gpio_30,
     inout gpio_31,
-
+*/
     input gptimer0_in,
     output gptimer0_out,
     input external_clk,
 
     input gptimer1_in,
     output gptimer1_out,
-
+/*
     input gptimer2_in,
     output gptimer2_out,
 
     input gptimer3_in,
     output gptimer3_out,
 	
-
+*/
 
 
     // ---- System Reset ------//

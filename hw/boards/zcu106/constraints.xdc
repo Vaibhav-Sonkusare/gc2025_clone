@@ -7,10 +7,6 @@ set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets sys_clk_IBUF]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets pin_tck_IBUF]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets external_clk]
 
-##Comment this out after fixing the violations for pins that are not mapped
-set_property SEVERITY {Warning} [get_drc_checks NSTD-1]
-set_property SEVERITY {Warning} [get_drc_checks UCIO-1]
-
 
 
 ## CPU reset
