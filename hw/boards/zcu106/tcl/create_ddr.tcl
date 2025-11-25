@@ -76,7 +76,7 @@ set_property -dict [list \
       CONFIG.RESET_BOARD_INTERFACE                {Custom} \
       CONFIG.Reference_Clock                      {Differential} \
       CONFIG.SET_DW_TO_40                         {false} \
-      CONFIG.System_Clock 												{Differential} \
+      CONFIG.System_Clock 												{No_Buffer} \
       CONFIG.TIMING_3DS                           {false} \
       CONFIG.TIMING_OP1                           {false} \
       CONFIG.TIMING_OP2                           {false} \
