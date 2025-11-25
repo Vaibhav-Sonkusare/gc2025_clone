@@ -27,23 +27,26 @@ Details:
 
 --------------------------------------------------------------------------------------------------
 */
-module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
+module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
   (
   // ---- DDR ports --------------//
-/*  
-  inout  [15:0] ddr3_dq,
-  inout  [1:0]  ddr3_dqs_n,
-  inout  [1:0]  ddr3_dqs_p,    
-  output [14:0] ddr3_addr,
-  output [2:0]  ddr3_ba,
-  output        ddr3_ras_n,
-  output        ddr3_cas_n,
-  output        ddr3_we_n,
-  output        ddr3_reset_n,
-  output        ddr3_ck_p,
-  output        ddr3_ck_n,
-  output        ddr3_cke,
-*/
+  input                   c0_sys_clk_p,
+  input                   c0_sys_clk_n,
+  output                  c0_ddr4_act_n,
+  output [16:0]           c0_ddr4_adr,
+  output [1:0]            c0_ddr4_ba,
+  output [0:0]            c0_ddr4_bg,
+  output [0:0]            c0_ddr4_cke,
+  output [0:0]            c0_ddr4_odt,
+  output [0:0]            c0_ddr4_cs_n,
+  output [0:0]            c0_ddr4_ck_t,
+  output [0:0]            c0_ddr4_ck_c,
+  output                  c0_ddr4_reset_n,
+  inout  [7:0]            c0_ddr4_dm_dbi_n,
+  inout  [63:0]           c0_ddr4_dq,
+  inout  [7:0]            c0_ddr4_dqs_t,
+  inout  [7:0]            c0_ddr4_dqs_c,
+
 //  output        ddr3_cs_n,
 /*
   output [1:0]  ddr3_dm,
@@ -153,123 +156,126 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 
   wire                            soc_reset;      // reset to the SoC
   wire                            core_clk;       // clock to the SoC
-  // wire                              ddr3_main;      // main clock to the ddr3-mig
-  // wire                              ddr3_ref;       // reference clock to dr3 mig
+  wire                              ddr3_main;      // main clock to the ddr3-mig
+  wire                              ddr3_ref;       // reference clock to dr3 mig
   wire                            locked;         // indicates pll is stable
   wire                              clk;            // mig ui clk            
   wire                              rst;            // mig ui reset
   wire                            mmcm_locked;    // indicates the ui clock from mig is stable
+ wire                              c0_ddr4_ui_clk;            // mig ui clk            
+  wire                              c0_ddr4_ui_clk_sync_rst;            // mig ui reset
+  reg                               c0_ddr4_aresetn;
   // Signals driven by axi converter to DDR slave ports
-//   wire [AXI_ID_WIDTH-1:0]           m_axi_awid;
-//   wire [AXI_ADDR_WIDTH-1:0]         m_axi_awaddr;
-//   wire [7:0]                        m_axi_awlen;
-//   wire [2:0]                        m_axi_awsize;
-//   wire [1:0]                        m_axi_awburst;
-//   wire [0:0]                        m_axi_awlock;
-//   wire [3:0]                        m_axi_awcache;
-//   wire [2:0]                        m_axi_awprot;
-//   wire                              m_axi_awvalid;
-//   wire                              m_axi_awready; 
-// `ifdef BUS_WIDTH128   
-//   wire [127:0]                       m_axi_wdata;
-//   wire [15:0]                        m_axi_wstrb;
-// `elsif BUS_WIDTH64
-//   wire [63:0]                       m_axi_wdata;
-//   wire [7:0]                        m_axi_wstrb;
-// `elsif BUS_WIDTH32
-//   wire [31:0]                       m_axi_wdata;
-//   wire [3:0]                        m_axi_wstrb;
-// `else
-//   wire [127:0]                       m_axi_wdata;
-//   wire [15:0]                        m_axi_wstrb;
-// `endif
-//   wire                              m_axi_wlast;
-//   wire                              m_axi_wvalid;
-//   wire                              m_axi_wready;   
-//   wire                              m_axi_bready;
-//   wire [AXI_ID_WIDTH-1:0]           m_axi_bid;
-//   wire [1:0]                        m_axi_bresp;
-//   wire                              m_axi_bvalid;   
-//   wire [AXI_ID_WIDTH-1:0]           m_axi_arid;
-//   wire [AXI_ADDR_WIDTH-1:0]         m_axi_araddr;
-//   wire [7:0]                        m_axi_arlen;
-//   wire [2:0]                        m_axi_arsize;
-//   wire [1:0]                        m_axi_arburst;
-//   wire [0:0]                        m_axi_arlock;
-//   wire [3:0]                        m_axi_arcache;
-//   wire [2:0]                        m_axi_arprot;
-//   wire                              m_axi_arvalid;
-//   wire                              m_axi_arready;    
-//   wire                              m_axi_rready;
-//   wire [AXI_ID_WIDTH-1:0]           m_axi_rid;
-// `ifdef BUS_WIDTH128   
-//   wire [127:0]                      m_axi_rdata;
-// `elsif BUS_WIDTH64
-//   wire [63:0]                       m_axi_rdata;
-// `elsif BUS_WIDTH32
-//   wire [31:0]                       m_axi_rdata;
-// `else
-//   wire [127:0]                      m_axi_rdata;
-// `endif
-//   wire [1:0]                        m_axi_rresp;
-//   wire                              m_axi_rlast;
-//   wire                              m_axi_rvalid;   
-//   // Signals from SoC Master to axi converter
-//   wire [AXI_ID_WIDTH-1:0]           s_axi_awid;
-//   wire [AXI_ADDR_WIDTH-1:0]         s_axi_awaddr;
-//   wire [7:0]                        s_axi_awlen;
-//   wire [2:0]                        s_axi_awsize;
-//   wire [1:0]                        s_axi_awburst;
-//   wire [0:0]                        s_axi_awlock;
-//   wire [3:0]                        s_axi_awcache;
-//   wire [2:0]                        s_axi_awprot;
-//   wire                              s_axi_awvalid;
-//   wire                              s_axi_awready;    
-// `ifdef BUS_WIDTH128   
-//   wire [127:0]                       s_axi_wdata;
-//   wire [15:0]                        s_axi_wstrb;
-// `elsif BUS_WIDTH64
-//   wire [63:0]                       s_axi_wdata;
-//   wire [7:0]                        s_axi_wstrb;
-// `elsif BUS_WIDTH32
-//   wire [31:0]                       s_axi_wdata;
-//   wire [3:0]                        s_axi_wstrb;
-// `else
-//   wire [127:0]                       s_axi_wdata;
-//   wire [15:0]                        s_axi_wstrb;
-// `endif
-//   wire                              s_axi_wlast;
-//   wire                              s_axi_wvalid;
-//   wire                              s_axi_wready;
-//   wire                              s_axi_bready;
-//   wire [AXI_ID_WIDTH-1:0]           s_axi_bid;
-//   wire [1:0]                        s_axi_bresp;
-//   wire                              s_axi_bvalid;
-//   wire [AXI_ID_WIDTH-1:0]           s_axi_arid;
-//   wire [AXI_ADDR_WIDTH-1:0]         s_axi_araddr;
-//   wire [7:0]                        s_axi_arlen;
-//   wire [2:0]                        s_axi_arsize;
-//   wire [1:0]                        s_axi_arburst;
-//   wire [0:0]                        s_axi_arlock;
-//   wire [3:0]                        s_axi_arcache;
-//   wire [2:0]                        s_axi_arprot;
-//   wire                              s_axi_arvalid;
-//   wire                              s_axi_arready;
-//   wire                              s_axi_rready;
-//   wire [AXI_ID_WIDTH-1:0]           s_axi_rid;
-// `ifdef BUS_WIDTH128   
-//   wire [127:0]                      s_axi_rdata;
-// `elsif BUS_WIDTH64
-//   wire [63:0]                       s_axi_rdata;
-// `elsif BUS_WIDTH32
-//   wire [31:0]                       s_axi_rdata;
-// `else
-//   wire [127:0]                      s_axi_rdata;
-// `endif
-//   wire [1:0]                        s_axi_rresp;
-//   wire                              s_axi_rlast;
-//   wire                              s_axi_rvalid;   
-//   wire [11:0]                       device_temp; 
+  wire [AXI_ID_WIDTH-1:0]           c0_ddr4_s_axi_awid;
+  wire [AXI_ADDR_WIDTH-1:0]         c0_ddr4_s_axi_awaddr;
+  wire [7:0]                        c0_ddr4_s_axi_awlen;
+  wire [2:0]                        c0_ddr4_s_axi_awsize;
+  wire [1:0]                        c0_ddr4_s_axi_awburst;
+  wire [0:0]                        c0_ddr4_s_axi_awlock;
+  wire [3:0]                        c0_ddr4_s_axi_awcache;
+  wire [2:0]                        c0_ddr4_s_axi_awprot;
+  wire                              c0_ddr4_s_axi_awvalid;
+  wire                              c0_ddr4_s_axi_awready; 
+`ifdef BUS_WIDTH128   
+  wire [127:0]                       c0_ddr4_s_axi_wdata;
+  wire [15:0]                        c0_ddr4_s_axi_wstrb;
+`elsif BUS_WIDTH64
+  wire [63:0]                       c0_ddr4_s_axi_wdata;
+  wire [7:0]                        c0_ddr4_s_axi_wstrb;
+`elsif BUS_WIDTH32
+  wire [31:0]                       c0_ddr4_s_axi_wdata;
+  wire [3:0]                        c0_ddr4_s_axi_wstrb;
+`else
+  wire [127:0]                       c0_ddr4_s_axi_wdata;
+  wire [15:0]                        c0_ddr4_s_axi_wstrb;
+`endif
+  wire                              c0_ddr4_s_axi_wlast;
+  wire                              c0_ddr4_s_axi_wvalid;
+  wire                              c0_ddr4_s_axi_wready;   
+  wire                              c0_ddr4_s_axi_bready;
+  wire [AXI_ID_WIDTH-1:0]           c0_ddr4_s_axi_bid;
+  wire [1:0]                        c0_ddr4_s_axi_bresp;
+  wire                              c0_ddr4_s_axi_bvalid;   
+  wire [AXI_ID_WIDTH-1:0]           c0_ddr4_s_axi_arid;
+  wire [AXI_ADDR_WIDTH-1:0]         c0_ddr4_s_axi_araddr;
+  wire [7:0]                        c0_ddr4_s_axi_arlen;
+  wire [2:0]                        c0_ddr4_s_axi_arsize;
+  wire [1:0]                        c0_ddr4_s_axi_arburst;
+  wire [0:0]                        c0_ddr4_s_axi_arlock;
+  wire [3:0]                        c0_ddr4_s_axi_arcache;
+  wire [2:0]                        c0_ddr4_s_axi_arprot;
+  wire                              c0_ddr4_s_axi_arvalid;
+  wire                              c0_ddr4_s_axi_arready;    
+  wire                              c0_ddr4_s_axi_rready;
+  wire [AXI_ID_WIDTH-1:0]           c0_ddr4_s_axi_rid;
+`ifdef BUS_WIDTH128   
+  wire [127:0]                       c0_ddr4_s_axi_rdata;
+`elsif BUS_WIDTH64
+  wire [63:0]                       c0_ddr4_s_axi_rdata;
+`elsif BUS_WIDTH32
+  wire [31:0]                       c0_ddr4_s_axi_rdata;
+`else
+  wire [127:0]                       c0_ddr4_s_axi_rdata;
+`endif
+  wire [1:0]                        c0_ddr4_s_axi_rresp;
+  wire                              c0_ddr4_s_axi_rlast;
+  wire                              c0_ddr4_s_axi_rvalid;   
+
+  wire [AXI_ID_WIDTH-1:0]           s_axi_awid;
+  wire [AXI_ADDR_WIDTH-1:0]         s_axi_awaddr;
+  wire [7:0]                        s_axi_awlen;
+  wire [2:0]                        s_axi_awsize;
+  wire [1:0]                        s_axi_awburst;
+  wire [0:0]                        s_axi_awlock;
+  wire [3:0]                        s_axi_awcache;
+  wire [2:0]                        s_axi_awprot;
+  wire                              s_axi_awvalid;
+  wire                              s_axi_awready;    
+`ifdef BUS_WIDTH128   
+  wire [127:0]                       s_axi_wdata;
+  wire [15:0]                        s_axi_wstrb;
+`elsif BUS_WIDTH64
+  wire [63:0]                       s_axi_wdata;
+  wire [7:0]                        s_axi_wstrb;
+`elsif BUS_WIDTH32
+  wire [31:0]                       s_axi_wdata;
+  wire [3:0]                        s_axi_wstrb;
+`else
+  wire [127:0]                       s_axi_wdata;
+  wire [15:0]                        s_axi_wstrb;
+`endif
+  wire                              s_axi_wlast;
+  wire                              s_axi_wvalid;
+  wire                              s_axi_wready;
+  wire                              s_axi_bready;
+  wire [AXI_ID_WIDTH-1:0]           s_axi_bid;
+  wire [1:0]                        s_axi_bresp;
+  wire                              s_axi_bvalid;
+  wire [AXI_ID_WIDTH-1:0]           s_axi_arid;
+  wire [AXI_ADDR_WIDTH-1:0]         s_axi_araddr;
+  wire [7:0]                        s_axi_arlen;
+  wire [2:0]                        s_axi_arsize;
+  wire [1:0]                        s_axi_arburst;
+  wire [0:0]                        s_axi_arlock;
+  wire [3:0]                        s_axi_arcache;
+  wire [2:0]                        s_axi_arprot;
+  wire                              s_axi_arvalid;
+  wire                              s_axi_arready;
+  wire                              s_axi_rready;
+  wire [AXI_ID_WIDTH-1:0]           s_axi_rid;
+`ifdef BUS_WIDTH128   
+  wire [127:0]                      s_axi_rdata;
+`elsif BUS_WIDTH64
+  wire [63:0]                       s_axi_rdata;
+`elsif BUS_WIDTH32
+  wire [31:0]                       s_axi_rdata;
+`else
+  wire [127:0]                      s_axi_rdata;
+`endif
+  wire [1:0]                        s_axi_rresp;
+  wire                              s_axi_rlast;
+  wire                              s_axi_rvalid;   
+  wire [11:0]                       device_temp; 
   wire [1:0]                         interrupts;
 
    wire phy_mdio_o, phy_mdio_i, phy_mdio_t;
@@ -343,19 +349,18 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
       .UPDATE(wire_update), // 1-bit output: UPDATE output from TAP controller
       .TDO(wire_tdo) // 1-bit input: Test Data Output (TDO) input for USER function.
     );
-
+*/
 
   wire [31:0] temp_s_axi_awaddr, temp_s_axi_araddr;
   assign s_axi_awaddr= temp_s_axi_awaddr [AXI_ADDR_WIDTH-1:0];
   assign s_axi_araddr= temp_s_axi_araddr [AXI_ADDR_WIDTH-1:0];
 
-*/
 
   proc_sys_reset_0 proc_reset_inst (
       .slowest_sync_clk (core_clk),
       .ext_reset_in     (sys_rst),
-      //.aux_reset_in     (init_calib_complete), //For DDR
-      .aux_reset_in     (1'b1), //For TCM
+      .aux_reset_in     (c0_init_calib_complete), //For DDR
+      //.aux_reset_in     (1'b1), //For TCM
       .mb_debug_sys_rst (0),
       .dcm_locked       (locked),
       .mb_reset         (soc_reset),
@@ -378,93 +383,80 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    // ----------------------------------------- //
   // ------------ MIG for DDR3 ---------------//
 
-  /*
-  mig_ddr3 mig_ddr3 (
- // Memory interface ports
-      .ddr3_addr                      (ddr3_addr),
-      .ddr3_ba                        (ddr3_ba),
-      .ddr3_cas_n                     (ddr3_cas_n),
-      .ddr3_ck_n                      (ddr3_ck_n),
-      .ddr3_ck_p                      (ddr3_ck_p),
-      .ddr3_cke                       (ddr3_cke),
-      .ddr3_ras_n                     (ddr3_ras_n),
-      .ddr3_we_n                      (ddr3_we_n),
-      .ddr3_dq                        (ddr3_dq),
-      .ddr3_dqs_n                     (ddr3_dqs_n),
-      .ddr3_dqs_p                     (ddr3_dqs_p),
-      .ddr3_reset_n                   (ddr3_reset_n),
-      .init_calib_complete            (init_calib_complete),
+  zcu106mig ddr (
+  .c0_init_calib_complete(c0_init_calib_complete),    // output wire c0_init_calib_complete
+  .dbg_clk(),                                  // output wire dbg_clk
+  .c0_sys_clk_p(c0_sys_clk_p),                        // input wire c0_sys_clk_p
+  .c0_sys_clk_n(c0_sys_clk_n),                        // input wire c0_sys_clk_n
+  .dbg_bus(),                                  // output wire [511 : 0] dbg_bus
+  .c0_ddr4_adr(c0_ddr4_adr),                          // output wire [16 : 0] c0_ddr4_adr
+  .c0_ddr4_ba(c0_ddr4_ba),                            // output wire [1 : 0] c0_ddr4_ba
+  .c0_ddr4_cke(c0_ddr4_cke),                          // output wire [0 : 0] c0_ddr4_cke
+  .c0_ddr4_cs_n(c0_ddr4_cs_n),                        // output wire [0 : 0] c0_ddr4_cs_n
+  .c0_ddr4_dm_dbi_n(c0_ddr4_dm_dbi_n),                // inout wire [7 : 0] c0_ddr4_dm_dbi_n
+  .c0_ddr4_dq(c0_ddr4_dq),                            // inout wire [63 : 0] c0_ddr4_dq
+  .c0_ddr4_dqs_c(c0_ddr4_dqs_c),                      // inout wire [7 : 0] c0_ddr4_dqs_c
+  .c0_ddr4_dqs_t(c0_ddr4_dqs_t),                      // inout wire [7 : 0] c0_ddr4_dqs_t
+  .c0_ddr4_odt(c0_ddr4_odt),                          // output wire [0 : 0] c0_ddr4_odt
+  .c0_ddr4_bg(c0_ddr4_bg),                            // output wire [0 : 0] c0_ddr4_bg
+  .c0_ddr4_reset_n(c0_ddr4_reset_n),                  // output wire c0_ddr4_reset_n
+  .c0_ddr4_act_n(c0_ddr4_act_n),                      // output wire c0_ddr4_act_n
+  .c0_ddr4_ck_c(c0_ddr4_ck_c),                        // output wire [0 : 0] c0_ddr4_ck_c
+  .c0_ddr4_ck_t(c0_ddr4_ck_t),                        // output wire [0 : 0] c0_ddr4_ck_t
+  .c0_ddr4_ui_clk(c0_ddr4_ui_clk),                    // output wire c0_ddr4_ui_clk
+  .c0_ddr4_ui_clk_sync_rst(c0_ddr4_ui_clk_sync_rst),  // output wire c0_ddr4_ui_clk_sync_rst
+  .c0_ddr4_aresetn(c0_ddr4_aresetn),                  // input wire c0_ddr4_aresetn
+  .c0_ddr4_s_axi_awid(c0_ddr4_s_axi_awid),            // input wire [3 : 0] c0_ddr4_s_axi_awid
+  .c0_ddr4_s_axi_awaddr(c0_ddr4_s_axi_awaddr),        // input wire [30 : 0] c0_ddr4_s_axi_awaddr
+  .c0_ddr4_s_axi_awlen(c0_ddr4_s_axi_awlen),          // input wire [7 : 0] c0_ddr4_s_axi_awlen
+  .c0_ddr4_s_axi_awsize(c0_ddr4_s_axi_awsize),        // input wire [2 : 0] c0_ddr4_s_axi_awsize
+  .c0_ddr4_s_axi_awburst(c0_ddr4_s_axi_awburst),      // input wire [1 : 0] c0_ddr4_s_axi_awburst
+  .c0_ddr4_s_axi_awlock(c0_ddr4_s_axi_awlock),        // input wire [0 : 0] c0_ddr4_s_axi_awlock
+  .c0_ddr4_s_axi_awcache(c0_ddr4_s_axi_awcache),      // input wire [3 : 0] c0_ddr4_s_axi_awcache
+  .c0_ddr4_s_axi_awprot(c0_ddr4_s_axi_awprot),        // input wire [2 : 0] c0_ddr4_s_axi_awprot
+  .c0_ddr4_s_axi_awqos(c0_ddr4_s_axi_awqos),          // input wire [3 : 0] c0_ddr4_s_axi_awqos
+  .c0_ddr4_s_axi_awvalid(c0_ddr4_s_axi_awvalid),      // input wire c0_ddr4_s_axi_awvalid
+  .c0_ddr4_s_axi_awready(c0_ddr4_s_axi_awready),      // output wire c0_ddr4_s_axi_awready
+  .c0_ddr4_s_axi_wdata(c0_ddr4_s_axi_wdata),          // input wire [511 : 0] c0_ddr4_s_axi_wdata
+  .c0_ddr4_s_axi_wstrb(c0_ddr4_s_axi_wstrb),          // input wire [63 : 0] c0_ddr4_s_axi_wstrb
+  .c0_ddr4_s_axi_wlast(c0_ddr4_s_axi_wlast),          // input wire c0_ddr4_s_axi_wlast
+  .c0_ddr4_s_axi_wvalid(c0_ddr4_s_axi_wvalid),        // input wire c0_ddr4_s_axi_wvalid
+  .c0_ddr4_s_axi_wready(c0_ddr4_s_axi_wready),        // output wire c0_ddr4_s_axi_wready
+  .c0_ddr4_s_axi_bready(c0_ddr4_s_axi_bready),        // input wire c0_ddr4_s_axi_bready
+  .c0_ddr4_s_axi_bid(c0_ddr4_s_axi_bid),              // output wire [3 : 0] c0_ddr4_s_axi_bid
+  .c0_ddr4_s_axi_bresp(c0_ddr4_s_axi_bresp),          // output wire [1 : 0] c0_ddr4_s_axi_bresp
+  .c0_ddr4_s_axi_bvalid(c0_ddr4_s_axi_bvalid),        // output wire c0_ddr4_s_axi_bvalid
+  .c0_ddr4_s_axi_arid(c0_ddr4_s_axi_arid),            // input wire [3 : 0] c0_ddr4_s_axi_arid
+  .c0_ddr4_s_axi_araddr(c0_ddr4_s_axi_araddr),        // input wire [30 : 0] c0_ddr4_s_axi_araddr
+  .c0_ddr4_s_axi_arlen(c0_ddr4_s_axi_arlen),          // input wire [7 : 0] c0_ddr4_s_axi_arlen
+  .c0_ddr4_s_axi_arsize(c0_ddr4_s_axi_arsize),        // input wire [2 : 0] c0_ddr4_s_axi_arsize
+  .c0_ddr4_s_axi_arburst(c0_ddr4_s_axi_arburst),      // input wire [1 : 0] c0_ddr4_s_axi_arburst
+  .c0_ddr4_s_axi_arlock(c0_ddr4_s_axi_arlock),        // input wire [0 : 0] c0_ddr4_s_axi_arlock
+  .c0_ddr4_s_axi_arcache(c0_ddr4_s_axi_arcache),      // input wire [3 : 0] c0_ddr4_s_axi_arcache
+  .c0_ddr4_s_axi_arprot(c0_ddr4_s_axi_arprot),        // input wire [2 : 0] c0_ddr4_s_axi_arprot
+  .c0_ddr4_s_axi_arqos(c0_ddr4_s_axi_arqos),          // input wire [3 : 0] c0_ddr4_s_axi_arqos
+  .c0_ddr4_s_axi_arvalid(c0_ddr4_s_axi_arvalid),      // input wire c0_ddr4_s_axi_arvalid
+  .c0_ddr4_s_axi_arready(c0_ddr4_s_axi_arready),      // output wire c0_ddr4_s_axi_arready
+  .c0_ddr4_s_axi_rready(c0_ddr4_s_axi_rready),        // input wire c0_ddr4_s_axi_rready
+  .c0_ddr4_s_axi_rlast(c0_ddr4_s_axi_rlast),          // output wire c0_ddr4_s_axi_rlast
+  .c0_ddr4_s_axi_rvalid(c0_ddr4_s_axi_rvalid),        // output wire c0_ddr4_s_axi_rvalid
+  .c0_ddr4_s_axi_rresp(c0_ddr4_s_axi_rresp),          // output wire [1 : 0] c0_ddr4_s_axi_rresp
+  .c0_ddr4_s_axi_rid(c0_ddr4_s_axi_rid),              // output wire [3 : 0] c0_ddr4_s_axi_rid
+  .c0_ddr4_s_axi_rdata(c0_ddr4_s_axi_rdata),          // output wire [511 : 0] c0_ddr4_s_axi_rdata
+  .addn_ui_clkout1(addn_ui_clkout1),                  // output wire addn_ui_clkout1
+  .sys_rst(sys_rst)                                  // input wire sys_rst
+);
 
-//      .ddr3_cs_n                      (ddr3_cs_n),
-      .ddr3_dm                        (ddr3_dm),
-      .ddr3_odt                       (ddr3_odt),
-      .ui_clk                         (clk),
-      .ui_clk_sync_rst                (rst),
-      .mmcm_locked                    (mmcm_locked),
-      .aresetn                        (aresetn),
-      .app_sr_req                     ( 1'b0),
-      .app_ref_req                    ( 1'b0),
-      .app_zq_req                     ( 1'b0),
-      .app_sr_active                  (),
-      .app_ref_ack                    (),
-      .app_zq_ack                     (),
-      // Slave Interface Write Address Ports
-      .s_axi_awid                     (m_axi_awid),
-      .s_axi_awaddr                   (m_axi_awaddr),
-      .s_axi_awlen                    (m_axi_awlen),
-      .s_axi_awsize                   (m_axi_awsize),
-      .s_axi_awburst                  (m_axi_awburst),
-      .s_axi_awlock                   (m_axi_awlock),
-      .s_axi_awcache                  (m_axi_awcache),
-      .s_axi_awprot                   (m_axi_awprot),
-      .s_axi_awqos                    (4'h0),
-      .s_axi_awvalid                  (m_axi_awvalid),
-      .s_axi_awready                  (m_axi_awready),
-      // Slave Interface Write Data Ports
-      .s_axi_wdata                    (m_axi_wdata),
-      .s_axi_wstrb                    (m_axi_wstrb),
-      .s_axi_wlast                    (m_axi_wlast),
-      .s_axi_wvalid                   (m_axi_wvalid),
-      .s_axi_wready                   (m_axi_wready),
-      // Slave Interface Write Response Ports
-      .s_axi_bid                      (m_axi_bid),
-      .s_axi_bresp                    (m_axi_bresp),
-      .s_axi_bvalid                   (m_axi_bvalid),
-      .s_axi_bready                   (m_axi_bready),
-      // Slave Interface Read Address Ports
-      .s_axi_arid                     (m_axi_arid),
-      .s_axi_araddr                   (m_axi_araddr),
-      .s_axi_arlen                    (m_axi_arlen),
-      .s_axi_arsize                   (m_axi_arsize),
-      .s_axi_arburst                  (m_axi_arburst),
-      .s_axi_arlock                   (m_axi_arlock),
-      .s_axi_arcache                  (m_axi_arcache),
-      .s_axi_arprot                   (m_axi_arprot),
-      .s_axi_arqos                    (4'h0),
-      .s_axi_arvalid                  (m_axi_arvalid),
-      .s_axi_arready                  (m_axi_arready),
-      // Slave Interface Read Data Ports
-      .s_axi_rid                      (m_axi_rid),
-      .s_axi_rdata                    (m_axi_rdata),
-      .s_axi_rresp                    (m_axi_rresp),
-      .s_axi_rlast                    (m_axi_rlast),
-      .s_axi_rvalid                   (m_axi_rvalid),
-      .s_axi_rready                   (m_axi_rready),
-      .sys_clk_i                      (ddr3_main),
-      .clk_ref_i                      (ddr3_ref),
-      //.device_temp_i                  (device_temp),
-      .sys_rst                        (sys_rst)
-   );
 
-   always @(posedge clk) begin
-     aresetn <= ~rst;
+   always @(posedge c0_ddr4_ui_clk) begin
+     c0_ddr4_aresetn <= ~c0_ddr4_ui_clk_sync_rst;
    end
    
 
    // Instantiating the clock converter between the SoC and DDR3 MIG
    clk_converter clock_converter (
        .s_axi_aclk(core_clk),
-    .s_axi_aresetn(~soc_reset),
+       .s_axi_aresetn(~soc_reset),
        .s_axi_awid(s_axi_awid),
        .s_axi_awaddr(s_axi_awaddr),
        .s_axi_awlen(s_axi_awlen),
@@ -504,50 +496,49 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
        .s_axi_rlast(s_axi_rlast),
        .s_axi_rvalid(s_axi_rvalid),
        .s_axi_rready(s_axi_rready),
-       .m_axi_aclk(clk),
-       .m_axi_aresetn(aresetn),
-       .m_axi_awid(m_axi_awid),
-       .m_axi_awaddr(m_axi_awaddr),
-       .m_axi_awlen(m_axi_awlen),
-       .m_axi_awsize(m_axi_awsize),
-       .m_axi_awburst(m_axi_awburst),
-       .m_axi_awlock(m_axi_awlock),
-       .m_axi_awcache(m_axi_awcache),
-       .m_axi_awprot(m_axi_awprot),
+       .m_axi_aclk(c0_ddr4_ui_clk),
+       .m_axi_aresetn(c0_ddr4_aresetn),
+       .m_axi_awid(c0_ddr4_s_axi_awid),
+       .m_axi_awaddr(c0_ddr4_s_axi_awaddr),
+       .m_axi_awlen(c0_ddr4_s_axi_awlen),
+       .m_axi_awsize(c0_ddr4_s_axi_awsize),
+       .m_axi_awburst(c0_ddr4_s_axi_awburst),
+       .m_axi_awlock(c0_ddr4_s_axi_awlock),
+       .m_axi_awcache(c0_ddr4_s_axi_awcache),
+       .m_axi_awprot(c0_ddr4_s_axi_awprot),
        .m_axi_awregion(),
-       .m_axi_awqos(),
-       .m_axi_awvalid(m_axi_awvalid),
-       .m_axi_awready(m_axi_awready),
-       .m_axi_wdata(m_axi_wdata),
-       .m_axi_wstrb(m_axi_wstrb),
-       .m_axi_wlast(m_axi_wlast),
-       .m_axi_wvalid(m_axi_wvalid),
-       .m_axi_wready(m_axi_wready),
-       .m_axi_bid(m_axi_bid),
-       .m_axi_bresp(m_axi_bresp),
-       .m_axi_bvalid(m_axi_bvalid),
-       .m_axi_bready(m_axi_bready),
-       .m_axi_arid(m_axi_arid),
-       .m_axi_araddr(m_axi_araddr),
-       .m_axi_arlen(m_axi_arlen),
-       .m_axi_arsize(m_axi_arsize),
-       .m_axi_arburst(m_axi_arburst),
-       .m_axi_arlock(m_axi_arlock),
-       .m_axi_arcache(m_axi_arcache),
-       .m_axi_arprot(m_axi_arprot),
+       .m_axi_awqos(c0_ddr4_s_axi_awqos),
+       .m_axi_awvalid(c0_ddr4_s_axi_awvalid),
+       .m_axi_awready(c0_ddr4_s_axi_awready),
+       .m_axi_wdata(c0_ddr4_s_axi_wdata),
+       .m_axi_wstrb(c0_ddr4_s_axi_wstrb),
+       .m_axi_wlast(c0_ddr4_s_axi_wlast),
+       .m_axi_wvalid(c0_ddr4_s_axi_wvalid),
+       .m_axi_wready(c0_ddr4_s_axi_wready),
+       .m_axi_bid(c0_ddr4_s_axi_bid),
+       .m_axi_bresp(c0_ddr4_s_axi_bresp),
+       .m_axi_bvalid(c0_ddr4_s_axi_bvalid),
+       .m_axi_bready(c0_ddr4_s_axi_bready),
+       .m_axi_arid(c0_ddr4_s_axi_arid),
+       .m_axi_araddr(c0_ddr4_s_axi_araddr),
+       .m_axi_arlen(c0_ddr4_s_axi_arlen),
+       .m_axi_arsize(c0_ddr4_s_axi_arsize),
+       .m_axi_arburst(c0_ddr4_s_axi_arburst),
+       .m_axi_arlock(c0_ddr4_s_axi_arlock),
+       .m_axi_arcache(c0_ddr4_s_axi_arcache),
+       .m_axi_arprot(c0_ddr4_s_axi_arprot),
        .m_axi_arregion(),
-       .m_axi_arqos(),
-       .m_axi_arvalid(m_axi_arvalid),
-       .m_axi_arready(m_axi_arready),
-       .m_axi_rid(m_axi_rid),
-       .m_axi_rdata(m_axi_rdata),
-       .m_axi_rresp(m_axi_rresp),
-       .m_axi_rlast(m_axi_rlast),
-       .m_axi_rvalid(m_axi_rvalid), 
-       .m_axi_rready(m_axi_rready)
+       .m_axi_arqos(c0_ddr4_s_axi_arqos),
+       .m_axi_arvalid(c0_ddr4_s_axi_arvalid),
+       .m_axi_arready(c0_ddr4_s_axi_arready),
+       .m_axi_rid(c0_ddr4_s_axi_rid),
+       .m_axi_rdata(c0_ddr4_s_axi_rdata),
+       .m_axi_rresp(c0_ddr4_s_axi_rresp),
+       .m_axi_rlast(c0_ddr4_s_axi_rlast),
+       .m_axi_rvalid(c0_ddr4_s_axi_rvalid), 
+       .m_axi_rready(c0_ddr4_s_axi_rready)
    );
 
-*/
    // ---- Instantiating the C-class SoC -------------//
    mkDebugSoc core(
        // Main Clock and Reset to the SoC
@@ -591,8 +582,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
         .uart0_io_SIN(uart0_SIN),
         .uart0_io_SOUT(uart0_SOUT),
        // AXI4 Master interface to be connected to DDR3
-
-       /*
 		   .mem_master_AWVALID (s_axi_awvalid),
 		   .mem_master_AWADDR  (temp_s_axi_awaddr),
 		   .mem_master_AWSIZE  (s_axi_awsize),
@@ -629,8 +618,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 		   .mem_master_RLAST  (s_axi_rlast),
 		   .mem_master_RID    (s_axi_rid),
 		   .mem_master_RREADY(s_axi_rready),
-
-       */
 
 			  //I2C ports
         .i2c0_out_scl_out (i2c0_scl_out),
