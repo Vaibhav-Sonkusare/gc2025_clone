@@ -8,6 +8,11 @@ set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets pin_tck_IBUF]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets external_clk]
 
 
+## Clock Wizard Input Clock
+set_property PACKAGE_PIN G9       [get_ports "sys_clk_n"] ;# Bank  68 VCCO - VADJ_FMC - IO_L11N_T1U_N9_GC_68
+set_property IOSTANDARD  LVDS     [get_ports "sys_clk_n"] ;# Bank  68 VCCO - VADJ_FMC - IO_L11N_T1U_N9_GC_68
+set_property PACKAGE_PIN H9       [get_ports "sys_clk_p"] ;# Bank  68 VCCO - VADJ_FMC - IO_L11P_T1U_N8_GC_68
+set_property IOSTANDARD  LVDS     [get_ports "sys_clk_p"] ;# Bank  68 VCCO - VADJ_FMC - IO_L11P_T1U_N8_GC_68
 
 ## CPU reset
 set_property PACKAGE_PIN G13      [get_ports "sys_rst" ] ;# Bank  68 VCCO - VADJ_FMC - IO_T2U_N12_68

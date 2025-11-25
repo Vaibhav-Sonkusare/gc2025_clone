@@ -30,6 +30,8 @@ Details:
 module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
   (
   // ---- DDR ports --------------//
+  input                   c0_sys_clk_p,
+  input                   c0_sys_clk_n,
   output                  c0_ddr4_act_n,
   output [16:0]           c0_ddr4_adr,
   output [1:0]            c0_ddr4_ba,
@@ -370,7 +372,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
    // ---------------------------------------------------------------------------- //
    // ---------- Clock divider ----------------//
    clk_divider clk_div (
-                       .clk_in1(c0_ddr4_ui_clk),
+                       .clk_in1_p(sys_clk_p),
+                       .clk_in1_n(sys_clk_n),
                        .clk_out1(core_clk),
                     // .clk_out2(ddr3_main),
                     //   .clk_out3(c0_sys_clk_i),
@@ -383,8 +386,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
   zcu106mig ddr (
   .c0_init_calib_complete(c0_init_calib_complete),    // output wire c0_init_calib_complete
   .dbg_clk(),                                  // output wire dbg_clk
-  .c0_sys_clk_p(sys_clk_p),                        // input wire c0_sys_clk_p
-  .c0_sys_clk_n(sys_clk_n),                        // input wire c0_sys_clk_n
+  .c0_sys_clk_p(c0_sys_clk_p),                        // input wire c0_sys_clk_p
+  .c0_sys_clk_n(c0_sys_clk_n),                        // input wire c0_sys_clk_n
   .dbg_bus(),                                  // output wire [511 : 0] dbg_bus
   .c0_ddr4_adr(c0_ddr4_adr),                          // output wire [16 : 0] c0_ddr4_adr
   .c0_ddr4_ba(c0_ddr4_ba),                            // output wire [1 : 0] c0_ddr4_ba
