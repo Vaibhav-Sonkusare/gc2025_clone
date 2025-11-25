@@ -91,6 +91,8 @@ package Soc;
   `endif
     else if(addr >= `BootBase && addr <= `BootEnd)
       slave_num = `Boot_slave_num;
+    else if(addr >= `MemoryBase && addr<= `MemoryEnd)
+      slave_num = `Memory_slave_num;
     else if(addr >= `SlowBase && addr <= `SlowEnd)
       slave_num = `Slow_fabric_slave_num;
     else if(addr >= `PLICBase && addr <= `PLICEnd)
@@ -134,6 +136,7 @@ package Soc;
     (*always_ready, always_enabled*)
     interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) xadc_master;
     interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) eth_master;
+    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) mem_master;
     interface IOCellSide iocell_io;
 
     (*always_ready,always_enabled*)
@@ -681,6 +684,7 @@ package Soc;
     interface iocell_io = mixed_cluster.pinmuxtop_iocell_side;						//GPIO IO interface
     interface xadc_master = mixed_cluster.xadc_master;
     interface eth_master = slow_fabric.v_to_slaves[`Eth_slave_num];
+    interface mem_master = fabric.v_to_slaves [`Memory_slave_num];
     method Action ext_interrupts(Bit#(2) i);
       wr_ext_interrupts <= i;
     endmethod

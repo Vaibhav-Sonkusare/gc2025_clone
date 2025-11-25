@@ -24,9 +24,9 @@
 `endif
 
 `ifdef simulate
-  `define Num_Fast_Slaves 7
+  `define Num_Fast_Slaves 8
 `else
-  `define Num_Fast_Slaves 6
+  `define Num_Fast_Slaves 7
 `endif
 `define TCM_slave_num 0
 `define Clint_slave_num 1
@@ -34,12 +34,13 @@
 `define FastErr_slave_num 3
 `define Slow_fabric_slave_num 4
 `define Boot_slave_num  5
+`define Memory_slave_num  6
 `ifdef simulate
-  `define Sign_slave_num 6
+  `define Sign_slave_num 7
 `endif
 
-`define MemoryBase        'h8000_0000
-`define MemoryEnd         'h8FFF_FFFF
+`define MemoryBase        'h9000_0000
+`define MemoryEnd         'h9FFF_FFFF
 `define TCMBase           'h8000_0000
 `define TCMEnd            'h8001_FFFF
 `define ClintBase         'h0200_0000
