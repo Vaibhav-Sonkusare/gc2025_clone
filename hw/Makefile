@@ -199,7 +199,7 @@ ifeq ($(XLEN_build), 32)
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
 else ifeq ($(XLEN_build), 64)
 	@cd boot-code-ganga; make
-	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
+##	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
 else
 	@cd boot-code; make
 	@cp boot-code/outputs/boot.mem $(VERILOGDIR)/
