@@ -14,8 +14,8 @@ if { [get_ips -quiet clk_divider] eq "" } {
 }
 
 set_property -dict [list \
-                        CONFIG.CLK_IN1_BOARD_INTERFACE {user_si570_sysclk} \
-                        CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
+                        CONFIG.CLK_IN1_BOARD_INTERFACE {Custom} \
+                        CONFIG.PRIM_SOURCE {Single_ended_clock_capable_pin} \
                         CONFIG.PRIM_IN_FREQ {300.000} \
                         CONFIG.CLKIN1_JITTER_PS {33.330000000000005} \
                         CONFIG.MMCM_CLKFBOUT_MULT_F {4.000} \
