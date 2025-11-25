@@ -15,21 +15,21 @@ set_property IOSTANDARD  LVCMOS18 [get_ports "sys_rst" ] ;# Bank  68 VCCO - VADJ
 
 
 ## PMOD0
-# #0
-# set_property PACKAGE_PIN B23      [get_ports "pin_tck"] ;# Bank  28 VCCO - VADJ_FMC - IO_T3U_N12_28
-# set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tck"] ;# Bank  28 VCCO - VADJ_FMC - IO_T3U_N12_28
-# #1
-# set_property PACKAGE_PIN A23      [get_ports "pin_trst"] ;# Bank  28 VCCO - VADJ_FMC - IO_L23N_T3U_N9_28
-# set_property IOSTANDARD  LVCMOS18 [get_ports "pin_trst"] ;# Bank  28 VCCO - VADJ_FMC - IO_L23N_T3U_N9_28
-# #2
-# set_property PACKAGE_PIN F25      [get_ports "pin_tdi"] ;# Bank  28 VCCO - VADJ_FMC - IO_T2U_N12_28
-# set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tdi"] ;# Bank  28 VCCO - VADJ_FMC - IO_T2U_N12_28
-# #3
-# set_property PACKAGE_PIN E20      [get_ports "pin_tms"] ;# Bank  28 VCCO - VADJ_FMC - IO_T1U_N12_28
-# set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tms"] ;# Bank  28 VCCO - VADJ_FMC - IO_T1U_N12_28
-# #4
-# set_property PACKAGE_PIN K24      [get_ports "pin_tdo"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2N_T0L_N3_28
-# set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tdo"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2N_T0L_N3_28
+#0
+set_property PACKAGE_PIN B23      [get_ports "pin_tck"] ;# Bank  28 VCCO - VADJ_FMC - IO_T3U_N12_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tck"] ;# Bank  28 VCCO - VADJ_FMC - IO_T3U_N12_28
+#1
+set_property PACKAGE_PIN A23      [get_ports "pin_trst"] ;# Bank  28 VCCO - VADJ_FMC - IO_L23N_T3U_N9_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "pin_trst"] ;# Bank  28 VCCO - VADJ_FMC - IO_L23N_T3U_N9_28
+#2
+set_property PACKAGE_PIN F25      [get_ports "pin_tdi"] ;# Bank  28 VCCO - VADJ_FMC - IO_T2U_N12_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tdi"] ;# Bank  28 VCCO - VADJ_FMC - IO_T2U_N12_28
+#3
+set_property PACKAGE_PIN E20      [get_ports "pin_tms"] ;# Bank  28 VCCO - VADJ_FMC - IO_T1U_N12_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tms"] ;# Bank  28 VCCO - VADJ_FMC - IO_T1U_N12_28
+#4
+set_property PACKAGE_PIN K24      [get_ports "pin_tdo"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2N_T0L_N3_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "pin_tdo"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2N_T0L_N3_28
 #5
 set_property PACKAGE_PIN L23      [get_ports "i2c0_sda"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2P_T0L_N2_28
 set_property IOSTANDARD  LVCMOS18 [get_ports "i2c0_sda"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2P_T0L_N2_28
