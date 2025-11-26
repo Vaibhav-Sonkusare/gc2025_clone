@@ -7,7 +7,7 @@ if { [get_ips -quiet zcu106mig] eq "" } {
 }
 set_property -dict [list \
       CONFIG.C0_CLOCK_BOARD_INTERFACE 						{user_si570_sysclk} \
-			CONFIG.C0_DDR4_BOARD_INTERFACE 							{ddr4_sdram} \
+			CONFIG.C0_DDR4_BOARD_INTERFACE 							{Custom} \
 			CONFIG.AL_SEL                               {0} \
       CONFIG.C0.ADDR_WIDTH                        {17} \
       CONFIG.C0.BANK_GROUP_WIDTH                  {1} \
@@ -51,7 +51,7 @@ set_property -dict [list \
       CONFIG.C0.DDR4_SELF_REFRESH                 {false} \
       CONFIG.C0.DDR4_Slot                         {Single} \
       CONFIG.C0.DDR4_Specify_MandD                {true} \
-			CONFIG.C0.DDR4_InputClockPeriod 						{3332} \
+			CONFIG.C0.DDR4_InputClockPeriod 						{13328} \
       CONFIG.C0.DDR4_TimePeriod                   {833} \
       CONFIG.C0.DDR4_UserRefresh_ZQCS             {false} \
       CONFIG.C0.DDR4_isCKEShared                  {false} \
