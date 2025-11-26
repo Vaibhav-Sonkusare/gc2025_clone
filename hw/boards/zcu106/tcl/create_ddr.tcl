@@ -25,15 +25,15 @@ set_property -dict [list \
       CONFIG.C0.DDR4_AxiSelection                 {true} \
       CONFIG.C0.DDR4_BurstLength                  {8} \
       CONFIG.C0.DDR4_BurstType                    {Sequential} \
-      CONFIG.C0.DDR4_CLKFBOUT_MULT                {5} \
-      CONFIG.C0.DDR4_CLKOUT0_DIVIDE               {5} \
+      CONFIG.C0.DDR4_CLKFBOUT_MULT                {4} \
+      CONFIG.C0.DDR4_CLKOUT0_DIVIDE               {4} \
       CONFIG.C0.DDR4_Capacity                     {512} \
       CONFIG.C0.DDR4_CasLatency                   {18} \
       CONFIG.C0.DDR4_CasWriteLatency              {12} \
       CONFIG.C0.DDR4_ChipSelect                   {true} \
       CONFIG.C0.DDR4_Clamshell                    {false} \
       CONFIG.C0.DDR4_CustomParts                  {no_file_loaded} \
-      CONFIG.C0.DDR4_DIVCLK_DIVIDE                {1} \
+      CONFIG.C0.DDR4_DIVCLK_DIVIDE                {2} \
       CONFIG.C0.DDR4_DataMask                     {DM_NO_DBI} \
       CONFIG.C0.DDR4_DataWidth                    {64} \
       CONFIG.C0.DDR4_Ecc                          {false} \
@@ -51,7 +51,7 @@ set_property -dict [list \
       CONFIG.C0.DDR4_SELF_REFRESH                 {false} \
       CONFIG.C0.DDR4_Slot                         {Single} \
       CONFIG.C0.DDR4_Specify_MandD                {true} \
-			CONFIG.C0.DDR4_InputClockPeriod 						{13328} \
+      CONFIG.C0.DDR4_InputClockPeriod 		        {3332} \
       CONFIG.C0.DDR4_TimePeriod                   {833} \
       CONFIG.C0.DDR4_UserRefresh_ZQCS             {false} \
       CONFIG.C0.DDR4_isCKEShared                  {false} \

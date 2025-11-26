@@ -443,7 +443,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
   .c0_ddr4_s_axi_rresp(c0_ddr4_s_axi_rresp),          // output wire [1 : 0] c0_ddr4_s_axi_rresp
   .c0_ddr4_s_axi_rid(c0_ddr4_s_axi_rid),              // output wire [3 : 0] c0_ddr4_s_axi_rid
   .c0_ddr4_s_axi_rdata(c0_ddr4_s_axi_rdata),          // output wire [511 : 0] c0_ddr4_s_axi_rdata
-  .addn_ui_clkout1(addn_ui_clkout1),                  // output wire addn_ui_clkout1
   .sys_rst(sys_rst)                                  // input wire sys_rst
 );
 
