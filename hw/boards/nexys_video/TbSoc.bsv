@@ -125,16 +125,12 @@ package TbSoc;
 
     Ifc_bram_axi4#(`paddr,`axi4_id_width, `buswidth, `USERSPACE, `Addr_space) bram <- mkbram_axi4(`MemoryBase,
                                                 "code.mem", "MainMEM");
-    Ifc_bram_axi4lite#(`paddr, `buswidth, `USERSPACE,  15) xbram <- mkbram_axi4lite(`XADCBase, "boot1.mem","BRAM");
-    Ifc_bram_axi4lite#(`paddr, `buswidth, `USERSPACE,  15) eth0 <- mkbram_axi4lite(`EthBase, "boot1.mem","BRAM");
   
   `ifdef rtldump
     `include "csr_probe.bsv"
   `endif
 		// ------------------- SDRAM connections ----------------------------------//
     mkConnection(soc.chip_io.mem_master, bram.slave);
-    mkConnection(soc.chip_io.xadc_master, xbram.slave);
-    mkConnection(soc.chip_io.eth_master, eth0.slave);
 
     UserInterface#(`paddr,`buswidth,16) uart0 <- mkuart_user(5,0,0);
     UserInterface#(`paddr,`buswidth,16) uart1 <- mkuart_user(5,0,0);
