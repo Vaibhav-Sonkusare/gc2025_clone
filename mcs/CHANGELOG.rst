@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+2025-12-01
+-------------------- 
+- Fix for PLIC source priority issue in 128 bit data width
+
 2025-11-20
 -------------------- 
 - Fix for PLIC Claim register is not getting duplicated for 64 bit data width
