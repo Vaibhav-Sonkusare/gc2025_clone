@@ -21,7 +21,7 @@ SHELL := /bin/bash # Use bash syntax
 DC ?=
 PROGRAM ?= pcf8574
 #default target board
-TARGET ?= artix7_35t
+TARGET ?= yamuna
 DEBUG ?=
 MARCH ?= rv32imac
 MABI  ?= ilp32

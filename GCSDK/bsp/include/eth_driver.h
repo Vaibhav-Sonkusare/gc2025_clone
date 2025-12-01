@@ -167,7 +167,23 @@ typedef struct {
 
 } XEmacLite;
 
-#ifndef ETH_VARI
+#ifdef ETH_VARI
+/*
+ * Variable used to indicate the length of the received frame.
+ */
+u32 volatile RecvFrameLength = 0;	/* Indicates the length of the Received packet
+				 */
+UINTPTR TxBuffPtr;
+UINTPTR RxBuffPtr;
+volatile int FramesTx;
+volatile int FramesRx;
+volatile int TxCount;
+volatile int RxCount;
+volatile int Padding;	/* For 1588 Packets we need to pad 8 bytes time stamp value */
+#else
+/*
+ * Variable used to indicate the length of the received frame.
+ */
 extern volatile u32 RecvFrameLength;
 extern UINTPTR TxBuffPtr;
 extern UINTPTR RxBuffPtr;

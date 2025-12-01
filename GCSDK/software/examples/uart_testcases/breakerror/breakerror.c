@@ -24,8 +24,12 @@
 
 /*
 Procedure:
+Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
+Run the code and type in the UART1 Miniterm window
 Break error is when the input is "stuck-at-0"
 grounding the RX pin UART1
+
 
 After some time, we will be getting break condition. */
 

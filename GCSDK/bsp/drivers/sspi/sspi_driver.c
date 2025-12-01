@@ -72,6 +72,29 @@ void sspi_configure_mas_slv(sspi_struct *sspi_instance, uint8_t mas_slv_cntrl)
     }
 }
 
+/**
+ * @brief Waits until the SSPI communication is complete.
+ * @details
+ * This function polls the `comm_status` register of the provided `sspi_instance`
+ * until the **busy flag (bit 0)** is cleared, indicating that the SSPI interface
+ * has completed its ongoing communication (transmit or receive).
+ * The function introduces a short delay (`waitfor(10)`) between consecutive polls
+ * to prevent overwhelming the system bus with reads.
+ * @param[in] sspi_instance Pointer to the SSPI peripheral structure.
+ * @return int Returns `1` once communication is complete.
+ */
+
+int sspi_notbusy(sspi_struct *sspi_instance)
+{
+	unsigned char  read_data = 0x01;
+	while(read_data & 0x01){
+		waitfor(10);
+		read_data = sspi_instance -> comm_status;
+        log_debug("\n Status Register: %x", read_data);
+	}
+	log_debug("\n SPI comm done \n");
+	return 1;
+}
 
 /** @fn void sspi_configure_pins(sspi_struct *sspi_instance, uint8_t mosi_pin_cntrl,uint8_t miso_pin_cntrl,
  *      uint8_t  cs_pin_cntrl,uint8_t  clk_pin_cntrl)

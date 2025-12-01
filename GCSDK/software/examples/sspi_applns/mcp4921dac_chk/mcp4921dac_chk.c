@@ -1,9 +1,9 @@
 /***************************************************************************
 * Project                               : shakti devt board
-* Name of the file                      : spi.c
+* Name of the file                      : mcp4921dac_check.c
 * Brief Description of file             : Erase a sector of flash
-* Name of Author                        : Sathya Narayanan
-* Email ID                              : sathya281@gmail.com
+* Name of Author                        : Sathya Narayanan, Kotteeswaran Ekambaram.
+* Email ID                              : sathya281@gmail.com, kottee.off@gmail.com
 
  Copyright (C) 2020  IIT Madras. All rights reserved.
 
@@ -22,9 +22,9 @@
 
 ***************************************************************************/
 /**
-@file erase.c
-@brief  Erase a sector of on-board flash in arty 35t/100t
-@detail Contains the code to erase a sector of on-board flash using spi
+@file mcp4921dac_check.c
+@brief  generates analog square waveform 
+@detail Contains the code to generate square wavefor using spi
 protocol.
 */
 

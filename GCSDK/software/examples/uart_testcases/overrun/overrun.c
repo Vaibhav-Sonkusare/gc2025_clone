@@ -21,9 +21,13 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ***************************************************************************/
-/*UART0: 19200, stop bit=1 No parity; (miniterm)
+/*
+Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
+Run the code and type in the UART1 Miniterm window
+UART0: 19200, stop bit=1 No parity; (miniterm)
 UART1: 19200, stop bit=1 No parity; (cutecom)
-Try sending chars from UART1 to UART0
+Try sending chars from UART1 to UART0 it will reflect overrun error in UART0.
 */
 
 

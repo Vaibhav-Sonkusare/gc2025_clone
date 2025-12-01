@@ -56,11 +56,8 @@
 #include "defines.h"
 #include "gpiov2.h"
 #include "pinmux.h"
-#ifdef BSOC
-#include "uartv3.h"
-#else
 #include "uart.h"
-#endif
+
 
 
 // odd pins input with interrupt enabled pins

@@ -79,6 +79,7 @@ int flash_write_enable(void)
  	return 1;
 }
 
+#if 0
 int sspi_notbusy(void)
 {
 	unsigned char  read_data = 0x01;
@@ -91,6 +92,7 @@ int sspi_notbusy(void)
 	log_debug("\n SPI comm done \n");
 	return 1;
 }
+#endif	
 /**
  * @fn void status_register_update(int data)
  * @brief Updates the flash memory status register.

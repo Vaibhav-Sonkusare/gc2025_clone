@@ -21,7 +21,10 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ***************************************************************************/
-/*Configure UART1 (cutecom) and UART0 (miniterm) with same baudrate, no of bits & Stop bits to be transmitted and parity.
+/*Connection Details:
+Take a UART Module and connect the TX to RX of other module and vice versa
+Configure UART1 (cutecom) and UART0 (miniterm) with same baudrate, no of bits & Stop bits to be transmitted and parity.
+Run the code and type in the UART1  window
 Continuously send some char from cutecom (UART1) to UART0
 UART0 is expecting 2 Stop bits where as UART1 is Sending data with 1 stop bit.
 We will get an framing error bit set.*/
@@ -51,7 +54,9 @@ We will get an framing error bit set.*/
  * @param[Out]
  */
 
-
+void set_uart_control(uart_struct *uart_instance, uint16_t uart_control){
+        uart_instance->control = uart_control;
+}
 int main(void) {
 
 	unsigned int int_id = 1;
@@ -86,9 +91,9 @@ int main(void) {
 
   printf("\n UART char size set to 22");
   control = value | 8 << 5;
-  set_uart_control(uart1,control);
+   uart_instance[1]->control  = control;
   printf("\n UART control is set to %d",control);
-  write_uart_string(uart1,"Hello World abc");
+  write_uart_string(uart1, "Hello World abc");
   //read_uart_string(uart1,readString);
   //printf("\n read from uart1 %s",readString);
   //write_uart_character(uart1,"W");

@@ -31,7 +31,7 @@ export GENLIB
 
 # Default PROGRAM and TARGET
 PROGRAM ?=
-TARGET ?= pinaka
+TARGET ?= yamuna
 DEBUG ?= DEBUG
 CLEAR ?=
 UPLOAD ?= UPLOAD
@@ -80,17 +80,17 @@ BOARD_DIR := $(shell ls ./bsp/third_party)
 #Each C file corresponds to a appln. Each appln has a label in makefile
 #that corresponds to each C file.
 
-GPIO_APPS := $(shell cd ./software/examples/gpio_applns/ && ls -d * | grep -v Makefile )
 GPIOV2_APPS := $(shell cd ./software/examples/gpiov2_applns/ && ls -d * | grep -v Makefile )
 UART_APPS := $(shell cd ./software/examples/uart_applns/ && ls -d * | grep -v Makefile )
+UART_TESTS := $(shell cd ./software/examples/uart_testcases/ && ls -d * | grep -v Makefile )
 I2C_APPS := $(shell cd software/examples/i2c_applns/ && ls -d * | grep -v Makefile )
-PWM_APPS := $(shell cd software/examples/pwm_applns/ && ls -d * | grep -v Makefile )
 PWMV2_APPS := $(shell cd software/examples/pwmv2_applns/ && ls -d * | grep -v Makefile )
-SPI_APPS := $(shell cd software/examples/spi_applns/ && ls -d * | grep -v Makefile )
+SSPI_APPS := $(shell cd software/examples/sspi_applns/ && ls -d * | grep -v Makefile )
+SSPI_TESTS := $(shell cd software/examples/sspi_testcases/ && ls -d * | grep -v Makefile )
 PLIC_APPS := $(shell cd software/examples/plic_applns/ && ls -d * | grep -v Makefile )
 XADC_APPS := $(shell cd software/examples/xadc_applns/ && ls -d * | grep -v Makefile )
 ETH_APPS := $(shell cd software/examples/eth_applns/ && ls -d * | grep -v Makefile )
-APP_DIR := $(GPIOV2_APPS) $(GPIO_APPS) $(UART_APPS) $(I2C_APPS) $(SPI_APPS) $(PWM_APPS) $(SSPI_APPS) $(PWMV2_APPS) $(PLIC_APPS)
+APP_DIR := $(GPIOV2_APPS) $(UART_APPS) $(I2C_APPS) $(UART_TESTS) $(PWM_APPS) $(SSPI_APPS) $(SSPI_TESTS) $(PWMV2_APPS) $(PLIC_APPS)
 
 
 #bsp board specific files path
@@ -170,21 +170,20 @@ clean:
 	@if [ -d software/examples/gen_lib/ ] ; then rm -rf software/examples/gen_lib/; fi
 	@if [ -d software/projects/gen_lib/ ] ; then rm -rf software/projects/gen_lib/; fi
 ifeq ($(PROGRAM),)
-	cd ./software/examples/clint_applns && $(MAKE) clean CLEAR=CLEAR
-	cd ./software/examples/spi_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/sspi_applns && $(MAKE) clean CLEAR=CLEAR
+	cd ./software/examples/clint_applns && $(MAKE) clean CLEAR=CLEAR
+	cd ./software/examples/sspi_testcases && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/uart_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/uart_testcases && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/i2c_applns && $(MAKE) clean CLEAR=CLEAR
-	cd ./software/examples/gpio_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/gpiov2_applns && $(MAKE) clean CLEAR=CLEAR
-	cd ./software/examples/pwm_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/pwmv2_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/plic_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/malloc_test && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/xadc_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/eth_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/gpt_applns && $(MAKE) clean CLEAR=CLEAR
+	cd ./software/benchmarking && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/projects && $(MAKE) clean CLEAR=CLEAR
 else
 	cd ./software/examples && $(MAKE) PROGRAM=$(PROGRAM) CLEAR=CLEAR

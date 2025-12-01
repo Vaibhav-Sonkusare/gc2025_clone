@@ -21,12 +21,16 @@ XLEN ?=64
 DC=
 
 #default target board
-TARGET ?= artix7_35t
+TARGET ?= yamuna
 DEBUG ?=
 PROGRAM=irrigationsystem
 
-ifeq ($(TARGET),artix7_35t)
+ifeq ($(TARGET),yamuna)
+<<<<<<< HEAD
+	XLEN=64
+=======
 	XLEN=32
+>>>>>>> main
 	flags= -D ARTIX7_35T
 	MARCH=rv32imac
 	MABI=ilp32
@@ -58,7 +62,7 @@ all: create_dir
 $(PROGRAM).riscv: create_dir
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS)-I$(bsplib) -I$(bspinc) -I$(bspdri)/plic -I$(bspboard) -c ./$(PROGRAM).c -o ./output/$(PROGRAM).o -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS)-I$(bsplib) -I$(bspinc) -I$(bspdri)/plic -I$(bspboard) -c ./lm75.c -o ./output/lm75.o -lm -lgcc
-	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/lm75.o $(GENLIB)gen_lib/libshakti$(XLEN).a ./output/$(PROGRAM).o -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/$(PROGRAM).o ./output/lm75.o $(GENLIB)gen_lib/libshakti$(XLEN).a -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-objdump -D ./output/$(PROGRAM).shakti > ./output/$(PROGRAM).dump
 
 

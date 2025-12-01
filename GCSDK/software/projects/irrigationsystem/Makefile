@@ -21,12 +21,16 @@ XLEN ?=64
 DC=
 
 #default target board
-TARGET ?= artix7_35t
+TARGET ?= yamuna
 DEBUG ?=
 PROGRAM=irrigationsystem
 
-ifeq ($(TARGET),artix7_35t)
+ifeq ($(TARGET),yamuna)
+<<<<<<< HEAD
+	XLEN=64
+=======
 	XLEN=32
+>>>>>>> main
 	flags= -D ARTIX7_35T
 	MARCH=rv32imac
 	MABI=ilp32
