@@ -6,6 +6,10 @@ CHANGELOG
 -------------------- 
 - Fix for PLIC Claim register is not getting duplicated for 64 bit data width
 
+2025-11-14
+-------------------- 
+- Fixing the trap in boot code 
+
 2025-11-15
 -------------------- 
 - PLIC Strobe fix for AXI4 Lite interface
