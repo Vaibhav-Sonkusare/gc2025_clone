@@ -79,8 +79,8 @@ void _printf_(const char *fmt, va_list ap)
 	register int ch;
 	unsigned long long num;
 	int base, lflag, i;
-	float float_num = 0;
-	char float_arr[30] = {'\0'};
+	double double_num;  // Changed from float to double
+	char float_arr[64] = {'\0'};  // Increased buffer size
 	int backtothebeginning;
 
 	for (;;) {
@@ -91,15 +91,27 @@ void _printf_(const char *fmt, va_list ap)
 		}
 		fmt++;
 
-		// Process a %-escape sequence
+		int precision = -1;
 		last_fmt = fmt;
 		lflag = 0;
 
 		backtothebeginning = 0;
 		for (;;) {
+			ch = *(unsigned char *) fmt;
+            
+            // Check for precision
+            if (ch == '.') {
+                fmt++;  
+                precision = 0;
+                while (*fmt >= '0' && *fmt <= '9') {
+                    precision = precision * 10 + (*fmt - '0');
+                    fmt++;
+                }
+                continue;  
+            }
 
 			switch (ch = *(unsigned char *) fmt++) {
-
+				
 				// long flag (doubled for long long)
 				case 'l':
 					lflag++;
@@ -141,19 +153,57 @@ void _printf_(const char *fmt, va_list ap)
 
 					break;
 
+				// case 'f':
+				// {
+				// 	double val = va_arg(ap, double);  // float is promoted to double
+
+				// 	// Decide precision based on format flags:
+				// 	// if "%lf" → lflag > 0, print 15 decimals
+				// 	// if "%f"  → lflag == 0, print 6 decimals
+				// 	int precision = (lflag > 0) ? 15 : 6;
+
+				// 	// Clear buffer
+				// 	for (i = 0; i < 64; i++) float_arr[i] = '\0';
+
+				// 	// Convert with required precision
+				// 	dtoa(val, float_arr, precision);
+
+				// 	// Print
+				// 	for (i = 0; float_arr[i] != '\0'; i++)
+				// 		putchar(float_arr[i]);
+				// 	break;
+				// }
 				case 'f':
-					float_num =  va_arg(ap, double);
+                {
+                    double val = va_arg(ap, double);
+                    
+                    // Determine default precision
+                    int default_precision;
+                    if (lflag > 0) {
+                        // %lf was used
+                        default_precision = 15;
+                    } else {
+                        // %f was used
+                        default_precision = 6;
+                    }
+                    
+                    // Use user-specified precision if provided, otherwise use default
+                    int actual_precision = (precision >= 0) ? precision : default_precision;
+                    
+                    // Clear buffer
+                    for (i = 0; i < 64; i++) float_arr[i] = '\0';
+                    
+                    // Convert with selected precision
+                    dtoa(val, float_arr, actual_precision);
+                    
+                    // Print result
+                    for (i = 0; float_arr[i] != '\0'; i++)
+                        putchar(float_arr[i]);
+                    
+                    break;
+                }
 
-					ftoa(float_num, float_arr, 6);
-
-					for( i = 0; float_arr[i] != '\0'; i++)
-					{
-						putchar(float_arr[i]);
-						if(i > 29) break;
-					}
-					break;
-
-					// unsigned decimal
+				// unsigned decimal
 				case 'u':
 					base = 10;
 

@@ -209,6 +209,9 @@ else
 ifeq ($(PROGRAM),hello)
 filepath := uart_applns/hello
 else
+ifeq ($(PROGRAM),print_check)
+filepath := uart_applns/print_check
+else
 ifeq ($(PROGRAM),csr_test)
 filepath := uart_applns/csr_test
 else
@@ -573,6 +576,7 @@ ifeq ($(PROGRAM),dhrystone)
 filepath := ../benchmarking/dhrystone
 else
 	@echo "Entry for $(PROGRAM) not present"
+endif
 endif
 endif
 endif
