@@ -417,16 +417,8 @@ package Soc;
     mkConnection (fabric.v_to_slaves [`Boot_slave_num], boot.slave);
 
     // sideband connection
-    rule rl_connect_clint_msip;
-      let msip <-clint.sb_clint_msip.get();
-      ccore.sb_clint_msip.put(msip[0]);
-    endrule: rl_connect_clint_msip
-  
-    rule rl_connect_clint_mtip;
-      let mtip <-clint.sb_clint_mtip.get();
-      ccore.sb_clint_mtip.put(mtip[0]);
-    endrule: rl_connect_clint_mtip
-
+    mkConnection(ccore.sb_clint_msip,clint.sb_clint_msip);
+    mkConnection(ccore.sb_clint_mtip,clint.sb_clint_mtip);
     mkConnection(ccore.sb_clint_mtime,clint.sb_clint_mtime);
 
 //    mkConnection (slow_fabric.v_to_slaves [`PWMCluster_slave_num], pwm_cluster.slave);
