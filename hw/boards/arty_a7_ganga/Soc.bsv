@@ -313,7 +313,7 @@ package Soc;
 
     AXI4_Fabric_IFC #(`Num_Fast_Masters, `Num_Fast_Slaves, `paddr, `axi4_id_width, `buswidth, `USERSPACE) 
                                                     fabric <- mkAXI4_Fabric(fn_slave_map_fast);
-    Ifc_clint_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE, 1, 512) clint <- mkclint_axi4();
+    Ifc_clint_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE, `num_harts, 512) clint <- mkclint_axi4();
   //`ifdef debug
     //Ifc_debug_halt_loop_axi4#(`paddr, ELEN, `USERSPACE) debug_memory <- mkdebug_halt_loop_axi4;
   //`endif
