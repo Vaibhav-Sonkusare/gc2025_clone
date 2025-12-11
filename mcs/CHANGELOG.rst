@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+2025-12-11
+-------------------- 
+- Bitstream with Clint that has multi hart support
+
 2025-12-01
 -------------------- 
 - Fix for PLIC source priority issue in 128 bit data width
