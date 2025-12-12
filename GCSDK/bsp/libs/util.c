@@ -72,6 +72,21 @@ float pow_10(unsigned int y)
 
 	return ((float) x);
 }
+
+/** @fn double pow_10_double(unsigned int y)
+ * @brief generate different powers of 10 for double precision
+ * @param unsigned int y
+ * @return return result in double 
+ */
+double pow_10_double(unsigned int y)
+{
+	double result = 1.0;
+	for (unsigned int i = 0; i < y; i++) {
+		result *= 10.0;
+	}
+	return result;
+}
+
 /** @fn void reverse(char *str, int length)
  * @brief reverse a string and store in the same string
  * @param char *str
@@ -135,72 +150,61 @@ int int_to_string(int number, char str[], unsigned int afterpoint)
 
 	return i;
 }
-/** @fn void ftoa(float n, char *res, int afterpoint)
- * @brief converts float to string
- * @details Split floating number into fpart and ipart
- *          Finally merge it into one float number.
- *          Return a string, which has the float value.
- * @param float (floating point number - n)
- * @param char* (float in string - res)
- * @param int (precision - afterpoint)
- */
-void ftoa(float n, char *res, unsigned int afterpoint)
+
+
+void dtoa(double n, char *res, unsigned int precision)
 {
-	int i=0;
-	char temp[30]={'\0'};
-	n += 0.0000001;
+    if (precision > 15)
+        precision = 15;
 
-	// Extract integer part
-	int ipart = (int)n;
+    int pos = 0;
+    
+    // Handle sign
+    if (n < 0.0) {
+        res[pos++] = '-';
+        n = -n;
+    }
 
-	// Extract floating part
-	float fpart = (float) (n - (float)ipart);
-	int j=0;
+    // Integer part
+    unsigned long long ipart = (unsigned long long)n;
+    double fpart = n - (double)ipart;
 
-	if(n < (0/1))
-	{
-		res[j]='-';
-		j=1;
-	}
+    // Convert integer part
+    char temp[32];
+    int idx = 0;
+    if (ipart == 0) {
+        temp[idx++] = '0';
+    } else {
+        while (ipart > 0) {
+            temp[idx++] = (char)('0' + (ipart % 10));
+            ipart /= 10;
+        }
+    }
+    for (int k = idx - 1; k >= 0; k--)
+        res[pos++] = temp[k];
 
-	if (ipart == 0)
-	{
-		res[j]='0';
-		j=j+1;
-	}
-	else{
-		if (ipart <0)
-		{
-			ipart =(-1)*ipart;
-		}
+    // No decimals?
+    if (precision == 0) {
+        res[pos] = '\0';
+        return;
+    }
 
-		i = int_to_string(ipart, temp, 0);
+    res[pos++] = '.';
 
-		strcpy(res+j,temp);
-	}
+    // Multiply fractional part
+    unsigned long long mul = 1;
+    for (unsigned int i = 0; i < precision; i++)
+        mul *= 10;
 
-	i = i+j;
+    unsigned long long frac = (unsigned long long)(fpart * mul + 0.5); // rounding
 
-	// check for display option after point
-	if (afterpoint != 0)
-	{
-		res[i] = '.';// add dot
-
-		if (fpart < 0/1)
-		{
-
-			fpart = (-1)*fpart;
-
-		}
-		else if (fpart == 0/1)
-		{
-			fpart = fpart;
-		}
-
-		fpart = fpart * pow_10( afterpoint);
-
-		int_to_string((int)fpart, res + i + 1, afterpoint);
-	}
+    // Convert fractional part with zero padding
+    for (int j = precision - 1; j >= 0; j--) {
+        res[pos + j] = (char)('0' + (frac % 10));
+        frac /= 10;
+    }
+    pos += precision;
+    res[pos] = '\0';
 }
 
 /** @fn void delay_loop(unsigned long cntr1, unsigned long cntr2)
