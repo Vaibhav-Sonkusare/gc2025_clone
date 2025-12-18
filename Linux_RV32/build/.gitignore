@@ -1,0 +1,8 @@
+linux/
+u-boot/
+buildroot/
+riscv-gnu-toolchain/
+riscv-gnu-toolchain-build-*/
+u-boot/out-*/
+buildroot/output/
+
