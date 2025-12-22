@@ -4,7 +4,7 @@ set -euo pipefail
 # ===================== CONFIG =====================
 RISCV_PREFIX="/opt/riscv32-imac-linux"
 
-TOP_DIR="${HOME}/gc_test/gc2025/RV32/build"
+TOP_DIR="${HOME}/gc2025/Linux_RV32/build"
 SRC_DIR="${TOP_DIR}/riscv-gnu-toolchain"
 BUILD_DIR="${TOP_DIR}/riscv-gnu-toolchain-build-rv32imac-linux"
 

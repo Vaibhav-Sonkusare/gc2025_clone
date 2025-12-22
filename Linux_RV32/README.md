@@ -1,221 +1,164 @@
+# Linux RV32 Bring-up on Shakti Yamuna
+## OpenSBI + U-Boot + Linux Kernel + Buildroot
 
-# Linux_RV32 – Yamuna (RV32IMAC) BSP Build Guide
+This repository documents the **complete bring-up of Linux on RV32 (RISC-V 32-bit)**
+for the **Shakti C-Class Yamuna** platform.
 
-This repository provides a **script-driven build flow** for running Linux on the
-**Shakti Yamuna** platform using an **RV32IMAC-only** RISC-V core.
-
-The build generates the complete boot stack:
-
-- RISC-V GNU **Linux toolchain** (glibc)
-- **U-Boot v2025.07** (Yamuna)
-- **OpenSBI v1.7** (Yamuna platform, U-Boot payload)
-- **Linux Kernel v6.16** (Yamuna 32-bit)
-- **Buildroot** root filesystem (Yamuna)
-
----
-
-## 0. Board Constraints (Important)
-
-- **ISA:** RV32IMAC only  
-- **ABI:** ilp32 (soft-float)  
-
-
-All components **must** be built for `rv32imac / ilp32`.
+It covers everything from:
+- Toolchain
+- Firmware
+- Bootloader
+- Kernel
+- Root filesystem
+- Booting from SD card
 
 ---
 
-## 1. Repository Location
+## Repository Structure
+
+```text
+Linux_RV32/
+├── bsp/                    # Board support patches & defconfigs
+│   ├── defconfig/
+│   └── patches/
+├── build/                  # Optional build artifacts
+├── Downloads/              # Cloned upstream sources
+│   ├── opensbi/
+│   ├── u-boot/
+│   ├── linux/
+│   └── buildroot/
+├── docs/                   # Documentation (READMEs)
+│   ├── opensbi/
+│   ├── u-boot/
+│   ├── linux/
+│   ├── buildroot/
+│   └── riscv32_toolchain/
+└── scripts/                # Helper scripts (optional)
+```
+
+---
+
+## RISC-V Boot Flow
+
+```text
+Power ON
+  ↓
+OpenSBI (M-mode firmware)
+  ↓
+U-Boot (bootloader)
+  ↓
+Linux Kernel (S-mode)
+  ↓
+Buildroot Root Filesystem
+```
+
+---
+
+## Components Overview
+
+### 1) RISC-V RV32 Toolchain
+- Cross-compiler used for OpenSBI, U-Boot, Linux, and Buildroot
+- Prefix:
+  ```
+  riscv32-unknown-linux-gnu-
+  ```
 
-All commands in this guide assume:
+Documentation:
+```
+docs/riscv32_toolchain/README.md
+```
 
-```bash
-~/gc_test/gc2025/Linux_RV32/build
+---
 
-export LINUX_RV32_ROOT="$HOME/gc_test/gc2025/Linux_RV32/build"
+### 2) OpenSBI (Firmware)
+- Runs in **Machine mode (M-mode)**
+- Initializes CPU and low-level platform
+- Jumps to U-Boot or Linux
 
-2. Repository Layout (Actual)
+Documentation:
+```
+docs/opensbi/README.md
+```
 
-Linux_RV32/build/
-├── bsp/                         # BSP patches
-│   ├── shakti_uboot.patch
-│   ├── shakti_opensbi.patch
-│   ├── shakti_linux.patch
-│   └── shakti_buildroot.patch
-├── u-boot/
-├── linux/
-├── buildroot/
-├── riscv-gnu-toolchain/
-├── riscv-gnu-toolchain-build-rv32imac-linux/
-├── riscv32_linux_toolchain_imac_install.sh
-├── uboot_setup.sh
-├── opensbi_auto.sh
-├── linux_setup.sh
-├── buildroot_setup.sh
-└── readme.md
+---
 
-3. Supported Host Systems
-OS	Status
-Ubuntu 24.04	✅ Supported and Tested
+### 3) U-Boot (Bootloader)
+- Loaded by OpenSBI
+- Initializes DRAM and peripherals
+- Loads Linux kernel and DTB
 
-4. Host Dependencies
-4.1 Toolchain Dependencies
-sudo apt update
-sudo apt install -y \
-  autoconf automake autotools-dev curl python3 python3-pip python3-tomli \
-  libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex \
-  texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev \
-  ninja-build git cmake libglib2.0-dev libslirp-dev
+Documentation:
+```
+docs/u-boot/README.md
+```
 
-5. Environment Setup (Use for All Builds)
+---
 
-Run once per terminal:
+### 4) Linux Kernel (RV32)
+- Runs in **Supervisor mode (S-mode)**
+- Version used: **Linux 6.16**
+- Board-specific patches applied for Shakti Yamuna
 
-export LINUX_RV32_ROOT="$HOME/gc_test/gc2025/Linux_RV32/build"
+Documentation:
+```
+docs/linux/README.md
+```
 
-# Toolchain install prefix
-export RISCV_TOOLCHAIN="/opt/riscv32-imac-linux"
-export PATH="$RISCV_TOOLCHAIN/bin:$PATH"
+---
 
-# Cross compiler prefix
-export CROSS_COMPILE="riscv32-unknown-linux-gnu-"
+### 5) Buildroot (Root Filesystem)
+- Provides Linux user space
+- BusyBox shell, init system, basic utilities
+- Root filesystem stored on SD card (ext4)
 
-# Linux kernel build requires ARCH=riscv
-export ARCH="riscv"
+Documentation:
+```
+docs/buildroot/README.md
+```
 
-6. RISC-V Linux Toolchain (RV32IMAC)
+---
 
-Build and install the Linux toolchain:
+## SD Card Layout
 
-cd "$LINUX_RV32_ROOT"
-./riscv32_linux_toolchain_imac_install.sh
-source ~/.bashrc
+Recommended SD card partitioning:
 
+| Partition | Type  | Usage |
+|---------|-------|------|
+| p1 | FAT32 | Kernel Image + DTB |
+| p2 | ext4 | Buildroot root filesystem |
 
-Toolchain installs to:
+---
 
-/opt/riscv32-imac-linux
+## Kernel Boot Arguments (Reference)
 
-7. U-Boot (v2025.07) – Yamuna
+```text
+earlycon=sbi console=hvc0 console=ttySHK0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 rootwait rw
+```
 
-U-Boot is the bootloader loaded by OpenSBI.
+---
 
-7.1 Setup (Clone + Patch)
-cd "$LINUX_RV32_ROOT"
-./uboot_setup.sh
+## Status
 
+✅ OpenSBI boots  
+✅ U-Boot loads kernel  
+✅ Linux kernel boots  
+✅ Buildroot rootfs mounts  
+✅ Interactive shell on UART  
 
-Verify Yamuna defconfig exists:
+---
 
-ls u-boot/configs/shakti_yamuna_defconfig
+## How to Use This Repository
 
-7.2 Build U-Boot (Yamuna)
-cd "$LINUX_RV32_ROOT/u-boot"
-export CROSS_COMPILE="riscv32-unknown-linux-gnu-"
+Follow the READMEs in this order:
 
-make distclean
-make shakti_yamuna_defconfig
-make -j$(nproc)
+1. `docs/riscv32_toolchain/README.md`
+2. `docs/opensbi/README.md`
+3. `docs/u-boot/README.md`
+4. `docs/linux/README.md`
+5. `docs/buildroot/README.md`
 
+---
 
-Outputs:
+## Final Summary
 
-u-boot
-u-boot.bin
-u-boot.elf
-
-8. OpenSBI (v1.7) – Yamuna Platform
-
-OpenSBI runs immediately after ROM and loads U-Boot as its payload.
-
-8.1 Build Using Script
-cd "$LINUX_RV32_ROOT"
-./opensbi_auto.sh
-
-8.2 Manual Build (Reference)
-cd "$LINUX_RV32_ROOT/opensbi"
-export CROSS_COMPILE="riscv32-unknown-linux-gnu-"
-
-make \
-  PLATFORM=cclass/yamuna \
-  FW_TEXT_START=0x80000000 \
-  FW_PAYLOAD_PATH="$LINUX_RV32_ROOT/u-boot/u-boot.bin" \
-  -j$(nproc)
-
-
-Output:
-
-opensbi/build/platform/cclass/yamuna/firmware/fw_payload.elf
-
-
-Boot chain:
-
-ROM → OpenSBI → U-Boot → Linux
-
-9. Linux Kernel (v6.16) – Yamuna 32-bit
-9.1 Setup (Clone + Checkout)
-cd "$LINUX_RV32_ROOT"
-./linux_setup.sh
-
-9.2 Apply BSP Patch (IMPORTANT)
-
-The Linux BSP patch must be applied using patch, not git apply:
-
-cd "$LINUX_RV32_ROOT/linux"
-patch -p1 < ../bsp/shakti_linux.patch
-
-9.3 Build Linux Kernel (Yamuna)
-
-Verify defconfig exists:
-
-ls arch/riscv/configs/shakti_yamuna_32_defconfig
-
-
-Build:
-
-cd "$LINUX_RV32_ROOT/linux"
-export ARCH="riscv"
-export CROSS_COMPILE="riscv32-unknown-linux-gnu-"
-
-make mrproper
-make shakti_yamuna_32_defconfig
-make -j$(nproc)
-
-
-Kernel image:
-
-ls -lh arch/riscv/boot/Image
-
-10. Buildroot – Yamuna Root Filesystem
-10.1 Setup (Clone + Patch)
-cd "$LINUX_RV32_ROOT"
-./buildroot_setup.sh
-
-
-Verify defconfig exists:
-
-ls buildroot/configs/shakti_yamuna_defconfig
-
-10.2 Build Root Filesystem
-cd "$LINUX_RV32_ROOT/buildroot"
-make clean
-make shakti_yamuna_defconfig
-make -j$(nproc)
-
-
-Output images:
-
-ls -lh output/images
-
-11. Recommended Build Order
-
-Toolchain
-
-U-Boot (Yamuna)
-
-OpenSBI (Yamuna + U-Boot payload)
-
-Linux Kernel (Yamuna 32-bit)
-
-Buildroot (Yamuna)
-
-
+> **This repository provides a complete, working reference for bringing up Linux on RV32 (Shakti Yamuna) from power-on to shell prompt.**
