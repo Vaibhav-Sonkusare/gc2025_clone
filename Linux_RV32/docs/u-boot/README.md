@@ -109,7 +109,9 @@ sudo apt install -y   git   make   gcc   g++   bc   bison   flex   libssl-dev   
 ## 2) Clone U-Boot Source
 
 ```bash
-cd ~/gc2025/Linux_RV32/Downloads
+cd ~/gc2025/Linux_RV32/
+mkdir Downloads
+cd Downloads
 git clone https://github.com/u-boot/u-boot.git
 cd u-boot
 ```
@@ -132,6 +134,9 @@ Expected output:
 ```text
 v2025.07
 ```
+```bash
+patch -p1 < ../../bsp/patches/u-boot/shakti_uboot.patch
+```
 
 ---
 
@@ -140,6 +145,7 @@ v2025.07
 ```bash
 export ARCH=riscv
 export CROSS_COMPILE=riscv32-unknown-linux-gnu-
+
 ```
 
 ---
@@ -154,7 +160,7 @@ make distclean
 Apply BSP defconfig:
 ```bash
 cp ../../bsp/defconfig/shakti_uboot_defconfig configs/
-make shakti_yamuna_defconfig
+make shakti_uboot_defconfig
 ```
 
 ---
