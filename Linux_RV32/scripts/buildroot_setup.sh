@@ -3,24 +3,13 @@ set -e
 
 # ========= CONFIG =========
 BUILDROOT_REPO="https://github.com/buildroot/buildroot.git"
-BUILDROOT_VER="2025.08.2"
+BUILDROOT_VER="2025.11"
 
 # Directory where this script lives (your repo root)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Repo-local locations
 BUILDROOT_DIR="${SCRIPT_DIR}/buildroot"
-PATCH_FILE="${SCRIPT_DIR}/bsp/shakti_buildroot.patch"
 # ==========================
-
-apply_patch() {
-  if git apply --check "$PATCH_FILE" >/dev/null 2>&1; then
-    git apply --whitespace=fix "$PATCH_FILE"
-    echo "Patch applied: $(basename "$PATCH_FILE")"
-  else
-    echo "Patch already applied or not applicable"
-  fi
-}
 
 echo "=== Buildroot setup started ==="
 echo "Buildroot dir : $BUILDROOT_DIR"
@@ -53,7 +42,6 @@ git reset --hard
 git clean -fd
 
 # Apply patch
-apply_patch
 
 echo "=== Buildroot setup completed successfully ==="
 
