@@ -159,7 +159,7 @@ index 00000000000..64cc2192c3f
 +    cpus {
 +        #address-cells = <1>;
 +        #size-cells = <0>;
-+        timebase-frequency = <10000000>; /* 10 MHz mtimer (matches OpenSBI) */
++        timebase-frequency = <97656>; /* 10 MHz mtimer (matches OpenSBI) */
 +
 +        cpu0: cpu@0 {
 +            device_type = "cpu";

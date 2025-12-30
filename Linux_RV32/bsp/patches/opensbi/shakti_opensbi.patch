@@ -501,7 +501,7 @@ index 00000000..fd2c3cc5
 +
 +/* From 'ClintBase' */
 +#define YAMUNA_CLINT_ADDR               0x02000000
-+#define YAMUNA_ACLINT_MTIMER_FREQ       10000000
++#define YAMUNA_ACLINT_MTIMER_FREQ       97656
 +
 +/* From 'UARTxBase' */
 +#define YAMUNA_UART0_ADDR               0x00011300
