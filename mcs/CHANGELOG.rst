@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+2026-01-05
+-------------------- 
+- Bitstream generation with the latest tags
+
 2025-12-11
 -------------------- 
 - Bitstream with Clint that has multi hart support
