@@ -1,5 +1,5 @@
 /***************************************************************************
- * Project                           : "iisu project"
+ * Project                           : "shakti project"
  * Name of the file                  : sspi.h
  * Brief Description of file         : Header to Standard spi driver
  * Name of Author                    : Sambhav Jain
@@ -22,7 +22,7 @@
 ***************************************************************************/
 /**
  * @file sspi.h
- * @project iisu project
+ * @project shakti project
  * @brief Header to sspi driver 
  */
 #ifndef _SSPI_H

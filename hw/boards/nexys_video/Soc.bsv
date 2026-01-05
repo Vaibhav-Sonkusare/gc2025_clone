@@ -53,10 +53,19 @@ package Soc;
   import uart :: *;
   import sspi :: *;
   import pwm :: *;
+  import gptimer::*;
   import i2c :: *;
   import gpio :: *;
   import csrbox :: * ;
   import bram :: *;
+  import BUtils::*;
+
+`ifndef axi4_128b
+  import bootrom :: *;
+`else
+  import bootrom_axi4 :: *;
+`endif
+
 `ifdef debug
   import debug_types::*;     
 `endif
@@ -77,18 +86,18 @@ package Soc;
       slave_num = `Clint_slave_num;
   `ifdef debug
     else if(addr >= `DebugBase && addr <= `DebugEnd)
-  `endif
       slave_num = `Debug_slave_num;
+  `endif
     else if(addr >= `BootBase && addr <= `BootEnd)
       slave_num = `Boot_slave_num;
     else if(addr >= `SlowBase && addr <= `SlowEnd)
       slave_num = `Slow_fabric_slave_num;
     else if(addr >= `PLICBase && addr <= `PLICEnd)
       slave_num = `Slow_fabric_slave_num;
-    `ifdef simulate
-      else if(addr >= `SignBase && addr <= `SignEnd)
-        slave_num = `Sign_slave_num;
-    `endif
+  `ifdef simulate
+    else if(addr >= `SignBase && addr <= `SignEnd)
+      slave_num = `Sign_slave_num;
+  `endif
     else
       slave_num = `FastErr_slave_num;
       
@@ -117,15 +126,22 @@ package Soc;
 
   interface Ifc_chip_io;
     interface Ifc_sspi_io spi0_io;
-//    interface Ifc_spi_io spi2_io;
+//    interface Ifc_sspi_io spi1_io;
     interface RS232 uart0_io;
 		method I2C_out i2c0_out;									//I2c IO interface
 		method I2C_out i2c1_out;									//I2c IO interface
     (*always_ready, always_enabled*)
-    interface AXI4_Lite_Master_IFC#(`paddr, 32, 0) xadc_master;
-    interface AXI4_Lite_Master_IFC#(`paddr, 32, 0) eth_master;
-    interface AXI4_Master_IFC#(`paddr, ELEN, 0) mem_master;
+    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) mem_master;
     interface IOCellSide iocell_io;
+
+    (*always_ready,always_enabled*)
+	  interface Ifc_gptimer_io gptimer0_io;
+    (*always_ready,always_enabled*)
+    interface Ifc_gptimer_io gptimer1_io;
+    (*always_ready,always_enabled*)
+    interface Ifc_gptimer_io gptimer2_io;
+    (*always_ready,always_enabled*)
+    interface Ifc_gptimer_io gptimer3_io;
     (*always_enabled,always_ready*)
     method Action  gpio_4(Bit#(1) in);
     (*always_enabled,always_ready*)
@@ -254,6 +270,7 @@ package Soc;
     method Bit#(1)gpio_30_outen;
     (*always_enabled,always_ready*)
     method Bit#(1)gpio_31_outen;
+
     (*always_ready, always_enabled*)
     method Action ext_interrupts(Bit#(2) i);
   endinterface
@@ -264,8 +281,8 @@ package Soc;
     method Maybe#(CommitLogPacket) commitlog;
   `endif
   `ifdef debug
-    interface AXI4_Slave_IFC#(`paddr, `elen, USERSPACE) to_debug_master;
-    interface AXI4_Master_IFC#(`paddr, `elen, USERSPACE) to_debug_slave;
+    interface AXI4_Slave_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) to_debug_master;
+    interface AXI4_Master_IFC#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) to_debug_slave;
     method Action ma_hart_interrupts (Bit#(`num_harts) i);
     method Bit#(`num_harts) mv_harts_have_reset;
     method Bit#(`num_harts) mv_core_debugenable;
@@ -283,7 +300,7 @@ package Soc;
 
 
   (*synthesize*)
-  module mkSoc `ifdef debug #(Vector#(`num_harts, Reset) hartresets ) `endif (Ifc_Soc);
+  module mkSoc#(Clock ext_clk `ifdef debug , Vector#(`num_harts, Reset) hartresets `endif ) (Ifc_Soc);
     let curr_clk<-exposeCurrentClock;
     let curr_reset<-exposeCurrentReset;
 
@@ -298,22 +315,26 @@ package Soc;
 
     Ifc_ccore_axi4 ccore <- mkccore_axi4(`resetpc, 0);
 
-    AXI4_Fabric_IFC #(`Num_Fast_Masters, `Num_Fast_Slaves, `paddr, ELEN, USERSPACE) 
+    AXI4_Fabric_IFC #(`Num_Fast_Masters, `Num_Fast_Slaves, `paddr, `axi4_id_width, `buswidth, `USERSPACE) 
                                                     fabric <- mkAXI4_Fabric(fn_slave_map_fast);
-    Ifc_clint_axi4#(`paddr, ELEN, 0, 1, 512) clint <- mkclint_axi4();
+    Ifc_clint_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE, `num_harts, 512) clint <- mkclint_axi4();
   //`ifdef debug
     //Ifc_debug_halt_loop_axi4#(`paddr, ELEN, USERSPACE) debug_memory <- mkdebug_halt_loop_axi4;
   //`endif
-    Ifc_err_slave_axi4#(`paddr,ELEN,0) fast_err_slave <- mkerr_slave_axi4;
+    Ifc_err_slave_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE) fast_err_slave <- mkerr_slave_axi4;
 
-    AXI4_Lite_Fabric_IFC #(`Num_Masters, `Num_Slaves, `paddr, 32, USERSPACE) 
+    AXI4_Lite_Fabric_IFC #(`Num_Masters, `Num_Slaves, `paddr, `buswidth, `USERSPACE) 
                                                         slow_fabric <- mkAXI4_Lite_Fabric(fn_slave_map);
     Ifc_pwm_cluster pwm_cluster <- mkpwm_cluster;
     Ifc_uart_cluster uart_cluster <- mkuart_cluster;
     Ifc_spi_cluster spi_cluster <- mkspi_cluster;
-    Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster;
-    Ifc_err_slave_axi4lite#(`paddr,32,0) err_slave <- mkerr_slave_axi4lite;
-    Ifc_bram_axi4#(`paddr, XLEN, 0,  15) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
+    Ifc_mixed_cluster mixed_cluster <- mkmixed_cluster(ext_clk);
+    Ifc_err_slave_axi4lite#(`paddr,`buswidth,`USERSPACE) err_slave <- mkerr_slave_axi4lite;
+  `ifndef simulate
+    Ifc_bram_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE,  13) boot <- mkbram_axi4('h1000, "boot.mem","BOOT");
+  `else
+    Ifc_bootrom_axi4#(`paddr, `axi4_id_width, `buswidth, `USERSPACE, `ifdef axi4_128b 12 `else 13 `endif ) boot <-mkbootrom_axi4(`BootBase);
+  `endif
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();
     `endif
@@ -365,20 +386,24 @@ package Soc;
 		rule rl_core_plic_connection;
 			ccore.sb_plic_meip(mixed_cluster.sb_ext_interrupt[0]);
 		endrule
+		
+	`ifdef supervisor
 		rule rl_core_plic_c1_connection;
 			ccore.sb_plic_seip(mixed_cluster.sb_ext_interrupt[1]);
 		endrule
+	`endif
 
     rule connect_interrupt_lines;
-      mixed_cluster.interrupts({spi_cluster.spi0_sb_interrupt,
-                                spi_cluster.spi1_sb_interrupt,
-                                wr_ext_interrupts, uart_cluster.uart_interrupts, pwm_cluster.pwm0_sb_interrupt, 
-                                                  pwm_cluster.pwm1_sb_interrupt, 
-                                                  pwm_cluster.pwm2_sb_interrupt, 
-                                                  pwm_cluster.pwm3_sb_interrupt, 
+      mixed_cluster.interrupts({spi_cluster.spi1_sb_interrupt,
+                                spi_cluster.spi0_sb_interrupt,
+                                wr_ext_interrupts, uart_cluster.uart_interrupts, pwm_cluster.pwm5_sb_interrupt, 
                                                   pwm_cluster.pwm4_sb_interrupt, 
-                                                  pwm_cluster.pwm5_sb_interrupt});
-    endrule 
+                                                  pwm_cluster.pwm3_sb_interrupt, 
+                                                  pwm_cluster.pwm2_sb_interrupt, 
+                                                  pwm_cluster.pwm1_sb_interrupt, 
+                                                  pwm_cluster.pwm0_sb_interrupt});
+    endrule
+    
 
       
     // ------------------------------------------------------------------------------------------/
@@ -445,8 +470,8 @@ package Soc;
 
 		   mixed_cluster.pinmuxtop_peripheral_side.mspi.clk_out.put(spi_cluster.spi1_io.sclk_out);
 		   mixed_cluster.pinmuxtop_peripheral_side.mspi.clk_outen.put(spi_cluster.spi1_io.sclk_outen);
-		   mixed_cluster.pinmuxtop_peripheral_side.mspi.nss_out.put(spi_cluster.spi1_io.ncs_out);
-		   mixed_cluster.pinmuxtop_peripheral_side.mspi.nss_outen.put(spi_cluster.spi1_io.ncs_outen);
+		   mixed_cluster.pinmuxtop_peripheral_side.mspi.nss_out.put(spi_cluster.spi1_io.ncs_out0);
+		   mixed_cluster.pinmuxtop_peripheral_side.mspi.nss_outen.put(spi_cluster.spi1_io.ncs_outen0);
 		   mixed_cluster.pinmuxtop_peripheral_side.mspi.mosi_out.put(spi_cluster.spi1_io.mosi_out);
 		   mixed_cluster.pinmuxtop_peripheral_side.mspi.mosi_outen.put(spi_cluster.spi1_io.mosi_outen);
 		   mixed_cluster.pinmuxtop_peripheral_side.mspi.miso_out.put(spi_cluster.spi1_io.miso_out);
@@ -500,7 +525,7 @@ package Soc;
 		   spi_cluster.spi1_io.miso_in(pinmux_spi1_miso);
 		   spi_cluster.spi1_io.mosi_in(pinmux_spi1_mosi);
 		   spi_cluster.spi1_io.sclk_in(pinmux_spi1_clk);
-		   spi_cluster.spi1_io.ncs_in(pinmux_spi1_nss);
+		   spi_cluster.spi1_io.ncs_in0(pinmux_spi1_nss);
 
 		   let pinmux_uart1_rx <- (mixed_cluster.pinmuxtop_peripheral_side.uart1.rx.get);
 		   uart_cluster.uart1_io.sin(pinmux_uart1_rx);
@@ -609,6 +634,11 @@ package Soc;
     method Bit#(1)gpio_29_out = mixed_cluster.gpio_io.gpio_out[29];
     method Bit#(1)gpio_30_out = mixed_cluster.gpio_io.gpio_out[30];
     method Bit#(1)gpio_31_out = mixed_cluster.gpio_io.gpio_out[31];
+    
+    interface gptimer0_io = mixed_cluster.gptimer0_io;
+	  interface gptimer1_io = mixed_cluster.gptimer1_io;
+	  interface gptimer2_io = mixed_cluster.gptimer2_io;
+	  interface gptimer3_io = mixed_cluster.gptimer3_io;
 
     method gpio_4_outen = mixed_cluster.gpio_io.gpio_out_en[4];
     method gpio_7_outen = mixed_cluster.gpio_io.gpio_out_en[7];
@@ -637,8 +667,6 @@ package Soc;
 		method  i2c0_out = mixed_cluster.i2c0_out;									//I2c IO interface
 		method  i2c1_out = mixed_cluster.i2c1_out;									//I2c IO interface
     interface iocell_io = mixed_cluster.pinmuxtop_iocell_side;						//GPIO IO interface
-    interface xadc_master = mixed_cluster.xadc_master;
-    interface eth_master = slow_fabric.v_to_slaves[`Eth_slave_num];
     interface mem_master = fabric.v_to_slaves [`Memory_slave_num];
     method Action ext_interrupts(Bit#(2) i);
       wr_ext_interrupts <= i;

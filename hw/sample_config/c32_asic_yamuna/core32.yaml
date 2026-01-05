@@ -51,7 +51,7 @@ dcache_configuration:
 reset_pc: 2147483648
 bus_protocol: AXI4
 bsc_compile_options:
-  test_memory_size: 33554432
+  test_memory_size: 268435456
   assertions: true
   ovl_assertions: False
   sva_assertions: False
