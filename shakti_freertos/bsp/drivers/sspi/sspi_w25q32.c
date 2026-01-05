@@ -1,5 +1,5 @@
 /***************************************************************************
- * Project               	    	: "shakti project"
+ * Project               	    	: "iisu project"
  * Name of the file	            	: sspi_driver.c
  * Brief Description of file            : Driver file to Standard SPI
  * Name of Author    	                : Sambhav Jain
@@ -74,7 +74,7 @@ int flash_write_enable(void)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_instance[SSPI_INSTANCE]->data_tx = FLASH_WRITE_ENABLE;	//MSB byte of address.
  	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
- 	sspi_notbusy();
+ 	sspi_notbusy(sspi_instance);
 	log_debug("\n Flash write enabled");
  	return 1;
 }
@@ -111,7 +111,7 @@ void status_register_update(int data)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
 	waitfor(20);
-	sspi_notbusy();	
+	sspi_notbusy(sspi_instance);	
 	log_debug("\n status register protection removed");
 }
 
@@ -127,7 +127,7 @@ char flash_cmd_read(char command)
 	sspi_configure_tx_rx_length(sspi_instance[SSPI_INSTANCE], 8, 8);
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], HALF_DUPLEX);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy();	
+	sspi_notbusy(sspi_instance);	
 	recvDATA = sspi_instance[SSPI_INSTANCE]->data_rx;
 	return recvDATA;
 }
@@ -168,7 +168,7 @@ int flash_cmd_addr(int command, int addr)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
 	waitfor(20);
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 	log_debug("\n Flash Erase command is sent");
 	return 1;
 }
@@ -214,7 +214,7 @@ void flash_write(int address, int data)
 #ifdef SHOW_REG
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 #endif	
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 	flash_status_register_read();
 	log_debug("\n Flash data is written");
 }
@@ -256,7 +256,7 @@ int flash_read(int address)
 #ifdef SHOW_REG
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 #endif	
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 	// read_data[0] = sspi_instance[SSPI_INSTANCE]->data_rx;
 	// read_data[1] = sspi_instance[SSPI_INSTANCE]->data_rx;
 	// read_data[2] = sspi_instance[SSPI_INSTANCE]->data_rx;
@@ -292,20 +292,20 @@ int flash_device_id(void)
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 #endif	
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 
 #else
 	sspi_configure_tx_rx_length(sspi_instance[SSPI_INSTANCE], 8, 0);//Tx - 8, Rx - 24;
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 
 	sspi_configure_tx_rx_length(sspi_instance[SSPI_INSTANCE], 0, 24);//Tx - 8, Rx - 24;
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 #endif
 
 	printf("\nrecv data 2");
@@ -331,7 +331,7 @@ int flash_device_id(void)
 	sspi_configure_tx_rx_length(SSPI1,8,24);//Tx - 8, Rx - 0;
 	sspi_enable_txrx(SSPI1, ENABLE);
 	sspi_read_registers(SSPI1);
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance);
 	recvData = (SSPI1->data_rx << 24)  | (SSPI1->data_rx << 16) | (SSPI1->data_rx << 8 ) | (SSPI1->data_rx );
 	printf("\nRECEIVED DATA %x",recvData);
 }
