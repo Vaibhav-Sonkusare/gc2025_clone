@@ -39,6 +39,7 @@
  */
 
 /* System Monitor/ADC Local Registers */
+#define XADC_BASE 0x00041000
 
 #define XADC_SRR_OFFSET		0x00  /**< Software Reset Register */
 #define XADC_SR_OFFSET		0x04  /**< Status Register */
@@ -137,5 +138,10 @@ uint32_t xadc_read_data(uint32_t *address);
 float xadc_onchip_temp(uint32_t value);
 float xadc_onchip_voltage(uint32_t value);
 float xadc_dedicated_channel(uint32_t value);
+void reg_write(uint32_t offset, uint32_t val);
+uint32_t reg_read(uint32_t offset);
+float xadc_aux_channel(uint32_t raw);
+float xadc_diff(uint32_t raw);
+
 
 #endif
