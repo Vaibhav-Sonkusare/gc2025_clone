@@ -39,6 +39,7 @@ DEMO_SRC = \
 	$(BSP_DIR)/drivers/clint/clint_driver.c \
 	$(BSP_DIR)/drivers/sspi/sspi_driver.c \
 	$(BSP_DIR)/drivers/sspi/sspi_w25q32.c \
+	$(BSP_DIR)/drivers/sspi/sspi_spansion.c \
 	$(BSP_DIR)/drivers/i2c/i2c_driver.c \
 	$(BSP_DIR)/drivers/plic/plic_driver.c \
 	$(BSP_DIR)/drivers/gpiov2/gpiov2.c \

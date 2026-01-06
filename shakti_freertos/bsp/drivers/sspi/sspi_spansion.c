@@ -1,5 +1,5 @@
 /***************************************************************************
- * Project               	    	: "iisu project"
+ * Project               	    	: "shakti project"
  * Name of the file	            	: sspi_driver.c
  * Brief Description of file            : Driver file to Standard SPI
  * Name of Author    	                : Sambhav Jain
@@ -81,19 +81,19 @@ int flash_write_enable(void)
  	return 1;
 }
 
-// int sspi_notbusy()
-// {
-// 	unsigned char  read_data = 0x01;
-// 	while(read_data & 0x01){
-// 		waitfor(10);
-// 		read_data = sspi_instance[SSPI_INSTANCE]->comm_status;
-// 		// read_data = sspi_instance -> comm_status;
-// //		read_data = SSPI0->comm_status;
-// 		//log_info("\n Status Register: %x", read_data);
-// 	}
-// 	log_debug("\n SPI comm done \n");
-// 	return 1;
-// }
+int sspi_notbusy()
+{
+	unsigned char  read_data = 0x01;
+	while(read_data & 0x01){
+		waitfor(10);
+		read_data = sspi_instance[SSPI_INSTANCE]->comm_status;
+		// read_data = sspi_instance -> comm_status;
+//		read_data = SSPI0->comm_status;
+		//log_info("\n Status Register: %x", read_data);
+	}
+	log_debug("\n SPI comm done \n");
+	return 1;
+}
 
 
 char flash_cmd_read(char command)
@@ -114,7 +114,7 @@ char flash_cmd_read(char command)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], HALF_DUPLEX);
 #endif
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy(sspi_instance);	
+	sspi_notbusy();	
 #ifdef SPI_FULL_DUPLEX
 	recvDATA = sspi_instance[SSPI_INSTANCE]->data_rx;
 #endif
@@ -166,7 +166,7 @@ char flash_write_bank_register(char command, char value)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
 	waitfor(20);
-	sspi_notbusy(sspi_instance);
+	sspi_notbusy();
 	log_debug("\n Flash write register is sent");
 	return 1;
 }
@@ -192,7 +192,7 @@ char flash_write_register(char command, char value1, char value2)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], SIMPLEX_TX);
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
 	waitfor(20);
-	sspi_notbusy(sspi_instance);
+	sspi_notbusy();
 	log_debug("\n Flash write register is sent");
 	return 1;
 }
@@ -220,7 +220,7 @@ int flash_cmd_addr(int command, int addr)
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
 	waitfor(20);
 	log_info("\n Flash Erase command is sent");
-	sspi_notbusy(sspi_instance);
+	sspi_notbusy();
 	log_info("\n Flash Erase command is sent");
 	return 1;
 }
@@ -267,7 +267,7 @@ void flash_write(int address, int data)
 #ifdef SHOW_REG
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 #endif	
-	sspi_notbusy(sspi_instance);
+	sspi_notbusy();
 	flash_status_register_read();
 	log_debug("\n Flash data is written");
 }
@@ -328,7 +328,7 @@ int flash_read(int address)
 #ifdef SHOW_REG
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 #endif	
-	sspi_notbusy(sspi_instance);
+	sspi_notbusy();
 #ifdef SPI_FULL_DUPLEX
 	read_data[0] = sspi_instance[SSPI_INSTANCE]->data_rx; //Full Duplex Dummy read
 	read_data[0] = sspi_instance[SSPI_INSTANCE]->data_rx; //Full Duplex Dummy read
@@ -372,7 +372,7 @@ int flash_device_id(void)
 	sspi_read_registers(sspi_instance[SSPI_INSTANCE]);
 #endif	
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy(sspi_instance);
+	sspi_notbusy();
 
 #ifdef SPI_FULL_DUPLEX
 	//Full duplex dummy read
