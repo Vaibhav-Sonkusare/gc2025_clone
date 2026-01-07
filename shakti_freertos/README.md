@@ -66,6 +66,7 @@ make
 - To Upload a custom application, navigate to <PATH_to_GC2025>/FreeRTOS/FreeRTOS/Demo/shakti-freertos/ganga.
 - To build, generate the ELF, and upload it to the board:
 ```bash
+make clean
 make upload
 ```
 - On pressing reset, the uploaded binary will boot automatically.
