@@ -1,10 +1,10 @@
-TARGET=riscv32-unknown-elf-
+TARGET=riscv64-unknown-elf-
 GCC	= $(TARGET)gcc
 OBJCOPY	= $(TARGET)objcopy
 OBJDUMP	= $(TARGET)objdump
 AR	= $(TARGET)ar
 RANLIB	= $(TARGET)ranlib
-XLEN = 32
+XLEN = 64
 MARCH = rv32imac_zicsr_zifencei
 MABI = ilp32
 OPENOCD = $(shell which openocd)
@@ -37,6 +37,7 @@ PORT_ASM = $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/portASM.S
 DEMO_SRC = \
         $(BSP_DIR)/drivers/uart/uart.c \
 	$(BSP_DIR)/drivers/clint/clint_driver.c \
+	$(BSP_DIR)/drivers/sspi/sspi_spansion.c \
 	$(BSP_DIR)/drivers/sspi/sspi_driver.c \
 	$(BSP_DIR)/drivers/sspi/sspi_w25q32.c \
 	$(BSP_DIR)/drivers/i2c/i2c_driver.c \

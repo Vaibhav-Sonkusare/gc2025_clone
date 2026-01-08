@@ -51,6 +51,7 @@ fi
 
 echo "[STEP 5] Building FreeRTOS for Shakti Ganga..."
 cd "$DEMO_DIR/shakti_freertos/ganga"
+make clean
 make || { echo "❌ Ganga build failed!"; exit 1; }
 
 

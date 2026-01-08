@@ -57,6 +57,20 @@ make
 
 - A new ELF file will be placed at <PATH_to_GC2025>/FreeRTOS/FreeRTOS/Demo/shakti-freertos/ganga/freertos.elf.
 
+### Upload and boot support (Yamuna / Ganga platforms)
+
+- Added support for an **upload** target that runs after a board reset.
+- The binary uploaded using `make upload` is programmed into the **boot memory**, so it automatically executes as boot code when the board is reset.
+
+**Usage:**
+- To Upload a custom application, navigate to <PATH_to_GC2025>/FreeRTOS/FreeRTOS/Demo/shakti-freertos/ganga.
+- To build, generate the ELF, and upload it to the board:
+```bash
+make clean
+make upload
+```
+- On pressing reset, the uploaded binary will boot automatically.
+
 ### Note
 - Ensure that the RISC-V toolchain is sourced before running make.
 - The same steps apply to the yamuna sample as well.
