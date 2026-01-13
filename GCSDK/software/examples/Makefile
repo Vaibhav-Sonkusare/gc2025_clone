@@ -374,6 +374,9 @@ else
 ifeq ($(PROGRAM),min_max_second)
 filepath := clint_applns/min_max_second
 else
+ifeq ($(PROGRAM),msip)
+filepath := clint_applns/msip
+else
 ifeq ($(PROGRAM),bmp280)
 filepath := i2c_applns/bmp280
 else
@@ -576,6 +579,7 @@ ifeq ($(PROGRAM),dhrystone)
 filepath := ../benchmarking/dhrystone
 else
 	@echo "Entry for $(PROGRAM) not present"
+endif
 endif
 endif
 endif
