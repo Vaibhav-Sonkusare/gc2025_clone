@@ -20,7 +20,7 @@ SHELL := /bin/bash # Use bash syntax
 DC ?=
 PROGRAM ?=
 #default target board
-TARGET ?= csoc
+TARGET ?= yamuna
 DEBUG ?=
 MARCH ?=rv32imac
 MABI  ?=ilp32
@@ -28,11 +28,11 @@ XLEN  ?= 32
 FLAGS ?=
 
 all: create_dir
-	make msip_csoc.riscv 
+	make msip.riscv 
 
-msip_csoc.riscv: create_dir
-	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bsplib) -I$(bspinc) -I$(bspboard) -I$(bspdri)/clint -c ./msip_csoc.c -o ./output/msip_csoc.o -lm -lgcc
-	@riscv$(XLEN)-unknown-elf-gcc -g -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/msip_csoc.o $(GENLIB)/gen_lib/libshakti$(XLEN).a  -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
+msip.riscv: create_dir
+	@riscv$(XLEN)-unknown-elf-gcc -march=$(MARCH) -mabi=$(MABI) -w $(DC) -mcmodel=medany -static -std=gnu99 -fno-builtin-printf $(FLAGS) -I$(bsplib) -I$(bspinc) -I$(bspboard) -I$(bspdri)/clint -c ./msip.c -o ./output/msip.o -lm -lgcc
+	@riscv$(XLEN)-unknown-elf-gcc -g -march=$(MARCH) -mabi=$(MABI) -T  $(bspboard)/link.ld ./output/msip.o $(GENLIB)/gen_lib/libshakti$(XLEN).a  -o ./output/$(PROGRAM).shakti -static -nostartfiles -lm -lgcc
 	@riscv$(XLEN)-unknown-elf-objdump -D ./output/$(PROGRAM).shakti > ./output/$(PROGRAM).dump
 
 create_dir:
