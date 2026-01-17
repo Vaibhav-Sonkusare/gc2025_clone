@@ -6,7 +6,7 @@ if { [get_ips -quiet kcu105mig] eq "" } {
     reset_run kcu105mig_synth_1
 }
 set_property -dict [list \
-      CONFIG.C0_CLOCK_BOARD_INTERFACE 						{user_si570_sysclk} \
+      CONFIG.C0_CLOCK_BOARD_INTERFACE 						{default_sysclk_300} \
 			CONFIG.C0_DDR4_BOARD_INTERFACE 							{Custom} \
 			CONFIG.AL_SEL                               {0} \
       CONFIG.C0.ADDR_WIDTH                        {17} \

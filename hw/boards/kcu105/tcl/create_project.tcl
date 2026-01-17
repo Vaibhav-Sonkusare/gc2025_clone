@@ -26,7 +26,7 @@ create_project -force $core_project -dir $core_project_dir
 set project_obj [get_projects $core_project]
 set_property "default_lib" "xil_defaultlib" $project_obj
 set_property "simulator_language" "Mixed" $project_obj
-set_property board_part xilinx.com:kcu105:part0:2.1 [current_project]                     
+set_property board_part xilinx.com:kcu105:part0:1.5 [current_project]                     
 
 #set_property part xc7a200tsbg484-1 [current_project]
 
