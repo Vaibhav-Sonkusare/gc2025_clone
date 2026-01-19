@@ -6,7 +6,7 @@
 set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets sys_clk_IBUF]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets pin_tck_IBUF]
 set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets external_clk]
-
+set_property UNAVAILABLE_DURING_CALIBRATION TRUE [get_ports pin_tdi]
 
 ## Clock Wizard Input Clock
 set_property PACKAGE_PIN F10       [get_ports "sys_clk_n"] ;# Bank  68 VCCO - VADJ_FMC - IO_L11N_T1U_N9_GC_68
@@ -35,29 +35,29 @@ set_property IOSTANDARD  LVCMOS12 [get_ports "pin_tms"] ;# Bank  28 VCCO - VADJ_
 #4
 set_property PACKAGE_PIN AE26      [get_ports "pin_tdo"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2N_T0L_N3_28
 set_property IOSTANDARD  LVCMOS12 [get_ports "pin_tdo"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2N_T0L_N3_28
-#5
-set_property PACKAGE_PIN AF25      [get_ports "i2c0_sda"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2P_T0L_N2_28
-set_property IOSTANDARD  LVCMOS12 [get_ports "i2c0_sda"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2P_T0L_N2_28
-#6
-set_property PACKAGE_PIN AE21      [get_ports "i2c0_scl"] ;# Bank  28 VCCO - VADJ_FMC - IO_L1N_T0L_N1_DBC_28
-set_property IOSTANDARD  LVCMOS12 [get_ports "i2c0_scl"] ;# Bank  28 VCCO - VADJ_FMC - IO_L1N_T0L_N1_DBC_28
+##5
+#set_property PACKAGE_PIN AF25      [get_ports "i2c0_sda"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2P_T0L_N2_28
+#set_property IOSTANDARD  LVCMOS12 [get_ports "i2c0_sda"] ;# Bank  28 VCCO - VADJ_FMC - IO_L2P_T0L_N2_28
+##6
+#set_property PACKAGE_PIN AE21      [get_ports "i2c0_scl"] ;# Bank  28 VCCO - VADJ_FMC - IO_L1N_T0L_N1_DBC_28
+#set_property IOSTANDARD  LVCMOS12 [get_ports "i2c0_scl"] ;# Bank  28 VCCO - VADJ_FMC - IO_L1N_T0L_N1_DBC_28
 #7
-set_property PACKAGE_PIN AM17     [get_ports "external_clk"] ;# Bank  68 VCCO - VADJ_FMC - IO_T1U_N12_68
-set_property IOSTANDARD  LVCMOS12 [get_ports "external_clk"] ;# Bank  68 VCCO - VADJ_FMC - IO_T1U_N12_68
+#set_property PACKAGE_PIN AM17     [get_ports "external_clk"] ;# Bank  68 VCCO - VADJ_FMC - IO_T1U_N12_68
+#set_property IOSTANDARD  LVCMOS12 [get_ports "external_clk"] ;# Bank  68 VCCO - VADJ_FMC - IO_T1U_N12_68
 
 ## PMOD1 
-#0
-set_property PACKAGE_PIN AL14      [get_ports "gptimer0_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L4N_T0U_N7_DBC_AD7N_66
-set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer0_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L4N_T0U_N7_DBC_AD7N_66
-#1
-set_property PACKAGE_PIN AM14      [get_ports "gptimer0_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L4P_T0U_N6_DBC_AD7P_66
-set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer0_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L4P_T0U_N6_DBC_AD7P_66
-#2
-set_property PACKAGE_PIN AP16     [get_ports "gptimer1_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L3N_T0L_N5_AD15N_66
-set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer1_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L3N_T0L_N5_AD15N_66
-#3
-set_property PACKAGE_PIN AP15     [get_ports "gptimer1_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L3P_T0L_N4_AD15P_66
-set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer1_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L3P_T0L_N4_AD15P_66
+##0
+#set_property PACKAGE_PIN AL14      [get_ports "gptimer0_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L4N_T0U_N7_DBC_AD7N_66
+#set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer0_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L4N_T0U_N7_DBC_AD7N_66
+##1
+#set_property PACKAGE_PIN AM14      [get_ports "gptimer0_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L4P_T0U_N6_DBC_AD7P_66
+#set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer0_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L4P_T0U_N6_DBC_AD7P_66
+##2
+#set_property PACKAGE_PIN AP16     [get_ports "gptimer1_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L3N_T0L_N5_AD15N_66
+#set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer1_in"] ;# Bank  66 VCCO - VCC1V2   - IO_L3N_T0L_N5_AD15N_66
+##3
+#set_property PACKAGE_PIN AP15     [get_ports "gptimer1_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L3P_T0L_N4_AD15P_66
+#set_property IOSTANDARD  LVCMOS12 [get_ports "gptimer1_out"] ;# Bank  66 VCCO - VCC1V2   - IO_L3P_T0L_N4_AD15P_66
 # #4
 # set_property PACKAGE_PIN AM16      [get_ports "spi0_nss"] ;# Bank  66 VCCO - VCC1V2   - IO_L2N_T0L_N3_66
 # set_property IOSTANDARD  LVCMOS12 [get_ports "spi0_nss"] ;# Bank  66 VCCO - VCC1V2   - IO_L2N_T0L_N3_66

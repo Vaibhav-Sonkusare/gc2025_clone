@@ -77,10 +77,11 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
     output        uart0_SOUT,
 
 //   // ---- I2C ports --------//
+/*
     inout         i2c0_sda,
     inout         i2c0_scl,
 
-  /*
+  
     inout         i2c1_sda,
     inout         i2c1_scl,
 
@@ -127,13 +128,14 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
     inout gpio_29,
     inout gpio_30,
     inout gpio_31,
-*/
+
     input gptimer0_in,
     output gptimer0_out,
     input external_clk,
 
     input gptimer1_in,
     output gptimer1_out,
+*/
 /*
     input gptimer2_in,
     output gptimer2_out,
@@ -768,6 +770,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
       end
    endgenerate*/
 //---- IOBUF FOR I2C -----//
+/*
    IOBUF i2c0_scl_inst(
              .O(i2c0_scl_in),
              .IO(i2c0_scl),
@@ -781,7 +784,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 31)
              .I(i2c0_sda_out),
              .T(~i2c0_sda_out_en)
          );
-/*
+
    ////---- IOBUF FOR I2C -----//
    IOBUF i2c1_scl_inst(
              .O(i2c1_scl_in),
