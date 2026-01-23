@@ -1,8 +1,37 @@
+From cc5f94ee2e04cbebf1164477ccf2473cbd450f31 Mon Sep 17 00:00:00 2001
+From: Umesh Gowda <umeshgowda202154@gmail.com>
+Date: Fri, 23 Jan 2026 14:20:28 +0530
+Subject: [PATCH] platform: add cclass/yamuna + Shakti UART support (v1.8)
+
+---
+ Makefile                                 |  10 +-
+ include/sbi_utils/serial/shakti-uart.h   |   7 +
+ lib/utils/serial/shakti-uart.c           |  83 ++++++-----
+ opensbi_cclass.patch                     | 167 +++++++++++++++++++++++
+ platform/cclass/ganga/Kconfig            |  17 +++
+ platform/cclass/ganga/configs/defconfig  |   1 +
+ platform/cclass/ganga/objects.mk         |  37 +++++
+ platform/cclass/ganga/platform.c         | 159 +++++++++++++++++++++
+ platform/cclass/yamuna/Kconfig           |  18 +++
+ platform/cclass/yamuna/configs/defconfig |   2 +
+ platform/cclass/yamuna/objects.mk        |  38 ++++++
+ platform/cclass/yamuna/platform.c        | 149 ++++++++++++++++++++
+ 12 files changed, 648 insertions(+), 40 deletions(-)
+ create mode 100644 opensbi_cclass.patch
+ create mode 100644 platform/cclass/ganga/Kconfig
+ create mode 100644 platform/cclass/ganga/configs/defconfig
+ create mode 100644 platform/cclass/ganga/objects.mk
+ create mode 100644 platform/cclass/ganga/platform.c
+ create mode 100644 platform/cclass/yamuna/Kconfig
+ create mode 100644 platform/cclass/yamuna/configs/defconfig
+ create mode 100644 platform/cclass/yamuna/objects.mk
+ create mode 100644 platform/cclass/yamuna/platform.c
+
 diff --git a/Makefile b/Makefile
-index 398eabe8..20da70b2 100644
+index 46541063..3a49c360 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -203,9 +203,9 @@ CC_SUPPORT_ZICSR_ZIFENCEI := $(shell $(CC) $(CLANG_TARGET) $(RELAX_FLAG) -nostdl
+@@ -209,9 +209,9 @@ CC_SUPPORT_ZICSR_ZIFENCEI := $(shell $(CC) $(CLANG_TARGET) $(RELAX_FLAG) -nostdl
  # Check whether the assembler and the compiler support the Vector extension
  CC_SUPPORT_VECTOR := $(shell $(CC) $(CLANG_TARGET) $(RELAX_FLAG) -nostdlib -march=rv$(OPENSBI_CC_XLEN)gv -dM -E -x c /dev/null 2>&1 | grep -q riscv.*vector && echo y || echo n)
  
@@ -15,7 +44,7 @@ index 398eabe8..20da70b2 100644
  
  # Build Info:
  # OPENSBI_BUILD_TIME_STAMP -- the compilation time stamp
-@@ -390,7 +390,7 @@ CFLAGS		+=	-mcmodel=$(PLATFORM_RISCV_CODE_MODEL)
+@@ -397,7 +397,7 @@ CFLAGS		+=	-mcmodel=$(PLATFORM_RISCV_CODE_MODEL)
  CFLAGS		+=	$(RELAX_FLAG)
  CFLAGS		+=	$(GENFLAGS)
  CFLAGS		+=	$(platform-cflags-y)
@@ -24,7 +53,7 @@ index 398eabe8..20da70b2 100644
  CFLAGS		+=	$(firmware-cflags-y)
  
  CPPFLAGS	+=	$(GENFLAGS)
-@@ -399,7 +399,7 @@ CPPFLAGS	+=	$(firmware-cppflags-y)
+@@ -406,7 +406,7 @@ CPPFLAGS	+=	$(firmware-cppflags-y)
  
  ASFLAGS		=	-g -Wall -nostdlib
  ASFLAGS		+=	-fno-omit-frame-pointer -fno-optimize-sibling-calls
@@ -53,16 +82,17 @@ index bcb019e6..a7fc1a9b 100644
  #endif
 +
 diff --git a/lib/utils/serial/shakti-uart.c b/lib/utils/serial/shakti-uart.c
-index 8769cb26..54f7c46a 100644
+index 8769cb26..1bb2a6b0 100644
 --- a/lib/utils/serial/shakti-uart.c
 +++ b/lib/utils/serial/shakti-uart.c
-@@ -1,60 +1,58 @@
+@@ -1,60 +1,73 @@
 -/*
 - * SPDX-License-Identifier: BSD-2-Clause
 - *
 - * Copyright (c) 2020 Vijai Kumar K <vijai@behindbytes.com>
 - */
--
++// opensbi/lib/utils/serial/shakti-uart.c
+ 
  #include <sbi/riscv_io.h>
  #include <sbi/sbi_console.h>
  #include <sbi_utils/serial/shakti-uart.h>
@@ -86,15 +116,19 @@ index 8769cb26..54f7c46a 100644
 +#define REG_IQ_CYCLES 0x1C
 +#define REG_RX_THRES  0x20
  
- #define UART_TX_FULL  0x2
+-#define UART_TX_FULL  0x2
 -#define UART_RX_NOT_EMPTY 0x4
- #define UART_RX_FULL  0x8
+-#define UART_RX_FULL  0x8
++/* STATUS bits */
++#define UART_TX_FULL        0x2  /* bit1 */
++#define UART_RX_NOT_EMPTY   0x4  /* bit2 -> byte available (use this for polling) */
++#define UART_RX_FULL        0x8  /* bit3 -> FIFO full (DON'T use for polling getc) */
  
 -static volatile char *uart_base;
-+static volatile void *uart_base;
++static volatile uintptr_t uart_base;
  
 -static void shakti_uart_putc(char ch)
-+/* ✅ Console ops: must be declared before usage */
++/* Console ops: functions are declared in shakti-uart.h, so don't make them static */
 +static struct sbi_console_device shakti_console = {
 +	.name = "shakti-uart",
 +	.console_putc = shakti_uart_putc,
@@ -104,18 +138,26 @@ index 8769cb26..54f7c46a 100644
 +void shakti_uart_putc(char ch)
  {
 -	while ((readb(uart_base + REG_STATUS) & UART_TX_FULL))
-+	while ((readw(uart_base + REG_STATUS) & UART_TX_FULL))
++	/* Wait until TX FIFO has space */
++	while (readw((void *)(uart_base + REG_STATUS)) & UART_TX_FULL)
  		;
- 	writeb(ch, uart_base + REG_TX);
+-	writeb(ch, uart_base + REG_TX);
++
++	/* Write byte */
++	writeb((u8)ch, (void *)(uart_base + REG_TX));
  }
  
 -static int shakti_uart_getc(void)
 +int shakti_uart_getc(void)
  {
 -	if (readb(uart_base + REG_STATUS) & UART_RX_NOT_EMPTY)
-+	u16 status = readw(uart_base + REG_STATUS);
-+	if (status & UART_RX_FULL)
- 		return readb(uart_base + REG_RX);
+-		return readb(uart_base + REG_RX);
++	u16 status = readw((void *)(uart_base + REG_STATUS));
++
++	/* Immediate read when FIFO is not empty */
++	if (status & UART_RX_NOT_EMPTY)
++		return (int)readb((void *)(uart_base + REG_RX));
++
  	return -1;
  }
  
@@ -128,19 +170,21 @@ index 8769cb26..54f7c46a 100644
  int shakti_uart_init(unsigned long base, u32 in_freq, u32 baudrate)
  {
 -	uart_base = (volatile char *)base;
--	u16 baud;
--
+ 	u16 baud;
+ 
 -	if (baudrate) {
 -		baud = (u16)(in_freq / (16 * baudrate));
 -		writew(baud, uart_base + REG_BAUD);
 -	}
-+	uart_base = (volatile void *)base;
-+	u16 baud = (u16)(in_freq / (16 * baudrate));
-+	writew(baud, uart_base + REG_BAUD);
++	uart_base = (uintptr_t)base;
++
++	/* Baud divisor: in_freq / (16 * baudrate) */
++	baud = (u16)(in_freq / (16U * baudrate));
++	writew(baud, (void *)(uart_base + REG_BAUD));
  
-+	/* ✅ Register UART console with OpenSBI */
++	/* Register UART console with OpenSBI */
  	sbi_console_set_device(&shakti_console);
--
+ 
  	return 0;
  }
 +
@@ -150,6 +194,179 @@ index 8769cb26..54f7c46a 100644
 +	return &shakti_console;
 +}
 +
+diff --git a/opensbi_cclass.patch b/opensbi_cclass.patch
+new file mode 100644
+index 00000000..e18216ff
+--- /dev/null
++++ b/opensbi_cclass.patch
+@@ -0,0 +1,167 @@
++diff --git a/Makefile b/Makefile
++index 46541063..3a49c360 100644
++--- a/Makefile
+++++ b/Makefile
++@@ -209,9 +209,9 @@ CC_SUPPORT_ZICSR_ZIFENCEI := $(shell $(CC) $(CLANG_TARGET) $(RELAX_FLAG) -nostdl
++ # Check whether the assembler and the compiler support the Vector extension
++ CC_SUPPORT_VECTOR := $(shell $(CC) $(CLANG_TARGET) $(RELAX_FLAG) -nostdlib -march=rv$(OPENSBI_CC_XLEN)gv -dM -E -x c /dev/null 2>&1 | grep -q riscv.*vector && echo y || echo n)
++ 
++-ifneq ($(OPENSBI_LD_PIE),y)
++-$(error Your linker does not support creating PIEs, opensbi requires this.)
++-endif
+++#ifneq ($(OPENSBI_LD_PIE),y)
+++#$(error Your linker does not support creating PIEs, opensbi requires this.)
+++#endif
++ 
++ # Build Info:
++ # OPENSBI_BUILD_TIME_STAMP -- the compilation time stamp
++@@ -397,7 +397,7 @@ CFLAGS		+=	-mcmodel=$(PLATFORM_RISCV_CODE_MODEL)
++ CFLAGS		+=	$(RELAX_FLAG)
++ CFLAGS		+=	$(GENFLAGS)
++ CFLAGS		+=	$(platform-cflags-y)
++-CFLAGS		+=	-fPIE -pie
+++#CFLAGS		+=	-fPIE -pie
++ CFLAGS		+=	$(firmware-cflags-y)
++ 
++ CPPFLAGS	+=	$(GENFLAGS)
++@@ -406,7 +406,7 @@ CPPFLAGS	+=	$(firmware-cppflags-y)
++ 
++ ASFLAGS		=	-g -Wall -nostdlib
++ ASFLAGS		+=	-fno-omit-frame-pointer -fno-optimize-sibling-calls
++-ASFLAGS		+=	-fPIE
+++#ASFLAGS		+=	-fPIE
++ ASFLAGS		+=	$(REPRODUCIBLE_FLAGS)
++ # Optionally supported flags
++ ifeq ($(CC_SUPPORT_SAVE_RESTORE),y)
++diff --git a/include/sbi_utils/serial/shakti-uart.h b/include/sbi_utils/serial/shakti-uart.h
++index bcb019e6..a7fc1a9b 100644
++--- a/include/sbi_utils/serial/shakti-uart.h
+++++ b/include/sbi_utils/serial/shakti-uart.h
++@@ -8,7 +8,14 @@
++ #define __SERIAL_SHAKTI_UART_H__
++ 
++ #include <sbi/sbi_types.h>
+++#include <sbi/sbi_console.h>
++ 
+++void shakti_uart_putc(char ch);
+++int shakti_uart_getc(void);
++ int shakti_uart_init(unsigned long base, u32 in_freq, u32 baudrate);
++ 
+++/* NEW: Return console device for OpenSBI */
+++struct sbi_console_device *shakti_uart_console_init(void);
+++
++ #endif
+++
++diff --git a/lib/utils/serial/shakti-uart.c b/lib/utils/serial/shakti-uart.c
++index 8769cb26..1bb2a6b0 100644
++--- a/lib/utils/serial/shakti-uart.c
+++++ b/lib/utils/serial/shakti-uart.c
++@@ -1,60 +1,73 @@
++-/*
++- * SPDX-License-Identifier: BSD-2-Clause
++- *
++- * Copyright (c) 2020 Vijai Kumar K <vijai@behindbytes.com>
++- */
+++// opensbi/lib/utils/serial/shakti-uart.c
++ 
++ #include <sbi/riscv_io.h>
++ #include <sbi/sbi_console.h>
++ #include <sbi_utils/serial/shakti-uart.h>
++ 
++-#define REG_BAUD	0x00
++-#define REG_TX		0x04
++-#define REG_RX		0x08
++-#define REG_STATUS	0x0C
++-#define REG_DELAY	0x10
++-#define REG_CONTROL	0x14
++-#define REG_INT_EN	0x18
++-#define REG_IQ_CYCLES	0x1C
++-#define REG_RX_THRES	0x20
+++#define REG_BAUD      0x00
+++#define REG_TX        0x04
+++#define REG_RX        0x08
+++#define REG_STATUS    0x0C
+++#define REG_DELAY     0x10
+++#define REG_CONTROL   0x14
+++#define REG_INT_EN    0x18
+++#define REG_IQ_CYCLES 0x1C
+++#define REG_RX_THRES  0x20
++ 
++-#define UART_TX_FULL  0x2
++-#define UART_RX_NOT_EMPTY 0x4
++-#define UART_RX_FULL  0x8
+++/* STATUS bits */
+++#define UART_TX_FULL        0x2  /* bit1 */
+++#define UART_RX_NOT_EMPTY   0x4  /* bit2 -> byte available (use this for polling) */
+++#define UART_RX_FULL        0x8  /* bit3 -> FIFO full (DON'T use for polling getc) */
++ 
++-static volatile char *uart_base;
+++static volatile uintptr_t uart_base;
++ 
++-static void shakti_uart_putc(char ch)
+++/* Console ops: functions are declared in shakti-uart.h, so don't make them static */
+++static struct sbi_console_device shakti_console = {
+++	.name = "shakti-uart",
+++	.console_putc = shakti_uart_putc,
+++	.console_getc = shakti_uart_getc
+++};
+++
+++void shakti_uart_putc(char ch)
++ {
++-	while ((readb(uart_base + REG_STATUS) & UART_TX_FULL))
+++	/* Wait until TX FIFO has space */
+++	while (readw((void *)(uart_base + REG_STATUS)) & UART_TX_FULL)
++ 		;
++-	writeb(ch, uart_base + REG_TX);
+++
+++	/* Write byte */
+++	writeb((u8)ch, (void *)(uart_base + REG_TX));
++ }
++ 
++-static int shakti_uart_getc(void)
+++int shakti_uart_getc(void)
++ {
++-	if (readb(uart_base + REG_STATUS) & UART_RX_NOT_EMPTY)
++-		return readb(uart_base + REG_RX);
+++	u16 status = readw((void *)(uart_base + REG_STATUS));
+++
+++	/* Immediate read when FIFO is not empty */
+++	if (status & UART_RX_NOT_EMPTY)
+++		return (int)readb((void *)(uart_base + REG_RX));
+++
++ 	return -1;
++ }
++ 
++-static struct sbi_console_device shakti_console = {
++-	.name = "shakti_uart",
++-	.console_putc = shakti_uart_putc,
++-	.console_getc = shakti_uart_getc
++-};
++-
++ int shakti_uart_init(unsigned long base, u32 in_freq, u32 baudrate)
++ {
++-	uart_base = (volatile char *)base;
++ 	u16 baud;
++ 
++-	if (baudrate) {
++-		baud = (u16)(in_freq / (16 * baudrate));
++-		writew(baud, uart_base + REG_BAUD);
++-	}
+++	uart_base = (uintptr_t)base;
+++
+++	/* Baud divisor: in_freq / (16 * baudrate) */
+++	baud = (u16)(in_freq / (16U * baudrate));
+++	writew(baud, (void *)(uart_base + REG_BAUD));
++ 
+++	/* Register UART console with OpenSBI */
++ 	sbi_console_set_device(&shakti_console);
++ 
++ 	return 0;
++ }
+++
+++/* Optional, for FDT-based integration */
+++struct sbi_console_device *shakti_uart_console_init(void)
+++{
+++	return &shakti_console;
+++}
+++
 diff --git a/platform/cclass/ganga/Kconfig b/platform/cclass/ganga/Kconfig
 new file mode 100644
 index 00000000..d2d69249
@@ -466,24 +683,31 @@ index 00000000..1b8a4062
 +
 diff --git a/platform/cclass/yamuna/platform.c b/platform/cclass/yamuna/platform.c
 new file mode 100644
-index 00000000..fd2c3cc5
+index 00000000..b827a07b
 --- /dev/null
 +++ b/platform/cclass/yamuna/platform.c
-@@ -0,0 +1,160 @@
+@@ -0,0 +1,149 @@
 +/*
 + * SPDX-License-Identifier: BSD-2-Clause
 + *
-+ * Copyright (c) 2019 Western Digital Corporation or its affiliates.
-+ * Copyright (c) 2024 Umesh .
++ * Yamuna (C-Class) OpenSBI platform
++ *
++ * Notes for OpenSBI v1.8:
++ * - struct sbi_platform_operations in v1.8 does NOT have .ipi_init/.timer_init
++ * - So we init ACLINT MSWI + MTIMER inside early_init() during cold boot.
 + */
 +
 +#include <sbi/riscv_asm.h>
 +#include <sbi/riscv_encoding.h>
 +#include <sbi/sbi_const.h>
 +#include <sbi/sbi_platform.h>
++
 +#include <sbi_utils/ipi/aclint_mswi.h>
-+#include <sbi_utils/irqchip/plic.h>
 +#include <sbi_utils/timer/aclint_mtimer.h>
++/* If you later enable PLIC, uncomment these:
++ * #include <sbi_utils/irqchip/plic.h>
++ */
++
 +#include <sbi_utils/serial/shakti-uart.h>
 +
 +/*
@@ -510,32 +734,20 @@ index 00000000..fd2c3cc5
 +#define YAMUNA_UART_INPUT_FREQ          50000000
 +#define YAMUNA_UART_BAUDRATE            115200
 +
-+/* From 'SPIxBase' */
-+#define YAMUNA_SPI0_ADDR                0x00020000
-+#define YAMUNA_SPI1_ADDR                0x00020100
-+
-+/* From 'I2CxBase' */
-+#define YAMUNA_I2C0_ADDR                0x00040000
-+#define YAMUNA_I2C1_ADDR                0x00041400
-+
-+/* From 'GPIOBase' */
-+#define YAMUNA_GPIO_ADDR                0x00040100
-+
-+/* From 'GPTimerxBase' */
-+#define YAMUNA_GPTIMER0_ADDR            0x00040200
-+#define YAMUNA_GPTIMER1_ADDR            0x00040300
-+
 +/* Derived Addresses (These typically don't need changes) */
 +#define YAMUNA_ACLINT_MSWI_ADDR         (YAMUNA_CLINT_ADDR + CLINT_MSWI_OFFSET)
 +#define YAMUNA_ACLINT_MTIMER_ADDR       (YAMUNA_CLINT_ADDR + CLINT_MTIMER_OFFSET)
 +
++/* If you later enable PLIC, you can use this (example).
++ * Make sure plic.h is included.
++ */
 +/*
 +static struct plic_data plic = {
 +	.addr = YAMUNA_PLIC_ADDR,
 +	.size = YAMUNA_PLIC_SIZE,
 +	.num_src = YAMUNA_PLIC_NUM_SOURCES,
 +	.context_map = {
-+		[0] = { 0, 1 }, // Context map for the single HART (HART 0)
++		[0] = { 0, 1 },
 +	},
 +};
 +*/
@@ -562,13 +774,27 @@ index 00000000..fd2c3cc5
 +
 +/*
 + * Platform early initialization.
++ * For OpenSBI v1.8, do cold-boot init for UART + ACLINT here.
 + */
 +static int yamuna_early_init(bool cold_boot)
 +{
++	int rc;
++
 +	if (!cold_boot)
 +		return 0;
 +
-+	return shakti_uart_init(YAMUNA_UART0_ADDR, YAMUNA_UART_INPUT_FREQ, YAMUNA_UART_BAUDRATE);
++	/* UART console */
++	rc = shakti_uart_init(YAMUNA_UART0_ADDR,
++			      YAMUNA_UART_INPUT_FREQ,
++			      YAMUNA_UART_BAUDRATE);
++	if (rc)
++		return rc;
++
++	/* IPI + timer init (OpenSBI v1.8 style: init here, not via ops fields) */
++	(void)aclint_mswi_cold_init(&mswi);
++	(void)aclint_mtimer_cold_init(&mtimer, NULL);
++
++	return 0;
 +}
 +
 +/*
@@ -576,47 +802,27 @@ index 00000000..fd2c3cc5
 + */
 +static int yamuna_final_init(bool cold_boot)
 +{
++	(void)cold_boot;
 +	return 0;
 +}
 +
++/* If you later enable PLIC, uncomment and add .irqchip_init in platform_ops */
 +/*
-+ * Initialize the platform interrupt controller during cold boot.
-+ */
-+/*
-+static int yamuna_irqchip_init(void)
++static int yamuna_irqchip_init(bool cold_boot)
 +{
-+	// Example if the generic PLIC driver is used
++	if (!cold_boot)
++		return 0;
 +	return plic_cold_irqchip_init(&plic);
 +}
 +*/
 +
 +/*
-+ * Initialize IPI during cold boot.
-+ */
-+static int yamuna_ipi_init(void)
-+{
-+	/* Example if the generic ACLINT driver is used */
-+	return aclint_mswi_cold_init(&mswi);
-+}
-+
-+/*
-+ * Initialize platform timer during cold boot.
-+ */
-+static int yamuna_timer_init(void)
-+{
-+	/* Example if the generic ACLINT driver is used */
-+	return aclint_mtimer_cold_init(&mtimer, NULL);
-+}
-+
-+/*
-+ * Platform descriptor.
++ * Platform descriptor (OpenSBI v1.8 compatible)
 + */
 +const struct sbi_platform_operations platform_ops = {
-+	.early_init		= yamuna_early_init,
-+	.final_init		= yamuna_final_init,
-+	// .irqchip_init	= yamuna_irqchip_init,
-+	.ipi_init		= yamuna_ipi_init,
-+	.timer_init		= yamuna_timer_init
++	.early_init = yamuna_early_init,
++	.final_init = yamuna_final_init,
++	/* .irqchip_init = yamuna_irqchip_init, */
 +};
 +
 +const struct sbi_platform platform = {
@@ -627,6 +833,9 @@ index 00000000..fd2c3cc5
 +	.hart_count		= YAMUNA_HART_COUNT,
 +	.hart_stack_size	= SBI_PLATFORM_DEFAULT_HART_STACK_SIZE,
 +	.heap_size		= SBI_PLATFORM_DEFAULT_HEAP_SIZE(YAMUNA_HART_COUNT),
-+	.platform_ops_addr	= (unsigned long)&platform_ops
++	.platform_ops_addr	= (unsigned long)&platform_ops,
 +};
 +
+-- 
+2.43.0
+
