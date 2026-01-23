@@ -2,8 +2,10 @@
 -include makefile.inc
 XLEN_build ?= 64
 BOARD ?= asic_yamuna
+SYNTHTOP ?= fpga_top
 ISA=RV$(XLEN_build)IMAFDCSU
 JOBS:=$(shell nproc)
+buswidth := $(word 2,$(subst =, ,$(filter buswidth=%,$(BSC_DEFINES))))
 SHAKTI_HOME:=$(CURDIR)
 
 WORKING_DIR := $(shell pwd)
@@ -15,6 +17,7 @@ ifeq ($(BSCAN2E), enable)
 else
 	JTAG_TYPE:=JTAG_EXTERNAL
 endif
+
 
 ifeq ($(BOARD), arty_a7)
 	FPGA:=xc7a100tcsg324-1
@@ -46,13 +49,27 @@ else ifeq ($(BOARD), vcu118)
 else ifeq ($(BOARD), vcu108)
 	FPGA:=xcvu095-ffva2104-2-e
 	MCS:=false
+else ifeq ($(BOARD), zcu106)
+	FPGA:=xczu7ev-ffvc1156-2-e
+	MCS:=false
 endif
+
+ifeq ($(buswidth), 128)
+  BUS_WIDTH:=BUS_WIDTH128
+else ifeq ($(buswidth), 64)
+  BUS_WIDTH:=BUS_WIDTH64
+else ifeq ($(buswidth), 32)
+  BUS_WIDTH:=BUS_WIDTH32
+endif
+
 
 MOREDEFINES=$(addprefix -D , $(BSC_DEFINES))
 
 # ------------------------------------- Makefile TARGETS ----------------------------------------- #
 default: quick_build_xilinx
-build:  quick_build_xilinx 
+build:  quick_build
+build_sim: quick_build_sim
+build_sim_gdb: quick_build_sim_gdb
 yamuna_asic: quick_asic_build
 build_hyp: quick_build_xilinx_hyp
 build: ## To start bitstream and MCS file generation for boards (passed through BOARD parameter)
@@ -65,6 +82,7 @@ build_program: ## To start bitstream and MCS file generation  for boards (passed
 
 %.bo:
 	 $(info building $@)
+	 $(info BSC_DEFINES = $(MOREDEFINES))
 	 @$(BSCCMD) $(MOREDEFINES) -p $(BSVINCDIR) $<
 
 .PHONY: help
@@ -80,6 +98,66 @@ run_setup_fpga: ## Run command to setup all dependant files for FPGA.
 	--cspec sample_config/c$(XLEN_build)_$(BOARD)/core$(XLEN_build).yaml \
 	--gspec sample_config/c$(XLEN_build)_$(BOARD)/csr_grouping$(XLEN_build).yaml \
 	--dspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_debug.yaml
+# ifeq ($(BOARD), arty_a7)
+# endif
+	@mkdir build
+	@mkdir build/hw
+	@mkdir build/hw/intermediate
+	@mkdir build/hw/verilog
+
+.PHONY: run_setup_build
+run_setup_build: ## Run command to setup all dependant files for FPGA.
+	@pip3 uninstall -r requirements.txt -y
+	@pip uninstall soc_config -y
+	@pip install -r requirements.txt
+	@cp -r boards/$(BOARD)/. .
+	@repomanager --yaml deps.yaml --clean 
+	@repomanager --yaml deps.yaml -cup
+	@soc_config --ispec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_isa.yaml \
+	--customspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_custom.yaml \
+	--cspec sample_config/c$(XLEN_build)_$(BOARD)/core$(XLEN_build).yaml \
+	--gspec sample_config/c$(XLEN_build)_$(BOARD)/csr_grouping$(XLEN_build).yaml \
+	--dspec sample_config/c$(XLEN_build)_$(BOARD)/rv$(XLEN_build)i_debug.yaml
+# ifeq ($(BOARD), arty_a7)
+# endif
+	@mkdir build
+	@mkdir build/hw
+	@mkdir build/hw/intermediate
+	@mkdir build/hw/verilog
+
+.PHONY: run_setup_simulate
+run_setup_simulate: ## Run command to setup all dependant files for FPGA.
+	@pip3 uninstall -r requirements.txt -y
+	@pip uninstall soc_config -y
+	@pip install -r requirements.txt
+	@cp -r boards/$(BOARD)/. .
+	@repomanager --yaml deps.yaml --clean 
+	@repomanager --yaml deps.yaml -cup
+	@soc_config --ispec sample_config/c$(XLEN_build)_$(BOARD)_sim/rv$(XLEN_build)i_isa.yaml \
+	--customspec sample_config/c$(XLEN_build)_$(BOARD)_sim/rv$(XLEN_build)i_custom.yaml \
+	--cspec sample_config/c$(XLEN_build)_$(BOARD)_sim/core$(XLEN_build).yaml \
+	--gspec sample_config/c$(XLEN_build)_$(BOARD)_sim/csr_grouping$(XLEN_build).yaml \
+	--dspec sample_config/c$(XLEN_build)_$(BOARD)_sim/rv$(XLEN_build)i_debug.yaml
+# ifeq ($(BOARD), arty_a7)
+# endif
+	@mkdir build
+	@mkdir build/hw
+	@mkdir build/hw/intermediate
+	@mkdir build/hw/verilog
+
+.PHONY: run_setup_simulate_gdb
+run_setup_simulate_gdb: ## Run command to setup all dependant files for FPGA.
+	@pip3 uninstall -r requirements.txt -y
+	@pip uninstall soc_config -y
+	@pip install -r requirements.txt
+	@cp -r boards/$(BOARD)/. .
+	@repomanager --yaml deps.yaml --clean 
+	@repomanager --yaml deps.yaml -cup
+	@soc_config --ispec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/rv$(XLEN_build)i_isa.yaml \
+	--customspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/rv$(XLEN_build)i_custom.yaml \
+	--cspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/core$(XLEN_build).yaml \
+	--gspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/csr_grouping$(XLEN_build).yaml \
+	--dspec sample_config/c$(XLEN_build)_$(BOARD)_sim_gdb/rv$(XLEN_build)i_debug.yaml
 # ifeq ($(BOARD), arty_a7)
 # endif
 	@mkdir build
@@ -116,16 +194,10 @@ simulate: run_setup_sim
 
 .PHONY: generate_boot_files
 generate_boot_files:
-ifeq ($(BOARD), arty_a7_yamuna)
+ifeq ($(XLEN_build), 32)
 	@cd boot-code-yamuna; make
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
-else ifeq ($(BOARD), asic_yamuna)
-	@cd boot-code-yamuna; make
-	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
-else ifeq ($(BOARD), nexys_a7)
-	@cd boot-code-yamuna; make
-	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
-else ifeq ($(BOARD), arty_a7_ganga)
+else ifeq ($(XLEN_build), 64)
 	@cd boot-code-ganga; make
 #	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
 else
@@ -133,10 +205,19 @@ else
 	@cp boot-code/outputs/boot.mem $(VERILOGDIR)/
 endif
 
-.PHONY: quick_build_xilinx
-quick_build_xilinx: run_setup_fpga
+.PHONY: quick_build
+quick_build: run_setup_build
 	@make generate_verilog -j && make generate_boot_files ip_build board_build
-	
+
+.PHONY: quick_build_sim
+quick_build_sim: run_setup_simulate
+	@make generate_verilog -j && make generate_boot_files_sim link_verilator
+
+.PHONY: quick_build_sim_gdb
+quick_build_sim_gdb: run_setup_simulate_gdb
+	@make generate_verilog -j && make generate_boot_files_sim link_verilator_gdb
+
+
 .PHONY: quick_asic_build
 quick_asic_build: run_setup_fpga
 	@make generate_verilog_asic -j
@@ -151,10 +232,11 @@ link_verilator: ## Generate simulation executable using Verilator
 	@mkdir -p $(BSVOUTDIR) obj_dir
 	@echo "#define TOPMODULE V$(TOP_MODULE)" > sim_main.h                                             
 	@echo '#include "V$(TOP_MODULE).h"' >> sim_main.h                                                 
-	verilator $(VERILATOR_FLAGS) --cc $(TOP_MODULE).v -y $(VERILOGDIR) -y $(BS_VERILOG_LIB) -y common_verilog --exe        
+	verilator $(VERILATOR_FLAGS) --cc $(TOP_MODULE).v -y $(VERILOGDIR) \
+	-y $(BS_VERILOG_LIB) -y common_verilog --exe        
 	@ln -f -s sim_main.cpp obj_dir/sim_main.cpp                                                       
 	@ln -f -s sim_main.h obj_dir/sim_main.h                                                           
-	@make -j8 -C obj_dir -f V$(TOP_MODULE).mk                                                         
+	@make $(VERILATOR_SPEED) VM_PARALLEL_BUILDS=1 -j8 -C obj_dir -f V$(TOP_MODULE).mk                                                         
 	@cp obj_dir/V$(TOP_MODULE) $(BSVOUTDIR)/out
 
 .PHONY: link_verilator_gdb
@@ -200,10 +282,12 @@ generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/FIFO20.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/BRAM1.v ${VERILOGDIR}
 	@cp ./common_verilog/bram_2rw.v ${VERILOGDIR}
+	@cp ./c-class/src/fpu/hardfloat/verilog_src/* ${VERILOGDIR}
 	@cp common_verilog/signedmul.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/UngatedClockMux.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ClockMux.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
@@ -233,6 +317,7 @@ generate_verilog_asic: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/SyncRegister.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeClock.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/UngatedClockMux.v ${VERILOGDIR}
+	@cp ${BS_VERILOG_LIB}/ClockMux.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/MakeResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncResetA.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/SyncHandshake.v ${VERILOGDIR}
@@ -266,28 +351,24 @@ update_xlen:
 .PHONY: generate_boot_files_sim
 generate_boot_files_sim: ## to generate boot files for simulation
 generate_boot_files_sim: update_xlen
+	@echo "XLEN=$(XLEN)" > boot/Makefile.inc
 	@mkdir -p bin
-	@cd verification/dts/; make;
-	@head -n 4096 verification/dts/boot.hex > bin/boot.mem
-	@rm -rf bin/boot1.mem
-	@for number in $$(seq 1 8192) ; do \
-    echo "00000000" >> bin/boot1.mem; \
-  done;
-	@cut -c1-8 verification/dts/boot.hex > bin/boot.MSB
+	@cd boot/; make;
+	@cut -c1-8 boot/boot.hex > bin/boot.MSB
 	@if [ "$(XLEN)" = "64" ]; then\
-	  cut -c9-16 verification/dts/boot.hex > bin/boot.LSB;\
+	  cut -c9-16 boot/boot.hex > bin/boot.LSB;\
     else cp bin/boot.MSB bin/boot.LSB;\
   fi
 
 .PHONY: ip_build
 ip_build: ## build Xilinx Core-IPs used in this project
 	vivado -log ipbuild.log -nojournal -mode tcl -notrace -source boards/$(BOARD)/tcl/create_ip_project.tcl \
-		-tclargs $(FPGA) $(XLEN) $(ISA) $(JOBS) \
+		-tclargs $(FPGA) $(XLEN) $(ISA) $(JOBS) $(buswidth) $(BUS_WIDTH)\
 		|| (echo "Could not create IP project"; exit 1)
 
 .PHONY: board_build
 board_build:
-	vivado -nojournal -nolog -mode tcl -notrace -source boards/$(BOARD)/tcl/create_project.tcl -tclargs $(SYNTHTOP) $(FPGA) $(ISA) $(JTAG_TYPE) $(VERILOGDIR)\
+	vivado -nojournal -nolog -mode tcl -notrace -source boards/$(BOARD)/tcl/create_project.tcl -tclargs $(SYNTHTOP) $(FPGA) $(ISA) $(JTAG_TYPE) $(VERILOGDIR) $(BUS_WIDTH)\
 	|| (echo "Could not create core project"; exit 1)
 	vivado -nojournal -log artybuild.log -notrace -mode tcl -source boards/$(BOARD)/tcl/run.tcl \
 		-tclargs $(JOBS) || (echo "ERROR: While running synthesis")

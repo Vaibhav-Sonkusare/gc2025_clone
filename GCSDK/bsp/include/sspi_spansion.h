@@ -1,5 +1,5 @@
 /***************************************************************************
- * Project               	    	: "iisu project"
+ * Project               	    	: "shakti project"
  * Name of the file	            	: sspi_spansion.h
  * Brief Description of file            : Driver file to Standard SPI Spansion flash
  * Name of Author    	                : Sambhav Jain

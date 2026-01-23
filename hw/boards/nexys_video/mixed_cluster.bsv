@@ -36,10 +36,13 @@ package mixed_cluster;
   import GetPut:: *;
   
   import i2c :: * ;
+  import gptimer::*;
   import gpio :: * ;
   import clint :: * ;
   import plic :: * ;
   import pinmux :: * ;
+  import Clocks::*;
+  import BUtils::*;
   import pinmux_axi4lite :: * ;
   `include "Soc.defines"
 
@@ -49,16 +52,25 @@ package mixed_cluster;
     method Bit#(2) sb_ext_interrupt;
     (*always_ready, always_enabled*)
     interface GPIO#(32) gpio_io;						//GPIO IO interface
+    
+    (*always_ready,always_enabled*)
+	  interface Ifc_gptimer_io gptimer0_io;
+    (*always_ready,always_enabled*)
+	  interface Ifc_gptimer_io gptimer1_io;
+    (*always_ready,always_enabled*)
+	  interface Ifc_gptimer_io gptimer2_io;
+    (*always_ready,always_enabled*)
+	  interface Ifc_gptimer_io gptimer3_io;
+
     interface IOCellSide pinmuxtop_iocell_side;
     interface PeripheralSide pinmuxtop_peripheral_side;
     (*always_ready, always_enabled*)
 		method Action interrupts(Bit#(13) inp);
-    interface AXI4_Lite_Slave_IFC#(`paddr, 32, 0) slave;
-    interface AXI4_Lite_Master_IFC#(`paddr, 32, 0) xadc_master;
+    interface AXI4_Lite_Slave_IFC#(`paddr, `buswidth, `USERSPACE) slave;
   endinterface
 
   (*synthesize*)
-  module mki2c (Ifc_i2c_axi4lite#(`paddr, 32, 0));
+  module mki2c (Ifc_i2c_axi4lite#(`paddr, `buswidth, `USERSPACE));
 	  let core_clock<-exposeCurrentClock;
   	let core_reset<-exposeCurrentReset;
     let ifc();
@@ -67,21 +79,28 @@ package mixed_cluster;
   endmodule
 
   (*synthesize*)
-  module mkgpio(Ifc_gpio_axi4lite#(`paddr, 32, 0, 32));
+module mkgptimer#(Clock ext_clk)(Ifc_gptimer_axi4lite#(`paddr, `buswidth, `USERSPACE,32)); 
+  let ifc();
+  mkgptimer_axi4lite#(ext_clk) _temp(ifc);
+  return ifc;
+endmodule
+
+  (*synthesize*)
+  module mkgpio(Ifc_gpio_axi4lite#(`paddr, `buswidth, `USERSPACE, 32));
     let ifc();
     mkgpio_axi4lite _temp(ifc);
     return ifc;
   endmodule
 
   (*synthesize*)
-  module mkplic(Ifc_plic_axi4lite#(`paddr, 32, 0, 31, 2, 7));
+  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, `USERSPACE, 35, 2, 7));
     let ifc();
     mkplic_axi4lite#(`PLICBase)_temp(ifc);
     return ifc;
   endmodule
 
   (*synthesize*)
-  module mkpinmuxtop(Ifc_pinmux_axi4lite#(`paddr, 32, 0));
+  module mkpinmuxtop(Ifc_pinmux_axi4lite#(`paddr, `buswidth, `USERSPACE));
     let ifc();
     mkpinmux_axi4lite _temp(ifc);
     return ifc;
@@ -97,6 +116,14 @@ package mixed_cluster;
       slave_num = `I2C1_slave_num;
     else if(addr>= `I2C0Base && addr<= `I2C0End)
       slave_num = `I2C0_slave_num;
+    else if(addr>= `GPTimer0Base && addr<= `GPTimer0End)
+			slave_num = `GPTimer0_slave_num;
+    else if(addr>= `GPTimer1Base && addr<= `GPTimer1End)
+		  slave_num = `GPTimer1_slave_num;
+    else if(addr>= `GPTimer2Base && addr<= `GPTimer2End)
+		  slave_num = `GPTimer2_slave_num;
+    else if(addr>= `GPTimer3Base && addr<= `GPTimer3End)
+		  slave_num = `GPTimer3_slave_num;
     else if(addr>= `XADCBase && addr<= `XADCEnd)
       slave_num = `XADC_slave_num;
     else if(addr >= `PinmuxBase && addr <= `PinmuxEnd)
@@ -108,18 +135,26 @@ package mixed_cluster;
   endfunction:fn_slave_map
 
   (*synthesize*)
-  module mkmixed_cluster(Ifc_mixed_cluster);
+  module mkmixed_cluster#(Clock ext_clk)(Ifc_mixed_cluster);
 	
-		AXI4_Lite_Master_Xactor_IFC #(`paddr, 32, 0) c2m_xactor <- mkAXI4_Lite_Master_Xactor;
-		AXI4_Lite_Slave_Xactor_IFC #(`paddr, 32, 0) c2s_xactor <- mkAXI4_Lite_Slave_Xactor;
-    AXI4_Lite_Fabric_IFC #(`MixedCluster_Num_Masters, `MixedCluster_Num_Slaves, `paddr, 32,0) 
+		AXI4_Lite_Master_Xactor_IFC #(`paddr, `buswidth, `USERSPACE) c2m_xactor <- mkAXI4_Lite_Master_Xactor;
+		AXI4_Lite_Slave_Xactor_IFC #(`paddr, `buswidth, `USERSPACE) c2s_xactor <- mkAXI4_Lite_Slave_Xactor;
+    AXI4_Lite_Fabric_IFC #(`MixedCluster_Num_Masters, `MixedCluster_Num_Slaves, `paddr, `buswidth,`USERSPACE) 
                                                     fabric <- mkAXI4_Lite_Fabric(fn_slave_map);
+    
+    
+    let curr_clk<- exposeCurrentClock;
+    let curr_rst <- exposeCurrentReset;
     let i2c0 <- mki2c;
     let i2c1 <- mki2c;
     let gpio <- mkgpio();
     let plic <- mkplic();
+    let gptimer0 <- mkgptimer(ext_clk);
+    let gptimer1 <- mkgptimer(ext_clk);
+    let gptimer2 <- mkgptimer(ext_clk);
+    let gptimer3 <- mkgptimer(ext_clk);
     let pinmuxtop <- mkpinmuxtop();
-    Ifc_err_slave_axi4lite#(`paddr, 32, 0 ) err_slave <- mkerr_slave_axi4lite;
+    Ifc_err_slave_axi4lite#(`paddr, `buswidth, `USERSPACE ) err_slave <- mkerr_slave_axi4lite;
 		Wire#(Bit#(13)) wr_external_interrupts <- mkDWire('d0);
     Wire#(Bit#(2)) wr_sb_ext_interrupt <- mkDWire(0);
 
@@ -132,7 +167,7 @@ package mixed_cluster;
     rule rl_connect_plic_connections;
 			let tmp <- gpio.sb_gpio_to_plic.get;
 			Bit#(16) lv_gpio_intr= truncate(pack(tmp));
-			Bit#(31) plic_inputs= {wr_external_interrupts[12:6], i2c1.isint, i2c0.isint, lv_gpio_intr, wr_external_interrupts[5:0]};
+			Bit#(35) plic_inputs= {wr_external_interrupts[12:6], i2c1.isint, i2c0.isint, gptimer3.sb_interrupt, gptimer2.sb_interrupt, gptimer1.sb_interrupt, gptimer0.sb_interrupt, lv_gpio_intr, wr_external_interrupts[5:0]};
 			plic.sb_frm_sources(plic_inputs);
 		endrule
 
@@ -146,6 +181,10 @@ package mixed_cluster;
 		
    	mkConnection (fabric.v_to_slaves [`I2C0_slave_num ],		i2c0.slave);
    	mkConnection (fabric.v_to_slaves [`I2C1_slave_num ],		i2c1.slave);
+     mkConnection (fabric.v_to_slaves [`GPTimer0_slave_num ],gptimer0.slave);
+     mkConnection (fabric.v_to_slaves [`GPTimer1_slave_num ],gptimer1.slave);
+     mkConnection (fabric.v_to_slaves [`GPTimer2_slave_num ],gptimer2.slave);
+     mkConnection (fabric.v_to_slaves [`GPTimer3_slave_num ],gptimer3.slave);
 		mkConnection (fabric.v_to_slaves [`PLIC_slave_num ], plic.slave);
 		mkConnection (fabric.v_to_slaves [`GPIO_slave_num ], gpio.slave);
 		mkConnection (fabric.v_to_slaves [`Pinmux_slave_num ], pinmuxtop.slave);
@@ -153,6 +192,12 @@ package mixed_cluster;
 		
     method I2C_out i2c0_out= i2c0.io;
     method I2C_out i2c1_out= i2c1.io;
+    interface gptimer0_io = gptimer0.io;
+    interface gptimer1_io = gptimer1.io;
+    interface gptimer2_io = gptimer2.io;
+    interface gptimer3_io = gptimer3.io;
+   
+
     method sb_ext_interrupt = wr_sb_ext_interrupt;
     interface gpio_io= gpio.io;
 		method Action interrupts(Bit#(13) inp);
@@ -161,7 +206,6 @@ package mixed_cluster;
     interface pinmuxtop_iocell_side = pinmuxtop.pinmuxaxi4lite_iocell_side;
     interface pinmuxtop_peripheral_side = pinmuxtop.pinmuxaxi4lite_peripheral_side;
     interface slave= c2s_xactor.axi_side;
-    interface xadc_master = fabric.v_to_slaves[`XADC_slave_num];
   endmodule
 endpackage
 

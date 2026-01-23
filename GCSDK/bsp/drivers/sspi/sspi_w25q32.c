@@ -1,5 +1,5 @@
 /***************************************************************************
- * Project               	    	: "iisu project"
+ * Project               	    	: "shakti project"
  * Name of the file	            	: sspi_driver.c
  * Brief Description of file            : Driver file to Standard SPI
  * Name of Author    	                : Sambhav Jain

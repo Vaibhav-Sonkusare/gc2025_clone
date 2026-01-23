@@ -1,5 +1,5 @@
 /***************************************************************************
- * Project               	    	: "iisu project"
+ * Project               	    	: "shakti project"
  * Name of the file	            	: sspi_driver.c
  * Brief Description of file            : Driver file to Standard SPI
  * Name of Author    	                : Sambhav Jain
@@ -81,19 +81,19 @@ int flash_write_enable(void)
  	return 1;
 }
 
-// int sspi_notbusy()
-// {
-// 	unsigned char  read_data = 0x01;
-// 	while(read_data & 0x01){
-// 		waitfor(10);
-// 		read_data = sspi_instance[SSPI_INSTANCE]->comm_status;
-// 		// read_data = sspi_instance -> comm_status;
-// //		read_data = SSPI0->comm_status;
-// 		//log_info("\n Status Register: %x", read_data);
-// 	}
-// 	log_debug("\n SPI comm done \n");
-// 	return 1;
-// }
+int sspi_notbusy()
+{
+	unsigned char  read_data = 0x01;
+	while(read_data & 0x01){
+		waitfor(10);
+		read_data = sspi_instance[SSPI_INSTANCE]->comm_status;
+		// read_data = sspi_instance -> comm_status;
+//		read_data = SSPI0->comm_status;
+		//log_info("\n Status Register: %x", read_data);
+	}
+	log_debug("\n SPI comm done \n");
+	return 1;
+}
 
 
 char flash_cmd_read(char command)

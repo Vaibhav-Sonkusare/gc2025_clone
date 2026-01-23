@@ -39,7 +39,9 @@
 `endif
 
 `define MemoryBase        'h8000_0000
-`define MemoryEnd         'h9FFF_FFFF
+`define MemoryEnd         'h8FFF_FFFF
+`define TCMBase           'h9000_0000
+`define TCMEnd            'h9FFF_FFFF
 `define ClintBase         'h0200_0000
 `define ClintEnd          'h020B_FFFF
 `define DebugBase         'h0000_0000
@@ -116,21 +118,33 @@
 `define UART2End      'h0001_1540
 
 // - Mixed Cluster
-`define MixedCluster_Num_Slaves 7
+`define MixedCluster_Num_Slaves 11
 `define MixedCluster_Num_Masters 1
 
 `define I2C0_slave_num 0
 `define I2C1_slave_num 1
-`define PLIC_slave_num 2
-`define GPIO_slave_num 3
-`define XADC_slave_num 4
-`define Pinmux_slave_num 5
-`define MixedCluster_err_slave_num 6
+`define GPTimer0_slave_num					2
+`define GPTimer1_slave_num					3
+`define GPTimer2_slave_num					4
+`define GPTimer3_slave_num					5
+`define PLIC_slave_num 6
+`define GPIO_slave_num 7
+`define XADC_slave_num 8
+`define Pinmux_slave_num 9
+`define MixedCluster_err_slave_num 10
 
 `define I2C0Base    'h0004_0000
 `define I2C0End     'h0004_00FF
 `define GPIOBase	  'h0004_0100
 `define GPIOEnd		  'h0004_01FF
+`define GPTimer0Base					'h0004_0200
+`define GPTimer0End 					'h0004_02FF
+`define GPTimer1Base					'h0004_0300
+`define GPTimer1End 					'h0004_03FF
+`define GPTimer2Base					'h0004_0400
+`define GPTimer2End 					'h0004_04FF
+`define GPTimer3Base					'h0004_0500
+`define GPTimer3End 					'h0004_05FF
 `define XADCBase    'h0004_1000
 `define XADCEnd     'h0004_13FF
 `define I2C1Base    'h0004_1400

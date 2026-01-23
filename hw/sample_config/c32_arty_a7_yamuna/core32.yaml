@@ -5,12 +5,12 @@ isb_sizes:
     isb_s3s4: 8
     isb_s4s5: 8
 num_harts: 1
-waw_stalls: True
+hardfloat: False
 merged_rf: False
 s_extension:
-  itlb_size: 4
-  dtlb_size: 4
-total_events : 31
+  itlb_size: 2
+  dtlb_size: 2
+total_events : 32
 iepoch_size: 2
 m_extension:
   mul_stages_in : 1
@@ -49,14 +49,23 @@ dcache_configuration:
   one_hot_select: false
   rwports: '1rw'
 reset_pc: 4096
-bus_protocol: AXI4
+bus_protocol_configuration:
+  bus_protocol: AXI4
+  bus_width: 32
+  axi4_transactor_fifo_depth: 2
+  axi4_internal_fifo_depth: 2
+  axi4_lite_transactor_fifo_depth: 2
+  axi4_lite_internal_fifo_depth: 2
+  axi4_id_width: 4
+  userspace_width: 0
 bsc_compile_options:
-  test_memory_size: 33554432
+  test_memory_size: 268435456
   assertions: true
   ovl_assertions: False
   sva_assertions: False
   ovl_path: ""
   trace_dump: false
+  etrace_port: False
   compile_target: 'fpga'
   suppress_warnings: ["none"]
   verilog_dir: build/hw/verilog
@@ -66,7 +75,6 @@ bsc_compile_options:
   top_dir: ./
   open_ocd: False
   cocotb_sim: False
-  debug_datawidth64: False
   static_check: True
   verbosity: 0
 verilator_configuration:

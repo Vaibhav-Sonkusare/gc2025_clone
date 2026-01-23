@@ -112,7 +112,7 @@ static void flash_read_locations(uint32_t read_address, uint32_t length, int *re
 {
 	for(int i = 0; i < length; ++i)
 	{
-		int read_value = flash_read(read_address);
+		int read_value = flash_read_w25q32(read_address);
 		printf("\nReading from adddress %x and data \
 			   %x\n",read_address,read_value);
 		*read_data++ = read_value;
@@ -236,13 +236,13 @@ void vTaskSPIFlash(void *pvParameters)
 	uint32_t length = 11;
 
 	sspi_init();
-	flash_init();
-	printf("SPI init done\n");
-	flash_device_id();
+	flash_init_w25q32();
+	printf("\n SPI init done");
+	flash_device_id_w25q32();
 	waitfor(200);
-	printf("\n Flash device id read complete");
-	status_register_update(STATUS_REGISTER);
-	flash_erase(FLASH_BASE_ADDRESS); //erases an entire sector
+	printf("\n Flash device id read complete in the main function");
+	status_register_update_w25q32(STATUS_REGISTER);
+	flash_erase_w25q32(FLASH_BASE_ADDRESS); //erases an entire sector
 	printf("\nErase complete");
 
 	int write_data[WRITE_SIZE] = {0};
@@ -258,7 +258,7 @@ void vTaskSPIFlash(void *pvParameters)
 	data = 0x0;
 	for(int i = 0; i < length; i++)
 	{
-		flash_write( write_address, data);
+		flash_write_w25q32( write_address, data);
 		write_data[i] = data;
 		data += 0x01010101;
 		write_address += 0x04;
@@ -286,12 +286,13 @@ void vLEDTask(void *pvParameters)
 	check_gpiov2();
 	printf("\n Read from GPIO Pins\n");
 	gpiov2_init();
-	gpiov2_instance->direction = 0x0;
+	gpiov2_instance->direction = 0xFFFFFFFF;
 
 	printf("\n Read from GPIO Pins\n");
 
 	while(1)
 	{
+		gpiov2_instance->toggle = 0xFFFFFFFF; 	
 		printf("\n GPIO Read Data: %x", gpiov2_instance->data );
 		delay_loop(1000, 1000);
 	}

@@ -1,4 +1,4 @@
-# <b>Shakti on Shakti</b>
+# <b>GC2025</b>
 
 ### <b>Maintained by : RISE/Shakti Lab, Indian Institute of Technology, Madras</b>
 
@@ -24,6 +24,7 @@ For more SoC related details please view README.rst
   $ cd gc2025/hw
   $ make build BOARD=arty_a7_yamuna XLEN_build=32
 ```
+For nexys_video support pass BOARD=nexys_video 
 
 <b>To Build MCS File for Ganga:</b>
 
@@ -31,6 +32,59 @@ For more SoC related details please view README.rst
   $ git clone https://gitlab.com/shaktiproject/gc2025.git
   $ cd gc2025/hw
   $ make build BOARD=arty_a7_ganga
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>Simulation for Yamuna SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim BOARD=arty_a7_yamuna XLEN_build=32
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>GDB Simulation for Yamuna SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim_gdb BOARD=arty_a7_yamuna XLEN_build=32
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>Simulation for Ganga SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim BOARD=arty_a7_ganga
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>GDB Simulation for Ganga SoC:</b>
+
+```
+  $ git clone https://gitlab.com/shaktiproject/gc2025.git
+  $ cd gc2025/hw
+  $ make build_sim_gdb BOARD=arty_a7_ganga
+```
+For nexys_video support pass BOARD=nexys_video 
+
+<b>To Perform Simulation (code.mem):</b>
+
+```
+After building Simulation for Ganga/Yamuna SoC, to generate the code.mem follow the steps below,
+  
+  $ elf2hex 4 67108864 hello.shakti 2147483648 > code.mem #Only for Yamuna SoC 
+  $ elf2hex 8 33554432 hello.shakti 2147483648 > code.mem #Only for Ganga SoC
+
+Place the generated code.mem in the bin directory, then follow the below steps,
+
+  $ cd bin
+  $ ./out +trace  #to enable waveform dumping in the logs directory
+
+The print statements in the code will be printed in the app_log file in the bin directory
 ```
 
 <b>To Build MCS File for Nexys A7:</b>

@@ -115,6 +115,21 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
     inout gpio_30,
     inout gpio_31,
 
+    input gptimer0_in,
+    output gptimer0_out,
+    input external_clk,
+
+    input gptimer1_in,
+    output gptimer1_out,
+
+    input gptimer2_in,
+    output gptimer2_out,
+
+    input gptimer3_in,
+    output gptimer3_out,
+	
+
+
 
     // ---- System Reset ------//
     input         sys_rst,	//Active Low
@@ -143,9 +158,20 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   wire [3:0]                        m_axi_awcache;
   wire [2:0]                        m_axi_awprot;
   wire                              m_axi_awvalid;
-  wire                              m_axi_awready;    
+  wire                              m_axi_awready; 
+`ifdef BUS_WIDTH128   
+  wire [127:0]                       m_axi_wdata;
+  wire [15:0]                        m_axi_wstrb;
+`elsif BUS_WIDTH64
   wire [63:0]                       m_axi_wdata;
   wire [7:0]                        m_axi_wstrb;
+`elsif BUS_WIDTH32
+  wire [31:0]                       m_axi_wdata;
+  wire [3:0]                        m_axi_wstrb;
+`else
+  wire [127:0]                       m_axi_wdata;
+  wire [15:0]                        m_axi_wstrb;
+`endif
   wire                              m_axi_wlast;
   wire                              m_axi_wvalid;
   wire                              m_axi_wready;   
@@ -165,7 +191,15 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   wire                              m_axi_arready;    
   wire                              m_axi_rready;
   wire [AXI_ID_WIDTH-1:0]           m_axi_rid;
+`ifdef BUS_WIDTH128   
+  wire [127:0]                      m_axi_rdata;
+`elsif BUS_WIDTH64
   wire [63:0]                       m_axi_rdata;
+`elsif BUS_WIDTH32
+  wire [31:0]                       m_axi_rdata;
+`else
+  wire [127:0]                      m_axi_rdata;
+`endif
   wire [1:0]                        m_axi_rresp;
   wire                              m_axi_rlast;
   wire                              m_axi_rvalid;   
@@ -180,8 +214,19 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   wire [2:0]                        s_axi_awprot;
   wire                              s_axi_awvalid;
   wire                              s_axi_awready;    
+`ifdef BUS_WIDTH128   
+  wire [127:0]                       s_axi_wdata;
+  wire [15:0]                        s_axi_wstrb;
+`elsif BUS_WIDTH64
   wire [63:0]                       s_axi_wdata;
   wire [7:0]                        s_axi_wstrb;
+`elsif BUS_WIDTH32
+  wire [31:0]                       s_axi_wdata;
+  wire [3:0]                        s_axi_wstrb;
+`else
+  wire [127:0]                       s_axi_wdata;
+  wire [15:0]                        s_axi_wstrb;
+`endif
   wire                              s_axi_wlast;
   wire                              s_axi_wvalid;
   wire                              s_axi_wready;
@@ -201,7 +246,15 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   wire                              s_axi_arready;
   wire                              s_axi_rready;
   wire [AXI_ID_WIDTH-1:0]           s_axi_rid;
+`ifdef BUS_WIDTH128   
+  wire [127:0]                      s_axi_rdata;
+`elsif BUS_WIDTH64
   wire [63:0]                       s_axi_rdata;
+`elsif BUS_WIDTH32
+  wire [31:0]                       s_axi_rdata;
+`else
+  wire [127:0]                      s_axi_rdata;
+`endif
   wire [1:0]                        s_axi_rresp;
   wire                              s_axi_rlast;
   wire                              s_axi_rvalid;   
@@ -249,6 +302,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    wire gpio_30_in, gpio_30_out, gpio_30_en;
    wire gpio_31_in, gpio_31_out, gpio_31_en;
 
+   wire ip2intc_irpt;
 // ---------------------------------------------------------------------------- //
     wire wire_tck_clk;
     wire wire_trst;
@@ -278,7 +332,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
       .TDO(wire_tdo) // 1-bit input: Test Data Output (TDO) input for USER function.
     );
 
-  // --------- Address width truncation and Reset generation for SoC ------------ //
+
   wire [31:0] temp_s_axi_awaddr, temp_s_axi_araddr;
   assign s_axi_awaddr= temp_s_axi_awaddr [AXI_ADDR_WIDTH-1:0];
   assign s_axi_araddr= temp_s_axi_araddr [AXI_ADDR_WIDTH-1:0];
@@ -483,6 +537,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
         .RST_N(~soc_reset),
         .CLK_tck_clk(wire_tck_clk),
         .RST_N_trst(~wire_trst),
+        .CLK_ext_clk(external_clk),
         .wire_capture_capture_in(wire_capture),
         .wire_run_test_run_test_in(wire_run_test),
         .wire_sel_sel_in(wire_sel),
@@ -499,12 +554,12 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
         .spi0_io_sclk_out(spi0_io_sclk_out),
         .spi0_io_sclk_outen(spi0_io_sclk_outen),
         .spi0_io_sclk_in_val(spi0_io_sclk_in_val),
-        .spi0_io_ncs_out(spi0_io_nss_out),
-        .spi0_io_ncs_outen(spi0_io_nss_outen),
-        .spi0_io_ncs_in_val(spi0_io_nss_in_val),
-	      .spi0_io_miso_out(spi0_io_miso_out),
-	      .spi0_io_miso_outen(spi0_io_miso_outen),
-	      .spi0_io_miso_in_val(spi0_io_miso_in_val),
+        .spi0_io_ncs_out0(spi0_io_nss_out),
+        .spi0_io_ncs_outen0(spi0_io_nss_outen),
+        .spi0_io_ncs_in0_val(spi0_io_nss_in_val),
+	.spi0_io_miso_out(spi0_io_miso_out),
+	.spi0_io_miso_outen(spi0_io_miso_outen),
+	.spi0_io_miso_in_val(spi0_io_miso_in_val),
 
        // UART port definitions
         .uart0_io_SIN(uart0_SIN),
@@ -554,13 +609,25 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
         .i2c0_out_sda_in_in(i2c0_sda_in),
         .i2c0_out_sda_out_en(i2c0_sda_out_en),
 
-			  //I2C ports
+			  ////I2C ports
         .i2c1_out_scl_out (i2c1_scl_out),
         .i2c1_out_scl_in_in(i2c1_scl_in),
         .i2c1_out_scl_out_en(i2c1_scl_out_en),
         .i2c1_out_sda_out(i2c1_sda_out),
         .i2c1_out_sda_in_in(i2c1_sda_in),
         .i2c1_out_sda_out_en(i2c1_sda_out_en),
+
+        .gptimer0_io_input_signal_signal_in(gptimer0_in),
+		    .gptimer0_io_timer_out(gptimer0_out),	
+
+        .gptimer1_io_input_signal_signal_in(gptimer1_in),
+		    .gptimer1_io_timer_out(gptimer1_out),	
+
+        .gptimer2_io_input_signal_signal_in(gptimer2_in),
+		    .gptimer2_io_timer_out(gptimer2_out),	
+
+        .gptimer3_io_input_signal_signal_in(gptimer3_in),
+		    .gptimer3_io_timer_out(gptimer3_out),	
 
         //pin muxed pins
     	  .iocell_io_io7_cell_in_in(io7_cell_in),
@@ -596,7 +663,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
     	  .iocell_io_io18_cell_outen(io18_cell_en),
     	  .iocell_io_io19_cell_outen(io19_cell_en),
     	  .iocell_io_io20_cell_outen(io20_cell_en),
-        
         
 
         //GPIO
@@ -670,7 +736,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 
 
 
-  assign interrupts = 2'b0;
+  assign interrupts = 2'b0 ;
 
 /*   // ---- Instantiating the C-class SoC -------------//
    genvar index;
@@ -686,8 +752,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
       end
    endgenerate*/
 //---- IOBUF FOR I2C -----//
-
-
    IOBUF i2c0_scl_inst(
              .O(i2c0_scl_in),
              .IO(i2c0_scl),
@@ -702,7 +766,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
              .T(~i2c0_sda_out_en)
          );
 
-   //---- IOBUF FOR I2C -----//
+   ////---- IOBUF FOR I2C -----//
    IOBUF i2c1_scl_inst(
              .O(i2c1_scl_in),
              .IO(i2c1_scl),
@@ -846,6 +910,6 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    IOBUF spi0_inst_nss(.O(spi0_io_nss_in_val) ,.IO(spi0_nss) ,.I(spi0_io_nss_out) ,.T(~spi0_io_nss_outen));
    IOBUF spi0_inst_sclk(.O(spi0_io_sclk_in_val) ,.IO(spi0_sclk) ,.I(spi0_io_sclk_out) ,.T(~spi0_io_sclk_outen));
 
-//
+
 
 endmodule
