@@ -65,7 +65,7 @@ index 000000000000..bee1caeb31c2
 +    cpus {
 +        #address-cells = <1>;
 +        #size-cells = <0>;
-+        timebase-frequency = <97656>;
++        timebase-frequency = <>;
 +
 +        cpu0: cpu@0 {
 +            device_type = "cpu";
@@ -232,7 +232,7 @@ index 000000000000..a8c8839c6bf3
 +    cpus {
 +        #address-cells = <1>;
 +        #size-cells = <0>;
-+        timebase-frequency = <97656>;
++        timebase-frequency = <10000000>;
 +
 +        cpu0: cpu@0 {
 +            device_type = "cpu";
@@ -240,7 +240,7 @@ index 000000000000..a8c8839c6bf3
 +            reg = <0>;
 +            riscv,isa = "rv32imac";
 +            mmu-type = "riscv,sv32";
-+            clock-frequency = <50000000>;
++            clock-frequency = <97656>;
 +
 +            cpu0_intc: interrupt-controller {
 +                #interrupt-cells = <1>;

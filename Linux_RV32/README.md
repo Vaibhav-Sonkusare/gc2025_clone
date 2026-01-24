@@ -156,40 +156,9 @@ Follow the READMEs in this order:
 3. `docs/u-boot/README.md`
 4. `docs/linux/README.md`
 5. `docs/buildroot/README.md`
-6. `docs/SDCARD/README.md`
 
 ---
 
 ## Final Summary
 
 > **This repository provides a complete, working reference for bringing up Linux on RV32 (Shakti Yamuna) from power-on to shell prompt.**
-
-## Option 2 
-
-```text
-In The Script Folder all automated Scripts available can use that will compile and create output Files 
-
-1. bash  riscv32_linux_toolchain_imac_install.sh
-
-will Crete a Toolchian.
-
-2. bash buildroot_auto_final_setup.sh
-
-will create a rootfs file system
-
-3. bash linux_auto_final.sh
-
-create dtb and kernel Image
-
-4. bash uboot_auto_final.sh
-
-crete a uboot binary file 
-
-5. bash opensbi_auto_final.sh
-
-it will create fw_payload.elf
-
-order can use same .
- 
-```
-

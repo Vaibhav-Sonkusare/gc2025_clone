@@ -50,7 +50,7 @@ index 00000000000..054526f3abe
 +    cpus {
 +        #address-cells = <1>;
 +        #size-cells = <0>;
-+        timebase-frequency = <97656>;   /* 10 MHz mtimer */
++        timebase-frequency = <0x8000>;   /* 10 MHz mtimer */
 +        cpu0: cpu@0 {
 +            device_type = "cpu";
 +            compatible = "riscv";

@@ -153,7 +153,7 @@ cd ~/gc2025/Linux_RV32/scripts
 Output directory:
 
 ```bash 
-cd  ~/gc2025/Linux_RV32/Downloads/opensbi/build/platform/cclass/yamuna/firmware/
+cd  ~/gc2025/Linux_RV32/build/platform/cclass/yamuna/firmware/
 ``` 
 ```bash
 riscv32-unknown-linux-gnu-gdb
@@ -178,12 +178,11 @@ Type "apropos word" to search for commands related to "word".
 (gdb) c 
 ```
 
-## SPI CHECK COMMANDS
+
 ```bash
 mmc list
 mmc dev 0
 mmc rescan
-use in uboot commmand line to check sd card is detected or Not
 mmc info
 part list mmc 0
 fstype mmc 0:1
@@ -197,8 +196,6 @@ ext4ls mmc 0:2 /
 ## 12. Boot Commands
 
 ```bash
-Use commands to load Kernel and dtb to RAM For Boot linux after connecting SD card.
-
 setenv kernel_addr_r 0x80400000
 setenv fdt_addr_r    0x83000000
 fatload mmc 0:1 ${kernel_addr_r} Image
