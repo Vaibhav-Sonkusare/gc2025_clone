@@ -122,7 +122,7 @@ void configure_counter( uint64_t value)
 
   	if (hartid == 0) {
     	*mtimecmp0 = *mtime + value;
-		log_debug("mtimecmp1 value = %d\n", *mtimecmp0);
+		log_debug("mtimecmp0 value = %d\n", *mtimecmp0);
 		log_info("mtimecmp0 value = %d\n", *mtimecmp0);
   	} else if (hartid == 1) {
     	*mtimecmp1 = *mtime + value;
