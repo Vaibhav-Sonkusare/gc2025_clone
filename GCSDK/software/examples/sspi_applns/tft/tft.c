@@ -1,8 +1,8 @@
 /***************************************************************************
- * Project               	    		      :  shakti devt board
- * Name of the file	            	 	    :  tft.c
+ * Project               	    		:  shakti devt board
+ * Name of the file	            		:  tft.c
  * Brief Description of file            :  TFT display Application code
- * Name of Author    	                  :  Balaji Sivanallaperumal	
+ * Name of Author    	                :  Balaji Sivanallaperumal	
  * Email ID                             :  ospbalaji@gmail.com
 
  Copyright (C) 2019  IIT Madras. All rights reserved.
