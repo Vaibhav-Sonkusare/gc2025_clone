@@ -524,6 +524,9 @@ else
 ifeq ($(PROGRAM),mcp4921dac_chk)
 filepath := sspi_applns/mcp4921dac_chk
 else
+ifeq ($(PROGRAM),tft)
+filepath := sspi_applns/tft
+else
 ifeq ($(PROGRAM),gpt_cntall_extclk)
 filepath := gpt_applns/gpt_cntall_extclk
 else
@@ -576,6 +579,7 @@ ifeq ($(PROGRAM),dhrystone)
 filepath := ../benchmarking/dhrystone
 else
 	@echo "Entry for $(PROGRAM) not present"
+endif
 endif
 endif
 endif
