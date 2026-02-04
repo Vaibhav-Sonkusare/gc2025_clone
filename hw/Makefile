@@ -49,6 +49,9 @@ else ifeq ($(BOARD), vcu118)
 else ifeq ($(BOARD), vcu108)
 	FPGA:=xcvu095-ffva2104-2-e
 	MCS:=false
+else ifeq ($(BOARD), ac701)
+	FPGA:=xc7a200tfbg676-2
+	MCS:=true
 else ifeq ($(BOARD), zcu106)
 	FPGA:=xczu7ev-ffvc1156-2-e
 	MCS:=false
