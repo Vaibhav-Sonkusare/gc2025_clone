@@ -39,7 +39,7 @@
 `endif
 
 `define MemoryBase        'h8000_0000
-`define MemoryEnd         'h8FFF_FFFF
+`define MemoryEnd         'hBFFF_FFFF
 `define TCMBase           'h9000_0000
 `define TCMEnd            'h9FFF_FFFF
 `define ClintBase         'h0200_0000
