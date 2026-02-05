@@ -56,7 +56,7 @@ platform.h - header file for SoS C class SoC on artix7_100t
 
 /*!Tightly Coupled Memory(TCM) Offset. Size 256mB */
 #define TCM_MEM_START 0x80000000 /*! DDR3 Memory Start address */
-#define TCM_MEM_SIZE 0x10000000 /*! DDR3 Memory Size */
+#define TCM_MEM_SIZE 0x40000000 /*! DDR3 Memory Size */
 
 /*!Percentage of Free Memory to be used as stack (0-100). The remaining space will be used by heap */
 #define STACK_PERCENTAGE 50 /*! DDR3 Memory Size */
