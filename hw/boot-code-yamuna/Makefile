@@ -1,5 +1,5 @@
 SHELL := /bin/bash # Use bash syntax
-XLEN=32
+XLEN=64
 
 OUTPUT:=./outputs
 SD_DIR= ./sdcard
