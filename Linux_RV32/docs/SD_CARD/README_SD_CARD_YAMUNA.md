@@ -126,6 +126,13 @@ sync
 ```bash
 sudo tar -xpf ~/gc2025/Linux_RV32/Downloads/buildroot/output/images/rootfs.tar -C /mnt/yamuna/rootfs
 ```
+```text
+Modify /etc/inittab
+After copying the files to the SD card, edit the inittab file and comment out the following line:
+::sysinit:/etc/init.d/rcS
+Change it to:
+#::sysinit:/etc/init.d/rcS
+```
 
 ---
 
