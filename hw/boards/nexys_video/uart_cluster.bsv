@@ -69,7 +69,7 @@ package uart_cluster;
     `ifdef simulate
       mkuart_axi4lite#(core_clock, core_reset, 5, 0, 0) _temp(ifc);
     `else
-        mkuart_axi4lite#(core_clock, core_reset, 163, 0, 0) _temp(ifc);
+        mkuart_axi4lite#(core_clock, core_reset, 130, 0, 0) _temp(ifc);
     `endif
     return ifc;
   endmodule
