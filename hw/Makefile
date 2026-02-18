@@ -73,6 +73,8 @@ default: quick_build_xilinx
 build:  quick_build
 build_sim: quick_build_sim
 build_sim_gdb: quick_build_sim_gdb
+build_vcs_sim: gen_sim_vcs_files
+build_vcs_sim_gdb: gen_sim_vcs_gdb_files
 yamuna_asic: quick_asic_build
 build_hyp: quick_build_xilinx_hyp
 build: ## To start bitstream and MCS file generation for boards (passed through BOARD parameter)
@@ -220,6 +222,18 @@ quick_build_sim: run_setup_simulate
 quick_build_sim_gdb: run_setup_simulate_gdb
 	@make generate_verilog -j && make generate_boot_files_sim link_verilator_gdb
 
+##For verification vcs setup
+.PHONY: gen_sim_vcs_files
+gen_sim_vcs_files: ## Compile BSV and generate simulation executable with VCS and boot files
+gen_sim_vcs_files: run_setup_simulate
+	@make generate_verilog -j && make link_vcs -j && make generate_boot_files_sim
+
+##For VCS GDB
+.PHONY: gen_sim_vcs_gdb_files
+gen_sim_vcs_gdb_files: ## Compile BSV and generate simulation executable with VCS and boot files
+gen_sim_vcs_gdb_files: run_setup_simulate_gdb
+	@make generate_verilog -j && make link_vcs_gdb -j && make generate_boot_files_sim
+	
 
 .PHONY: quick_asic_build
 quick_asic_build: run_setup_fpga
@@ -242,6 +256,18 @@ link_verilator: ## Generate simulation executable using Verilator
 	@make $(VERILATOR_SPEED) VM_PARALLEL_BUILDS=1 -j8 -C obj_dir -f V$(TOP_MODULE).mk                                                         
 	@cp obj_dir/V$(TOP_MODULE) $(BSVOUTDIR)/out
 
+.PHONY: link_vcs                                                                             
+link_vcs: ## Generate simulation executable using VCS                                   
+	@echo "Linking $(TOP_MODULE) using VCS"
+	@export LD_LIBRARY_PATH=${PWD}
+	@mkdir -p $(BSVOUTDIR)
+	@cp vcs_verilog/vcs_sim.v $(VERILOGDIR)
+	@vcs -debug_access+all -fgp -full64 -v2005 -sverilog +vcs+lic+wait -LDFLAGS -Wl,--no-as-needed -l vcs_compile_chain_sdf.log +compsdf +sdfverbose \
+	+define+verbose_1 +define+BSV_RESET_FIFO_ARRAY +define+BSV_RESET_FIFO_HEAD +define+BSV_ASYNC_RESET +vpi +v2k +incdir+${PWD}/build/hw/verilog/ +libext+.v $(VERILOGDIR)/*.v  -top vcs_sim +warn=noTFX-DUMPVARCA \
+	-timescale=1ns/1ps +notimingcheck +cli+4 -o $(BSVOUTDIR)/out
+	@export LD_LIBRARY_PATH=${PWD}/$(BSVOUTDIR)
+	@echo Linking finished
+
 .PHONY: link_verilator_gdb
 link_verilator_gdb: ## Generate simulation executable using Verilator and VPI for GDB
 	@echo "Linking Verilator With the Shakti RBB Vpi"
@@ -261,6 +287,21 @@ link_verilator_gdb: ## Generate simulation executable using Verilator and VPI fo
 	make $(VERILATOR_SPEED) VM_PARALLEL_BUILDS=1 -j4 -C obj_dir -f V$(TOP_MODULE)_edited.mk
 	@cp obj_dir/V$(TOP_MODULE)_edited $(BSVOUTDIR)/out
 	@cp gdb_setup/code.mem$(XLEN) $(BSVOUTDIR)/code.mem
+	@echo Linking finished
+
+.PHONY: link_vcs_gdb
+link_vcs_gdb: ## Generate simulation executable using vcs for GDB
+	@echo "Linking VCS With the Shakti RBB Vpi"
+	@export LD_LIBRARY_PATH=${PWD}
+	@mkdir -p $(BSVOUTDIR)
+	@rm -rf  $(BSVOUTDIR)/*
+	@cp vcs_verilog/vcs_sim.v $(VERILOGDIR)
+	@vcs -debug_access+all -kdb -fgp -full64 -v2005 -sverilog +vcs+lic+wait -LDFLAGS -Wl,--no-as-needed -l vcs_compile_chain_sdf.log +compsdf +sdfverbose \
+	+define+verbose_1 +define+BSV_RESET_FIFO_ARRAY +define+BSV_RESET_FIFO_HEAD +define+BSV_ASYNC_RESET +vpi +v2k +incdir+${PWD}/$(VERILOGDIR)  +libext+.v -load ./rbb_vpi.so  $(VERILOGDIR)/*.v -top vcs_sim  +warn=noTFX-DUMPVARCA \
+	-timescale=1ns/1ps +notimingcheck +cli+4 -o $(BSVOUTDIR)/out
+	@cp gdb_setup/code.mem$(XLEN) $(BSVOUTDIR)/code.mem
+	@cp *.so  $(BSVOUTDIR)
+	@export LD_LIBRARY_PATH=${PWD}/$(BSVOUTDIR)
 	@echo Linking finished
 
 .PHONY: generate_verilog 
