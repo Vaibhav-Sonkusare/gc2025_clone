@@ -5,7 +5,7 @@ isb_sizes:
     isb_s3s4: 8
     isb_s4s5: 8
 num_harts: 1
-hardfloat: False
+hardfloat: True
 merged_rf: False
 s_extension:
   itlb_size: 4
