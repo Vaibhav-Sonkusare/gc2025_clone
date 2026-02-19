@@ -28,10 +28,13 @@ platform.h - header file for Artix 35 T E class SoC
  */
 
 #define CLOCK_FREQUENCY 50000000
-#define CLINT_BASE 0x020000000
+#define CLINT_BASE 0x02000000
+#define MSIP0      0x02000000
+#define MSIP1      0x02000004
+#define MTIMECMP0  0x02004000
+#define MTIMECMP1  0x02004008
 #define MTIME      0x0200BFF8
-#define MTIMECMP   0x02004000
-#define CLINT_DIVISOR   16
+#define CLINT_DIVISOR   256
 
 #define MCAUSE_INT         0x80000000
 #define MCAUSE_CAUSE       0x7FFFFFFF

@@ -2,6 +2,10 @@
 CHANGELOG
 =========
 
+2026-01-12
+-------------------- 
+- Bitstream generation with the latest devices tag 9.0.1
+
 2026-01-05
 -------------------- 
 - Bitstream generation with the latest tags

@@ -32,11 +32,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "platform.h"
 
 extern volatile uint64_t* mtime;
-extern volatile uint64_t* mtimecmp;
+extern volatile uint64_t* mtimecmp0;
+extern volatile uint64_t* mtimecmp1;
+extern volatile uint32_t* msip0;
+extern volatile uint32_t* msip1;
 
 /* function prototype */
 uint64_t get_timer_value(void);
+uint64_t get_hart_id(void);
 void configure_counter(uint64_t value);
 void mach_clint_handler(uintptr_t int_id, uintptr_t epc);
+void mach_sip_clint_handler(uintptr_t int_id, uintptr_t epc);
 
 #endif
