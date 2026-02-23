@@ -42,6 +42,12 @@ volatile uint64_t* mtimecmp1 =  (MTIMECMP1);
 volatile uint32_t* msip0     =  (MSIP0);
 volatile uint32_t* msip1     =  (MSIP1);
 
+volatile uint32_t* mtime_l     =  (volatile uint32_t* ) (MTIME_L);
+volatile uint32_t* mtime_h     =  (volatile uint32_t* ) (MTIME_H);
+volatile uint32_t* mtimecmp_l     =  (volatile uint32_t* ) (MTIMECMP0_L);
+volatile uint32_t* mtimecmp_h     =  (volatile uint32_t* ) (MTIMECMP0_H);
+
+
 
 /** @fn static uint64_t mhartid_read()
  * @brief return the hart ID of the current core
@@ -119,19 +125,33 @@ void configure_counter( uint64_t value)
 	log_trace("\nconfigure_counter entered\n");
 
 	uint64_t hartid = get_hart_id();
+	printf("\n Hard ID: %x", hartid);
+
 
   	if (hartid == 0) {
-    	*mtimecmp0 = *mtime + value;
+#ifdef yamuna
+	uint64_t temp_value;
+	log_trace("\nconfigure_counter entered\n");
+	temp_value = ((*mtime_h << 32) | (*mtime_l)) + value;
+	//*mtimecmp = *mtime + value;
+	*mtimecmp_h = temp_value >> 32;
+	*mtimecmp_l = temp_value & 0xFFFFFFFF;
+	printf("mtime value: %lx ", ((*mtime_h << 32) | (*mtime_l)));
+	printf("\ntemp_value:  %lx ", temp_value);
+#else
+
+		*mtimecmp0 = *mtime + value;
 		log_debug("mtimecmp0 value = %d\n", *mtimecmp0);
 		log_info("mtimecmp0 value = %d\n", *mtimecmp0);
-  	} else if (hartid == 1) {
+		log_debug("mtime value = %d\n", *mtime);
+		log_info("mtime value = %d\n", *mtime);
+#endif
+	} else if (hartid == 1) {
     	*mtimecmp1 = *mtime + value;
 		log_debug("mtimecmp1 value = %d\n", *mtimecmp1);
 		log_info("mtimecmp1 value = %d\n", *mtimecmp1);
   	}
 
-	log_debug("mtime value = %d\n", *mtime);
-	log_info("mtime value = %d\n", *mtime);
 
 	log_trace("\nconfigure_counter exited\n");
 }
@@ -146,9 +166,11 @@ void mach_clint_handler( __attribute__((unused)) uintptr_t int_id,  __attribute_
 {
 	log_trace("\nmach_clint_handler entered\n");
 	uint64_t hartid = get_hart_id();
+
 	//set mtimecmp to some value. On appln reqt basis handle timer interrupt
 	if (hartid == 0) {
-		*mtimecmp0 = -1;
+		configure_counter(CLOCK_FREQUENCY / CLINT_DIVISOR);
+//		*mtimecmp0 = -1;
 	} 
 	else if (hartid == 1) {
 		*mtimecmp1 = -1;

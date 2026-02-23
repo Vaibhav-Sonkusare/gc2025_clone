@@ -708,6 +708,7 @@ endif
 endif
 endif
 endif
+endif
 
 erase: check library
 	@rm -r output
