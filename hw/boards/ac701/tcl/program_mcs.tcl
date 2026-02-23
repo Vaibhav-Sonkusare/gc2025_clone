@@ -11,7 +11,7 @@ set mcs $core_project_dir/$top_module.mcs
 set bitload "up 0x00000000 $bit"
 
 puts "BITSTREAM: $bit  MCS: $mcs"
-#write_cfgmem  -format mcs -size 16 -interface SPIx1 -loadbit $bitload  -force -file $mcs;
+write_cfgmem  -format mcs -size 16 -interface SPIx1 -loadbit $bitload  -force -file $mcs;
 
 open_hw
 connect_hw_server
@@ -20,7 +20,7 @@ set_property PROGRAM.FILE $bit [get_hw_devices xc7a200t_0]
 current_hw_device [get_hw_devices xc7a200t_0]
 refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a200t_0] 0]
 
-create_hw_cfgmem -hw_device [lindex [get_hw_devices xc7a200t_0] 0] [lindex [get_cfgmem_parts {s25fl256sxxxxxx0-spi-x1_x2_x4}] 0]
+create_hw_cfgmem -hw_device [lindex [get_hw_devices xc7a200t_0] 0] [lindex [get_cfgmem_parts {mt25ql256-spi-x1_x2_x4}] 0]
 set_property PROGRAM.BLANK_CHECK  0 [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
 set_property PROGRAM.ERASE  1 [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
 set_property PROGRAM.CFG_PROGRAM  1 [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
@@ -28,7 +28,7 @@ set_property PROGRAM.VERIFY  1 [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_
 set_property PROGRAM.CHECKSUM  0 [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
 refresh_hw_device [lindex [get_hw_devices xc7a200t_0] 0]
 
-set_property PROGRAM.ADDRESS_RANGE  {use_file} [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
+set_property PROGRAM.ADDRESS_RANGE  {entire_device} [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
 set_property PROGRAM.FILES $mcs [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
 set_property PROGRAM.PRM_FILE {} [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
 set_property PROGRAM.UNUSED_PIN_TERMINATION {pull-none} [ get_property PROGRAM.HW_CFGMEM [lindex [get_hw_devices xc7a200t_0] 0]]
@@ -46,5 +46,6 @@ endgroup
 
 disconnect_hw_server localhost:3121;
 puts "INFO: FPGA CFG MEM  has been programmed with the given bitstream"
-puts "Please Disconnect FPGA from USB Port to use"
+puts "Please Disconnect FPGA from USB Port or POWER OFF & ON the board to use"
 exit
+close_hw

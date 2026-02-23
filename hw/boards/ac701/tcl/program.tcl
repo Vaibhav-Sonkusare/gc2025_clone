@@ -21,4 +21,5 @@ close_hw_target
 disconnect_hw_server
 puts "INFO: FPGA has been programmed with the given bitstream"
 exit
+close_hw
 
