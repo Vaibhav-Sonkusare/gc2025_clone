@@ -55,7 +55,4 @@ char *bootlogo = "\n\
 char *bootstring ="\n\
                     SHAKTI PROCESSORS\n\
                   Ganga on Arty-A7-100T\n";
-
-
-
 #endif
