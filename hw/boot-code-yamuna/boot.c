@@ -30,13 +30,15 @@ protocol.
 
 #include <stdint.h>
 #include "sspi.h"
-//#include "app_data.h"
+#include "boot.h"
+
 
 
 #define  WRITE_SIZE write_data[0]
 #define  READ_SIZE 10
 #define FLASH_BASE_ADDRESS 0x00b00000
 #define SSPI_INSTANCE 0
+unsigned char str1[] = "Control transferred to RAM";
 
 /** @fn void delay_loop(unsigned long cntr1, unsigned long cntr2)
  * @brief Delay calculated interms of iterative operation
@@ -56,7 +58,10 @@ void delay_loop(unsigned long cntr1, unsigned long cntr2)
 }
 void jumpToRAM()
 {
-	printf("\n%s\n","Control transferred to RAM");
+//	printf("\n%s\n","Control transferred to RAM");
+	printf("\n%s\n",str1);
+	// delay_loop(1000,2000);
+	// while(1);
 	asm volatile("fence.i");
 	asm volatile( "li x30, 0x80000000" "\n\t"
 			"jr x30" "\n\t"
@@ -78,13 +83,18 @@ void main()
 	int  data = 0, count = 0; //32 bits of data can be written at a time
 	uint32_t length = 11;
 	int* bram_address = (int*) 0x80000000;
-
+	printf("%s\n SHAKTI PROCESSORS \n",bootlogo);
+	printf("Booting on YAMUNA! hart 0 \n");
+	printf("YAMUNA is a SoC build on top of Artix7 100T.\n");
+	printf("The core belongs to Shakti C class, 64 bit.\n");
+	printf("Supported ISA: RV32IMACSU.\n");
 	sspi_init();
 	flash_init();
-	printf("SPI init done\n");
-	printf("\n Com status: %x", sspi_instance[0] -> comm_status);
-	printf("\n FIFO status: %x", sspi_instance[0] -> fifo_status);
-	// sspi_clear_fifo(sspi_instance[SSPI_INSTANCE]);
+
+	// printf("SPI init done\n");
+	// printf("\n Com status: %x", sspi_instance[0] -> comm_status);
+	// printf("\n FIFO status: %x", sspi_instance[0] -> fifo_status);
+	sspi_clear_fifo(sspi_instance[SSPI_INSTANCE]);
 	flash_register_read(0x35);
 	flash_register_read(0x05);
 	// flash_write_bank_register(0x17, 0x80);
@@ -92,12 +102,15 @@ void main()
 	//printf("\n device id is %x",flash_device_id());
 
 	flash_device_id();
+/*
+	while(1);
 	flash_register_read(0x16);
 	printf("\n Com status: %x", sspi_instance[0] -> comm_status);
 	printf("\n FIFO status: %x", sspi_instance[0] -> fifo_status);
 	waitfor(200);
 	delay_loop(1000, 1000);
-	printf("\n Flash device id read complete");
+*/
+	// printf("\n Flash device id read complete");
 	sspi_clear_fifo(sspi_instance[SSPI_INSTANCE]);
 	count = flash_read(read_address);
 	printf("\n count value: %x", count);
@@ -140,8 +153,9 @@ void main()
 	bram_address++;
 	read_address += 4;
 	}
-	printf("\n\nread complete.\n");
+	// printf("\n\nread complete.\n");
 	jumpToRAM();
+	asm volatile ("ebreak");
 	}
 	else
 	{

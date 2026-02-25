@@ -62,7 +62,7 @@ static void flash_read_locations(uint32_t read_address, uint32_t length, int *re
 	for(int i = 0; i < 8193; ++i)
 	{
 		int read_value = flash_read(read_address);
-		printf("\nReading from adddress %x and data \
+		//printf("\nReading from adddress %x and data \
 			   %x\n",read_address,read_value);
 		*read_data++ = read_value;
 		read_address = read_address+4;

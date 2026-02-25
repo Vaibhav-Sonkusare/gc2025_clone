@@ -99,7 +99,7 @@ char flash_cmd_read(char command)
 	sspi_configure_comm_mode(sspi_instance[SSPI_INSTANCE], HALF_DUPLEX);
 #endif
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
-	sspi_notbusy();	
+	sspi_notbusy(sspi_instance[SSPI_INSTANCE]);	
 #ifdef SPI_FULL_DUPLEX
 	recvDATA = sspi_instance[SSPI_INSTANCE]->data_rx;
 #endif
@@ -205,7 +205,7 @@ int flash_cmd_addr(int command, int addr)
 	sspi_enable_txrx(sspi_instance[SSPI_INSTANCE], ENABLE);
 	waitfor(20);
 	log_info("\n Flash Erase command is sent");
-	sspi_notbusy();
+	sspi_notbusy(sspi_instance[SSPI_INSTANCE]);
 	log_info("\n Flash Erase command is sent");
 	return 1;
 }

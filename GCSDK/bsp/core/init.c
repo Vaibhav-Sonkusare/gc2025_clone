@@ -90,7 +90,7 @@ inline static void trap_init(void)
 	mcause_interrupt_table[USER_SW_INTERRUPT]        = default_handler;
 	mcause_interrupt_table[SUPER_SW_INTERRUPT]       = default_handler;
 	mcause_interrupt_table[RESERVED_INTERRUPT0]      = default_handler;
-	mcause_interrupt_table[MACH_SW_INTERRUPT]        = default_handler;
+	mcause_interrupt_table[MACH_SW_INTERRUPT]        = mach_sip_clint_handler;
 	mcause_interrupt_table[USER_TIMER_INTERRUPT]     = default_handler;
 	mcause_interrupt_table[SUPER_TIMER_INTERRUPT]    = default_handler;
 	mcause_interrupt_table[RESERVED_INTERRUPT1]      = default_handler;

@@ -55,6 +55,9 @@ else ifeq ($(BOARD), ac701)
 else ifeq ($(BOARD), zcu106)
 	FPGA:=xczu7ev-ffvc1156-2-e
 	MCS:=false
+else ifeq ($(BOARD), kcu105)
+	FPGA:=xcku040-ffva1156-2-e
+	MCS:=false
 endif
 
 ifeq ($(buswidth), 128)
@@ -204,7 +207,7 @@ ifeq ($(XLEN_build), 32)
 	@cp boot-code-yamuna/outputs/boot.mem $(VERILOGDIR)/
 else ifeq ($(XLEN_build), 64)
 	@cd boot-code-ganga; make
-#	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
+	@cp boot-code-ganga/outputs/boot.mem $(VERILOGDIR)/
 else
 	@cd boot-code; make
 	@cp boot-code/outputs/boot.mem $(VERILOGDIR)/

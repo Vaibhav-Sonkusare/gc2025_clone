@@ -31,12 +31,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "traps.h"
 #include "platform.h"
 
+#define MTIMECMP0_L  0x02004000
+#define MTIMECMP0_H  0x02004004
+#define MTIMECMP1_L  0x02004008
+#define MTIMECMP1_H  0x0200400C
+#define MTIME_L      0x0200BFF8
+#define MTIME_H      0x0200BFFC
+
+
 extern volatile uint64_t* mtime;
-extern volatile uint64_t* mtimecmp;
+extern volatile uint64_t* mtimecmp0;
+extern volatile uint64_t* mtimecmp1;
+extern volatile uint32_t* msip0;
+extern volatile uint32_t* msip1;
+
+extern volatile uint32_t* mtime_l;
+extern volatile uint32_t* mtime_h;
+extern volatile uint32_t* mtimecmp_l;
+extern volatile uint32_t* mtimecmp_h;
 
 /* function prototype */
 uint64_t get_timer_value(void);
+uint64_t get_hart_id(void);
 void configure_counter(uint64_t value);
 void mach_clint_handler(uintptr_t int_id, uintptr_t epc);
+void mach_sip_clint_handler(uintptr_t int_id, uintptr_t epc);
 
 #endif

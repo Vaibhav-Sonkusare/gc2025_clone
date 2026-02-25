@@ -36,8 +36,31 @@ interrupt handler, configure the counter and support for e and c class clint tim
 #include "gpiov2.h"
 #endif
 
-volatile uint64_t* mtime    =  (MTIME);
-volatile uint64_t* mtimecmp =  (MTIMECMP);
+volatile uint64_t* mtime     =  (MTIME);
+volatile uint64_t* mtimecmp0 =  (MTIMECMP0);
+volatile uint64_t* mtimecmp1 =  (MTIMECMP1);
+volatile uint32_t* msip0     =  (MSIP0);
+volatile uint32_t* msip1     =  (MSIP1);
+
+volatile uint32_t* mtime_l     =  (volatile uint32_t* ) (MTIME_L);
+volatile uint32_t* mtime_h     =  (volatile uint32_t* ) (MTIME_H);
+volatile uint32_t* mtimecmp_l     =  (volatile uint32_t* ) (MTIMECMP0_L);
+volatile uint32_t* mtimecmp_h     =  (volatile uint32_t* ) (MTIMECMP0_H);
+
+
+
+/** @fn static uint64_t mhartid_read()
+ * @brief return the hart ID of the current core
+ * @details Reads mhartid CSR (XLEN-wide) and returns it as uint64_t.
+ *          Safe for both RV32 and RV64.
+ * @return unsigned 64bit hart ID
+ */
+static uint64_t mhartid_read(void)
+{
+  unsigned long hartid;
+  asm volatile ("csrr %0, mhartid" : "=r"(hartid));
+  return (uint64_t)hartid;
+}
 
 /** @fn static unsigned long mtime_low( )
  * @brief return the lower 32bit of mtime.
@@ -80,6 +103,18 @@ uint64_t get_timer_value()
 #endif
 }
 
+/** @fn uint64_t get_hart_id()
+ * @brief return hart ID in 64-bit format
+ * @return unsigned 64bit hart ID
+ */
+uint64_t get_hart_id(void)
+{
+  unsigned long hartid;
+  asm volatile ("csrr %0, mhartid" : "=r"(hartid));
+  return (uint64_t)hartid;
+}
+
+
 /** @fn void configure_counter( uint64_t value)
  * @brief sets up the timer
  * @details sets the mtimecmp to current mtime + delta
@@ -89,13 +124,34 @@ void configure_counter( uint64_t value)
 {
 	log_trace("\nconfigure_counter entered\n");
 
-	*mtimecmp = *mtime + value;
+	uint64_t hartid = get_hart_id();
+	printf("\n Hard ID: %x", hartid);
 
-	log_debug("mtimecmp value = %d\n", *mtimecmp);
-	log_debug("mtime value = %d\n", *mtime);
 
-	log_info("mtimecmp value = %d\n", *mtimecmp);
-	log_info("mtime value = %d\n", *mtime);
+  	if (hartid == 0) {
+#ifdef yamuna
+	uint64_t temp_value;
+	log_trace("\nconfigure_counter entered\n");
+	temp_value = ((*mtime_h << 32) | (*mtime_l)) + value;
+	//*mtimecmp = *mtime + value;
+	*mtimecmp_h = temp_value >> 32;
+	*mtimecmp_l = temp_value & 0xFFFFFFFF;
+	printf("mtime value: %lx ", ((*mtime_h << 32) | (*mtime_l)));
+	printf("\ntemp_value:  %lx ", temp_value);
+#else
+
+		*mtimecmp0 = *mtime + value;
+		log_debug("mtimecmp0 value = %d\n", *mtimecmp0);
+		log_info("mtimecmp0 value = %d\n", *mtimecmp0);
+		log_debug("mtime value = %d\n", *mtime);
+		log_info("mtime value = %d\n", *mtime);
+#endif
+	} else if (hartid == 1) {
+    	*mtimecmp1 = *mtime + value;
+		log_debug("mtimecmp1 value = %d\n", *mtimecmp1);
+		log_info("mtimecmp1 value = %d\n", *mtimecmp1);
+  	}
+
 
 	log_trace("\nconfigure_counter exited\n");
 }
@@ -109,9 +165,16 @@ void configure_counter( uint64_t value)
 void mach_clint_handler( __attribute__((unused)) uintptr_t int_id,  __attribute__((unused)) uintptr_t epc)
 {
 	log_trace("\nmach_clint_handler entered\n");
+	uint64_t hartid = get_hart_id();
 
 	//set mtimecmp to some value. On appln reqt basis handle timer interrupt
-	*mtimecmp = -1;
+	if (hartid == 0) {
+		configure_counter(CLOCK_FREQUENCY / CLINT_DIVISOR);
+//		*mtimecmp0 = -1;
+	} 
+	else if (hartid == 1) {
+		*mtimecmp1 = -1;
+	}
 #ifdef sos
 	gpiov2_init();
 	gpiov2_instance->direction = 0x1;
@@ -119,5 +182,20 @@ void mach_clint_handler( __attribute__((unused)) uintptr_t int_id,  __attribute_
 #endif
 	log_info("Timer interrupt handled \n");
 
+	log_trace("mach_clint_handler exited\n");
+}
+
+void mach_sip_clint_handler( __attribute__((unused)) uintptr_t int_id,  __attribute__((unused)) uintptr_t epc)
+{
+	uint64_t hartid = get_hart_id();
+	if (hartid == 0) {
+		*msip0 = 0;
+		log_info("MSIP0 Machine Software interrupt handled \n");
+	} 
+	else if (hartid == 1) {
+		*msip1 = 0;
+		log_info("MSIP1 Machine Software interrupt handled \n");
+	}
+	log_trace("\nmach_clint_handler entered\n");
 	log_trace("mach_clint_handler exited\n");
 }
