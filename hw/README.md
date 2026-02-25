@@ -58,7 +58,8 @@ For nexys_video support pass BOARD=nexys_video
 ```
   $ git clone https://gitlab.com/shaktiproject/gc2025.git
   $ cd gc2025/hw
-  $ make build_sim BOARD=arty_a7_ganga
+  $ make build_sim BOARD=arty_a7_ganga #for Verilator
+  $ make build_vcs_sim BOARD=arty_a7_ganga #for VCS
 ```
 For nexys_video support pass BOARD=nexys_video 
 
@@ -67,7 +68,8 @@ For nexys_video support pass BOARD=nexys_video
 ```
   $ git clone https://gitlab.com/shaktiproject/gc2025.git
   $ cd gc2025/hw
-  $ make build_sim_gdb BOARD=arty_a7_ganga
+  $ make build_sim_gdb BOARD=arty_a7_ganga #for Verilator
+  $ make build_vcs_sim_gdb BOARD=arty_a7_ganga #for VCS
 ```
 For nexys_video support pass BOARD=nexys_video 
 
@@ -82,9 +84,36 @@ After building Simulation for Ganga/Yamuna SoC, to generate the code.mem follow 
 Place the generated code.mem in the bin directory, then follow the below steps,
 
   $ cd bin
-  $ ./out +trace  #to enable waveform dumping in the logs directory
+  $ ./out +trace  #to enable waveform dumping in the logs directory [to run in verilator]
+  $ ./out +vcd  #to enable waveform dumping [to run in VCS]
+
 
 The print statements in the code will be printed in the app_log file in the bin directory
+```
+
+<b>To Perform GDB Simulation:</b>
+
+```
+After building executable "out" for GC2025 SoC with the build_sim_gdb / build_vcs_sim_gdb command,
+
+In first tab go to the hw/bin directory,
+  $ ./out +trace  #trace to enable waveform dumping in the logs directory [to run in verilator]
+  $ ./out +vcd  #vcd to enable waveform dumping [to run in VCS]
+
+In second tab connect the openocd,
+  $ sudo openocd -f gdb_setup/shakti_ocd.cfg
+
+In third tab open the gdb and establish the connection,
+  $ riscv64-unknown-elf-gdb
+  (gdb) source gdb_setup/gdb.script
+  (gdb) file <path to the executable file>
+  (gdb) load
+  (gdb) compare-sections #if any mismatch, load again
+  (gdb) c
+
+
+Load the code in the third tab and see the prints in the app_log[UART0] file in the bin directory 
+
 ```
 
 <b>To Build MCS File for Nexys A7:</b>
