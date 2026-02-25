@@ -202,6 +202,8 @@ ifeq ($(PROGRAM),all)
 	cd ./malloc_test && $(MAKE) all TARGET=$(TARGET)
 	cd ./xadc_applns && $(MAKE) all TARGET=$(TARGET)
 	cd ./eth_applns && $(MAKE) all TARGET=$(TARGET)
+	cd ./AS32-TTL-100_LoRa && $(MAKE) all TARGET=$(TARGET)
+
 else
 ifeq ($(PROGRAM),loopback)
 filepath := uart_applns/loopback
@@ -458,6 +460,9 @@ else
 ifeq ($(PROGRAM),sspi_full_duplex)
 filepath := sspi_testcases/sspi_full_duplex
 else
+ifeq ($(PROGRAM),sdcard)
+filepath := sspi_applns/sdcard
+else
 ifeq ($(PROGRAM),adc_dac_test)
 filepath := sspi_applns/adc_dac_test
 else
@@ -581,7 +586,21 @@ else
 ifeq ($(PROGRAM),dhrystone)
 filepath := ../benchmarking/dhrystone
 else
+ifeq ($(PROGRAM),lora_basic_test)
+filepath := AS32-TTL-100_LoRa/lora_basic_test
+else
+ifeq ($(PROGRAM),lora_readConfig)
+filepath := AS32-TTL-100_LoRa/lora_readConfig
+else
+ifeq ($(PROGRAM),lora_send_receive)
+filepath := AS32-TTL-100_LoRa/lora_send_receive
+else
+
 	@echo "Entry for $(PROGRAM) not present"
+endif
+endif
+endif
+endif
 endif
 endif
 endif

@@ -90,7 +90,8 @@ SSPI_TESTS := $(shell cd software/examples/sspi_testcases/ && ls -d * | grep -v 
 PLIC_APPS := $(shell cd software/examples/plic_applns/ && ls -d * | grep -v Makefile )
 XADC_APPS := $(shell cd software/examples/xadc_applns/ && ls -d * | grep -v Makefile )
 ETH_APPS := $(shell cd software/examples/eth_applns/ && ls -d * | grep -v Makefile )
-APP_DIR := $(GPIOV2_APPS) $(UART_APPS) $(I2C_APPS) $(UART_TESTS) $(PWM_APPS) $(SSPI_APPS) $(SSPI_TESTS) $(PWMV2_APPS) $(PLIC_APPS)
+LORA_APPS := $(shell cd software/examples/AS32-TTL-100_LoRa/ && ls -d * | grep -v Makefile )
+APP_DIR := $(GPIOV2_APPS) $(UART_APPS) $(I2C_APPS) $(UART_TESTS) $(PWM_APPS) $(SSPI_APPS) $(SSPI_TESTS) $(PWMV2_APPS) $(PLIC_APPS) $(LORA_APPS)
 
 
 #bsp board specific files path
@@ -183,6 +184,7 @@ ifeq ($(PROGRAM),)
 	cd ./software/examples/xadc_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/eth_applns && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/examples/gpt_applns && $(MAKE) clean CLEAR=CLEAR
+	cd ./software/examples/AS32-TTL-100_LoRa && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/benchmarking && $(MAKE) clean CLEAR=CLEAR
 	cd ./software/projects && $(MAKE) clean CLEAR=CLEAR
 else
