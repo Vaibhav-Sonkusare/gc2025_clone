@@ -1,0 +1,12 @@
+VmkTbSoc_edited__pch.h.fast.gch: VmkTbSoc_edited__pch.h \
+ /usr/local/share/verilator/include/verilated.h \
+ /usr/local/share/verilator/include/verilatedos.h \
+ /usr/local/share/verilator/include/verilated_config.h \
+ /usr/local/share/verilator/include/verilated_types.h \
+ /usr/local/share/verilator/include/verilated_funcs.h \
+ /usr/local/share/verilator/include/verilated_dpi.h \
+ /usr/local/share/verilator/include/verilated.h \
+ /usr/local/share/verilator/include/verilated_sym_props.h \
+ /usr/local/share/verilator/include/vltstd/svdpi.h \
+ VmkTbSoc_edited__Syms.h VmkTbSoc_edited.h VmkTbSoc_edited___024root.h \
+ VmkTbSoc_edited___024unit.h

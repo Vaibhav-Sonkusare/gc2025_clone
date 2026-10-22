@@ -311,6 +311,7 @@ link_vcs_gdb: ## Generate simulation executable using vcs for GDB
 generate_verilog: $(BSVBUILDDIR)/$(TOP_BIN)
 	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/RegFile.v ${VERILOGDIR}  
 	@cp ${BS_VERILOG_LIB}/../Verilog.Vivado/BRAM2BELoad.v ${VERILOGDIR}  
+	@cp ./ip_verilog/* ${VERILOGDIR}
 	@cp ./common_verilog/BRAM1Load.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/FIFO2.v ${VERILOGDIR}
 	@cp ${BS_VERILOG_LIB}/FIFO1.v ${VERILOGDIR}

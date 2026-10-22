@@ -52,6 +52,8 @@ package mixed_cluster;
     method Bit#(2) sb_ext_interrupt;
     (*always_ready, always_enabled*)
     interface GPIO#(32) gpio_io;						//GPIO IO interface
+
+    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) vga_c_master;
     
     (*always_ready,always_enabled*)
 	  interface Ifc_gptimer_io gptimer0_io;
@@ -65,7 +67,7 @@ package mixed_cluster;
     interface IOCellSide pinmuxtop_iocell_side;
     interface PeripheralSide pinmuxtop_peripheral_side;
     (*always_ready, always_enabled*)
-		method Action interrupts(Bit#(13) inp);
+		method Action interrupts(Bit#(14) inp);
     interface AXI4_Lite_Slave_IFC#(`paddr, `buswidth, `USERSPACE) slave;
   endinterface
 
@@ -93,7 +95,7 @@ endmodule
   endmodule
 
   (*synthesize*)
-  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, `USERSPACE, 35, 2, 7));
+  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, `USERSPACE, 36, 2, 7));
     let ifc();
     mkplic_axi4lite#(`PLICBase)_temp(ifc);
     return ifc;
@@ -128,6 +130,8 @@ endmodule
       slave_num = `XADC_slave_num;
     else if(addr >= `PinmuxBase && addr <= `PinmuxEnd)
       slave_num = `Pinmux_slave_num;
+    else if(addr >= `VGAcBase && addr <= `VGAcEnd)
+      slave_num = `VGAc_slave_num;
     else
       slave_num = `MixedCluster_err_slave_num;
       
@@ -155,7 +159,7 @@ endmodule
     let gptimer3 <- mkgptimer(ext_clk);
     let pinmuxtop <- mkpinmuxtop();
     Ifc_err_slave_axi4lite#(`paddr, `buswidth, `USERSPACE ) err_slave <- mkerr_slave_axi4lite;
-		Wire#(Bit#(13)) wr_external_interrupts <- mkDWire('d0);
+		Wire#(Bit#(14)) wr_external_interrupts <- mkDWire('d0);
     Wire#(Bit#(2)) wr_sb_ext_interrupt <- mkDWire(0);
 
 		//Rule to connect PLIC interrupt to the core's sideband
@@ -167,7 +171,7 @@ endmodule
     rule rl_connect_plic_connections;
 			let tmp <- gpio.sb_gpio_to_plic.get;
 			Bit#(16) lv_gpio_intr= truncate(pack(tmp));
-			Bit#(35) plic_inputs= {wr_external_interrupts[12:6], i2c1.isint, i2c0.isint, gptimer3.sb_interrupt, gptimer2.sb_interrupt, gptimer1.sb_interrupt, gptimer0.sb_interrupt, lv_gpio_intr, wr_external_interrupts[5:0]};
+			Bit#(36) plic_inputs= {wr_external_interrupts[13:6], i2c1.isint, i2c0.isint, gptimer3.sb_interrupt, gptimer2.sb_interrupt, gptimer1.sb_interrupt, gptimer0.sb_interrupt, lv_gpio_intr, wr_external_interrupts[5:0]};
 			plic.sb_frm_sources(plic_inputs);
 		endrule
 
@@ -200,12 +204,13 @@ endmodule
 
     method sb_ext_interrupt = wr_sb_ext_interrupt;
     interface gpio_io= gpio.io;
-		method Action interrupts(Bit#(13) inp);
+		method Action interrupts(Bit#(14) inp);
 			wr_external_interrupts<= inp;
 		endmethod
     interface pinmuxtop_iocell_side = pinmuxtop.pinmuxaxi4lite_iocell_side;
     interface pinmuxtop_peripheral_side = pinmuxtop.pinmuxaxi4lite_peripheral_side;
     interface slave= c2s_xactor.axi_side;
+    interface vga_c_master = fabric.v_to_slaves[`VGAc_slave_num];
   endmodule
 endpackage
 

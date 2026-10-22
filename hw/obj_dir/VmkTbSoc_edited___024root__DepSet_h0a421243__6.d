@@ -1,0 +1,3 @@
+VmkTbSoc_edited___024root__DepSet_h0a421243__6.o: \
+ VmkTbSoc_edited___024root__DepSet_h0a421243__6.cpp \
+ VmkTbSoc_edited__pch.h VmkTbSoc_edited___024root.h

@@ -212,7 +212,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 28)
   wire                              s_axi_rlast;
   wire                              s_axi_rvalid;   
   wire [11:0]                       device_temp; 
-  wire [1:0]                         interrupts;
+  wire [2:0]                         interrupts;
 
    wire phy_mdio_o, phy_mdio_i, phy_mdio_t;
 
@@ -837,7 +837,8 @@ axi_ethernetlite_0 eth10 (
 //
 //          );
 
-  assign interrupts = {eth10_ip2intc_irpt, 1'b0};
+  wire VGA_ip_intr;
+  assign interrupts = {VGA_ip_intr, eth10_ip2intc_irpt, 1'b0};
 
 /*   // ---- Instantiating the C-class SoC -------------//
    genvar index;

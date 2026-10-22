@@ -118,7 +118,7 @@
 `define UART2End      'h0001_1540
 
 // - Mixed Cluster
-`define MixedCluster_Num_Slaves 9
+`define MixedCluster_Num_Slaves 10
 `define MixedCluster_Num_Masters 1
 
 `define I2C0_slave_num 0
@@ -129,7 +129,8 @@
 `define GPIO_slave_num 5
 `define XADC_slave_num 6
 `define Pinmux_slave_num 7
-`define MixedCluster_err_slave_num 8
+`define VGA_slave_num 8
+`define MixedCluster_err_slave_num 9
 
 `define I2C0Base    'h0004_0000
 `define I2C0End     'h0004_00FF
@@ -148,5 +149,6 @@
 `define PinmuxEnd       'h0004_15FF
 `define PLICBase	  'h0C00_0000
 `define PLICEnd	    'h0FFF_FFFF
-
-
+`define VGABase     'h0004_2000
+`define VGAEnd      'h0004_2FFF
+// Mixed cluster ends at h0004_15FF. need to modify VGAEnd

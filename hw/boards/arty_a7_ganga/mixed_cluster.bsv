@@ -47,6 +47,7 @@ package mixed_cluster;
   `include "Soc.defines"
 
   interface Ifc_mixed_cluster;
+    interface VGA_Master_IFC#(`paddr, 32, 0) vga_master;
 		method I2C_out i2c0_out;									//I2c IO interface
 //		method I2C_out i2c1_out;
     (*always_ready,always_enabled*)
@@ -59,7 +60,7 @@ package mixed_cluster;
     interface IOCellSide pinmuxtop_iocell_side;
     interface PeripheralSide pinmuxtop_peripheral_side;
     (*always_ready, always_enabled*)
-		method Action interrupts(Bit#(13) inp);
+		method Action interrupts(Bit#(14) inp);
     interface AXI4_Lite_Slave_IFC#(`paddr, `buswidth, `USERSPACE) slave;
 //    interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) xadc_master;
   endinterface
@@ -88,7 +89,7 @@ endmodule
   endmodule
 
   (*synthesize*)
-  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, `USERSPACE, 35, 2, 7));
+  module mkplic(Ifc_plic_axi4lite#(`paddr, `buswidth, `USERSPACE, 36, 2, 7));
     let ifc();
     mkplic_axi4lite#(`PLICBase)_temp(ifc);
     return ifc;
@@ -115,6 +116,8 @@ endmodule
 			slave_num = `GPTimer0_slave_num;
     else if(addr>= `GPTimer1Base && addr<= `GPTimer1End)
 		  slave_num = `GPTimer1_slave_num;
+    else if(addr >= `VGABase && addr <= `VGAEnd)
+      slave_num = `VGA_slave_num;
     else if(addr >= `PinmuxBase && addr <= `PinmuxEnd)
       slave_num = `Pinmux_slave_num;
     else
@@ -142,7 +145,7 @@ endmodule
     let gptimer1 <- mkgptimer(ext_clk);
     let pinmuxtop <- mkpinmuxtop();
     Ifc_err_slave_axi4lite#(`paddr, `buswidth, `USERSPACE ) err_slave <- mkerr_slave_axi4lite;
-		Wire#(Bit#(13)) wr_external_interrupts <- mkDWire('d0);
+		Wire#(Bit#(14)) wr_external_interrupts <- mkDWire('d0);
     Wire#(Bit#(2)) wr_sb_ext_interrupt <- mkDWire(0);
 
 		//Rule to connect PLIC interrupt to the core's sideband
@@ -181,12 +184,13 @@ endmodule
     interface gptimer1_io = gptimer1.io;
     method sb_ext_interrupt = wr_sb_ext_interrupt;
     interface gpio_io= gpio.io;
-		method Action interrupts(Bit#(13) inp);
+		method Action interrupts(Bit#(14) inp);
 			wr_external_interrupts<= inp;
 		endmethod
     interface pinmuxtop_iocell_side = pinmuxtop.pinmuxaxi4lite_iocell_side;
     interface pinmuxtop_peripheral_side = pinmuxtop.pinmuxaxi4lite_peripheral_side;
     interface slave= c2s_xactor.axi_side;
+    interface vga_master = fabric.v_to_slaves[`VGA_slave_num];
 //    interface xadc_master = fabric.v_to_slaves[`XADC_slave_num];
   endmodule
 endpackage

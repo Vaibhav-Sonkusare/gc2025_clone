@@ -1,0 +1,124 @@
+# ================================================================
+# VGA LCD IP — AXI4 Simulation Makefile
+#
+# Targets:
+#   make sim_slave   — AXI4-Lite slave unit test
+#   make sim_master  — AXI4 Full master unit test
+#   make sim_top     — Integration test (all modules)
+#   make sim_all     — Run all three
+#   make wave_slave  — Open slave waveform in GTKWave
+#   make wave_master — Open master waveform in GTKWave
+#   make wave_top    — Open top waveform in GTKWave
+#   make clean       — Remove generated files
+# ================================================================
+
+IVERILOG = iverilog
+VVP      = vvp
+GTKWAVE  = gtkwave
+
+# Include path
+INC = -I.
+
+
+# All original IP source files (not modified)
+IP_SRCS = \
+    vga_fifo.v        \
+    vga_fifo_dc.v     \
+    vga_csm_pb.v      \
+    vga_pgen.v        \
+    vga_tgen.v        \
+    vga_vtim.v        \
+    vga_colproc.v     \
+    vga_curproc.v     \
+    vga_clkgen.v      \
+    vga_cur_cregs.v   \
+    generic_dpram.v   \
+    generic_spram.v
+
+# New AXI4 source files
+AXI_SRCS = \
+    vga_axi_slave.v   \
+    vga_axi_master.v  \
+    vga_axi_top.v
+
+# ----------------------------------------------------------------
+# TB1: AXI4-Lite Slave unit test
+# ----------------------------------------------------------------
+SLAVE_TB_SRCS = vga_axi_slave_tb.v vga_axi_slave.v vga_cur_cregs.v
+
+sim_slave: slave_tb
+	@echo "\n===== Running AXI4-Lite Slave Testbench =====\n"
+	$(VVP) slave_tb
+	@echo "\n===== Slave TB Done =====\n"
+
+slave_tb: $(SLAVE_TB_SRCS)
+	$(IVERILOG) $(INC) -o slave_tb $(SLAVE_TB_SRCS)
+
+wave_slave: slave_tb.vcd
+	$(GTKWAVE) slave_tb.vcd &
+
+slave_tb.vcd: slave_tb
+	$(VVP) slave_tb
+
+# ----------------------------------------------------------------
+# TB2: AXI4 Full Master unit test
+# ----------------------------------------------------------------
+MASTER_TB_SRCS = vga_axi_master_tb.v vga_axi_master.v vga_fifo.v
+
+sim_master: master_tb
+	@echo "\n===== Running AXI4 Full Master Testbench =====\n"
+	$(VVP) master_tb
+	@echo "\n===== Master TB Done =====\n"
+
+master_tb: $(MASTER_TB_SRCS)
+	$(IVERILOG) $(INC) -o master_tb $(MASTER_TB_SRCS)
+
+wave_master: master_tb.vcd
+	$(GTKWAVE) master_tb.vcd &
+
+master_tb.vcd: master_tb
+	$(VVP) master_tb
+
+# ----------------------------------------------------------------
+# TB3: Top-level Integration test
+# ----------------------------------------------------------------
+TOP_TB_SRCS = vga_axi_top_tb.v $(AXI_SRCS) $(IP_SRCS)
+
+sim_top: top_tb
+	@echo "\n===== Running Integration Testbench =====\n"
+	$(VVP) top_tb
+	@echo "\n===== Top TB Done =====\n"
+
+top_tb: $(TOP_TB_SRCS)
+	$(IVERILOG) $(INC) -o top_tb $(TOP_TB_SRCS)
+
+wave_top: top_tb.vcd
+	$(GTKWAVE) top_tb.vcd &
+
+top_tb.vcd: top_tb
+	$(VVP) top_tb
+
+# ----------------------------------------------------------------
+# Run all tests
+# ----------------------------------------------------------------
+sim_all: sim_slave sim_master sim_top
+	@echo "\n===== ALL SIMULATIONS COMPLETE =====\n"
+
+# ----------------------------------------------------------------
+# Lint (Verilator — checks new AXI4 files only)
+# ----------------------------------------------------------------
+lint:
+	verilator --lint-only -Wall --language 1364-2001 $(INC) vga_axi_slave.v
+	verilator --lint-only -Wall --language 1364-2001 --no-timing $(INC) vga_axi_master.v
+	@echo "Lint complete."
+
+# ----------------------------------------------------------------
+# Clean
+# ----------------------------------------------------------------
+clean:
+	rm -f slave_tb master_tb top_tb
+	rm -f slave_tb.vcd master_tb.vcd top_tb.vcd
+	rm -rf obj_dir
+
+.PHONY: sim_slave sim_master sim_top sim_all lint clean \
+        wave_slave wave_master wave_top

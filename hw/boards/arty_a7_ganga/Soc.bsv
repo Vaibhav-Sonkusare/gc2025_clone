@@ -127,6 +127,7 @@ package Soc;
   interface Ifc_chip_io;
     interface Ifc_sspi_io spi0_io;
     interface RS232 uart0_io;
+    interface VGA_Master_IFC#(`paddr, 32, 0) vga_master;
 		method I2C_out i2c0_out;									//I2c IO interface
     (*always_ready, always_enabled*)
     // interface AXI4_Lite_Master_IFC#(`paddr, `buswidth, `USERSPACE) xadc_master;
@@ -268,7 +269,7 @@ package Soc;
 //    (*always_enabled,always_ready*)
 //    method Bit#(1)gpio_31_outen;
     (*always_ready, always_enabled*)
-    method Action ext_interrupts(Bit#(2) i);
+    method Action ext_interrupts(Bit#(3) i);
   endinterface
 
   interface Ifc_soc_sb;
@@ -334,7 +335,7 @@ package Soc;
     `ifdef simulate
       Ifc_sign_dump signature <- mksign_dump();
     `endif
-    Wire#(Bit#(2)) wr_ext_interrupts <- mkWire();
+    Wire#(Bit#(3)) wr_ext_interrupts <- mkWire();
 
     Wire#(Bit#(1)) wr_gpio4_in <- mkDWire(0);
     Wire#(Bit#(1)) wr_gpio7_in <- mkDWire(0);
@@ -661,9 +662,10 @@ package Soc;
 //		method  i2c1_out = mixed_cluster.i2c1_out;									//I2c IO interface
     interface iocell_io = mixed_cluster.pinmuxtop_iocell_side;						//GPIO IO interface
 //    interface xadc_master = mixed_cluster.xadc_master;
+    interface vga_master = mixed_cluster.vga_master;
     interface eth_master = slow_fabric.v_to_slaves[`Eth_slave_num];
     interface mem_master = fabric.v_to_slaves [`Memory_slave_num];
-    method Action ext_interrupts(Bit#(2) i);
+    method Action ext_interrupts(Bit#(3) i);
       wr_ext_interrupts <= i;
     endmethod
   endinterface;

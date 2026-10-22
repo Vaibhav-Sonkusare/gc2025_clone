@@ -65,6 +65,13 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
     input         uart0_SIN,
     output        uart0_SOUT,
 
+  // ---- VGA ports ---------//
+    output [3:0] vga_r,
+    output [3:0] vga_g,
+    output [3:0] vga_b,
+    output       vga_hs,
+    output       vga_vs,
+
 //   // ---- I2C ports --------//
     inout         i2c0_sda,
     inout         i2c0_scl,
@@ -72,20 +79,20 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
     inout         i2c1_scl,
 
 //   // ---- SPI ports ---------//
-   inout       spi0_mosi,
-// output       spi0_sclk,// if external flash enable this or disable if onboard flash
-   inout       spi0_nss,
-   inout        spi0_miso,
-   inout        spi0_sclk,
+//    inout       spi0_mosi,
+// // output       spi0_sclk,// if external flash enable this or disable if onboard flash
+//    inout       spi0_nss,
+//    inout        spi0_miso,
+//    inout        spi0_sclk,
 
   // ---- io_cell_ports(Pin Muxed) ---------//
-    inout io7_cell,
-    inout io8_cell,
-    inout io9_cell,
-    inout io10_cell,
-    inout io12_cell,
-    inout io13_cell,
-    inout io16_cell,
+    // inout io7_cell,
+    // inout io8_cell,
+    // inout io9_cell,
+    // inout io10_cell,
+    // inout io12_cell,
+    // inout io13_cell,
+    // inout io16_cell,
     inout io17_cell,
     inout io18_cell,
     inout io19_cell,
@@ -93,11 +100,11 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 
 
     // ---- GPIO ports --------//
-    inout gpio_4,
-    inout gpio_7,
-    inout gpio_8,
-    inout gpio_14,
-    inout gpio_15,
+    // inout gpio_4,
+    // inout gpio_7,
+    // inout gpio_8,
+    // inout gpio_14,
+    // inout gpio_15,
     inout gpio_16,
     inout gpio_17,
     inout gpio_18,
@@ -142,6 +149,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 
   wire                            soc_reset;      // reset to the SoC
   wire                            core_clk;       // clock to the SoC
+  wire                            pix_clk;        // 25 MHz VGA pixel clock
   wire                              ddr3_main;      // main clock to the ddr3-mig
   wire                              ddr3_ref;       // reference clock to dr3 mig
   wire                            locked;         // indicates pll is stable
@@ -259,7 +267,51 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
   wire                              s_axi_rlast;
   wire                              s_axi_rvalid;   
   wire [11:0]                       device_temp; 
-  wire [1:0]                         interrupts;
+  wire [2:0]                         interrupts;
+
+  // -------------------------------------------------------------
+  // VGA AXI4-Lite Slave Interface
+  // Shakti AXI4-Lite Master -> VGA AXI4-Lite Slave
+  // -------------------------------------------------------------
+  wire [31:0] vga_axi_awaddr;
+  wire [2:0]  vga_axi_awprot;
+  wire [1:0]  vga_axi_awsize;
+  wire        vga_axi_awvalid;
+  wire        vga_axi_awready;
+
+`ifdef BUS_WIDTH32
+  wire [31:0] vga_axi_wdata;
+  wire [3:0]  vga_axi_wstrb;
+`elsif BUS_WIDTH128
+  wire [127:0] vga_axi_wdata;
+  wire [15:0]  vga_axi_wstrb;
+`else
+  wire [63:0] vga_axi_wdata;
+  wire [7:0]  vga_axi_wstrb;
+`endif
+  wire        vga_axi_wvalid;
+  wire        vga_axi_wready;
+
+  wire [1:0]  vga_axi_bresp;
+  wire        vga_axi_bvalid;
+  wire        vga_axi_bready;
+
+  wire [31:0] vga_axi_araddr;
+  wire [2:0]  vga_axi_arprot;
+  wire [1:0]  vga_axi_arsize;
+  wire        vga_axi_arvalid;
+  wire        vga_axi_arready;
+
+`ifdef BUS_WIDTH32
+  wire [31:0] vga_axi_rdata;
+`elsif BUS_WIDTH128
+  wire [127:0] vga_axi_rdata;
+`else
+  wire [63:0] vga_axi_rdata;
+`endif
+  wire [1:0]  vga_axi_rresp;
+  wire        vga_axi_rvalid;
+  wire        vga_axi_rready;
 
    wire phy_mdio_o, phy_mdio_i, phy_mdio_t;
 
@@ -303,6 +355,24 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    wire gpio_31_in, gpio_31_out, gpio_31_en;
 
    wire ip2intc_irpt;
+
+  // tied to 0 for now, as thier ports are used by vga.
+   assign io7_cell_in  = 1'b0;
+   assign io8_cell_in  = 1'b0;
+   assign io9_cell_in  = 1'b0;
+   assign io10_cell_in = 1'b0;
+   assign io12_cell_in = 1'b0;
+   assign io13_cell_in = 1'b0;
+   assign io16_cell_in = 1'b0;
+   assign gpio_4_in    = 1'b0;
+   assign gpio_7_in    = 1'b0;
+   assign gpio_8_in    = 1'b0;
+   assign gpio_14_in   = 1'b0;
+   assign gpio_15_in   = 1'b0;
+   assign spi0_io_mosi_in_val = 1'b0;
+   assign spi0_io_miso_in_val = 1'b0;
+   assign spi0_io_nss_in_val  = 1'b0;
+   assign spi0_io_sclk_in_val = 1'b0;
 // ---------------------------------------------------------------------------- //
     wire wire_tck_clk;
     wire wire_trst;
@@ -356,6 +426,7 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
                        .clk_out1(core_clk),
                     .clk_out2(ddr3_main),
                     .clk_out3(ddr3_ref),
+                    .clk_out4(pix_clk),
     .resetn   (sys_rst), 
     .locked   (locked)
   );
@@ -601,6 +672,37 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 		   .mem_master_RLAST  (s_axi_rlast),
 		   .mem_master_RID    (s_axi_rid),
 		   .mem_master_RREADY(s_axi_rready),
+
+       // -------------------------------------------------------
+       // VGA AXI4-Lite Master interface
+       // Generated from vga_c_master in Shakti
+       // -------------------------------------------------------
+       .vga_c_master_awvalid          (vga_axi_awvalid),
+       .vga_c_master_awaddr           (vga_axi_awaddr),
+       .vga_c_master_awprot           (vga_axi_awprot),
+       .vga_c_master_awsize           (vga_axi_awsize),
+       .vga_c_master_m_awready_awready(vga_axi_awready),
+
+       .vga_c_master_wvalid           (vga_axi_wvalid),
+       .vga_c_master_wdata            (vga_axi_wdata),
+       .vga_c_master_wstrb            (vga_axi_wstrb),
+       .vga_c_master_m_wready_wready  (vga_axi_wready),
+
+       .vga_c_master_m_bvalid_bvalid  (vga_axi_bvalid),
+       .vga_c_master_m_bvalid_bresp   (vga_axi_bresp),
+       .vga_c_master_bready           (vga_axi_bready),
+
+       .vga_c_master_arvalid          (vga_axi_arvalid),
+       .vga_c_master_araddr           (vga_axi_araddr),
+       .vga_c_master_arprot           (vga_axi_arprot),
+       .vga_c_master_arsize           (vga_axi_arsize),
+       .vga_c_master_m_arready_arready(vga_axi_arready),
+
+       .vga_c_master_m_rvalid_rvalid  (vga_axi_rvalid),
+       .vga_c_master_m_rvalid_rresp   (vga_axi_rresp),
+       .vga_c_master_m_rvalid_rdata   (vga_axi_rdata),
+       .vga_c_master_rready           (vga_axi_rready),
+
 			  //I2C ports
         .i2c0_out_scl_out (i2c0_scl_out),
         .i2c0_out_scl_in_in(i2c0_scl_in),
@@ -735,8 +837,8 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 
 
 
-
-  assign interrupts = 2'b0 ;
+  wire vga_c_intrupt;
+  assign interrupts = {vga_c_intrupt, 2'b0} ;
 
 /*   // ---- Instantiating the C-class SoC -------------//
    genvar index;
@@ -751,6 +853,94 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
 				 );
       end
    endgenerate*/
+
+  wire [7:0] vga_r_full, vga_g_full, vga_b_full;
+  assign vga_r = vga_r_full[7:4];
+  assign vga_g = vga_g_full[7:4];
+  assign vga_b = vga_b_full[7:4];
+
+  // -------------------------------------------------------------
+  // VGA IP
+  // AXI4-Lite slave connected to Shakti
+  // -------------------------------------------------------------
+  vga_axi_top #(
+      .AXI_ADDR_WIDTH (32),
+`ifdef BUS_WIDTH32
+      .DATA_WIDTH     (32)
+`elsif BUS_WIDTH128
+      .DATA_WIDTH     (128)
+`else
+      .DATA_WIDTH     (64)
+`endif
+  ) vga_inst (
+
+      // System clock/reset
+      .axi_aclk       (core_clk),
+      .axi_aresetn    (~soc_reset),
+
+      // Pixel clock
+      .clk_p_i        (pix_clk),
+
+      // Interrupt
+      .irq_o          (vga_c_intrupt),
+
+      // ---------------------------------------------------------
+      // AXI4-Lite Slave
+      // ---------------------------------------------------------
+      .s_axi_awaddr   (vga_axi_awaddr),
+      .s_axi_awvalid  (vga_axi_awvalid),
+      .s_axi_awready  (vga_axi_awready),
+
+      .s_axi_wdata    (vga_axi_wdata),
+      .s_axi_wstrb    (vga_axi_wstrb),
+      .s_axi_wvalid   (vga_axi_wvalid),
+      .s_axi_wready   (vga_axi_wready),
+
+      .s_axi_bresp    (vga_axi_bresp),
+      .s_axi_bvalid   (vga_axi_bvalid),
+      .s_axi_bready   (vga_axi_bready),
+
+      .s_axi_araddr   (vga_axi_araddr),
+      .s_axi_arvalid  (vga_axi_arvalid),
+      .s_axi_arready  (vga_axi_arready),
+
+      .s_axi_rdata    (vga_axi_rdata),
+      .s_axi_rresp    (vga_axi_rresp),
+      .s_axi_rvalid   (vga_axi_rvalid),
+      .s_axi_rready   (vga_axi_rready),
+
+      // ---------------------------------------------------------
+      // AXI4 Full Master
+      //
+      // NOT being connected to Shakti yet.
+      // ---------------------------------------------------------
+      .m_axi_araddr   (),
+      .m_axi_arlen    (),
+      .m_axi_arsize   (),
+      .m_axi_arburst  (),
+      .m_axi_arlock   (),
+      .m_axi_arcache  (),
+      .m_axi_arprot   (),
+      .m_axi_arvalid  (),
+      .m_axi_arready  (1'b0),
+
+      .m_axi_rdata    (32'b0),
+      .m_axi_rresp    (2'b00),
+      .m_axi_rlast    (1'b0),
+      .m_axi_rvalid   (1'b0),
+      .m_axi_rready   (),
+
+      // VGA outputs
+      .clk_p_o       (),
+      .hsync_pad_o   (vga_hs),
+      .vsync_pad_o   (vga_vs),
+      .csync_pad_o   (),
+      .blank_pad_o   (),
+      .r_pad_o       (vga_r_full),
+      .g_pad_o       (vga_g_full),
+      .b_pad_o       (vga_b_full)
+  );
+
 //---- IOBUF FOR I2C -----//
    IOBUF i2c0_scl_inst(
              .O(i2c0_scl_in),
@@ -782,54 +972,54 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
          );
   //----IOBUF FOR MUXED PIN----//
 
-   IOBUF io7_cell_inst(
-             .O(io7_cell_in),
-             .IO(io7_cell),
-             .I(io7_cell_out),
-             .T(io7_cell_en)
-         );
+  //  IOBUF io7_cell_inst(
+  //            .O(io7_cell_in),
+  //            .IO(io7_cell),
+  //            .I(io7_cell_out),
+  //            .T(io7_cell_en)
+  //        );
 
-   IOBUF io8_cell_inst(
-             .O(io8_cell_in),
-             .IO(io8_cell),
-             .I(io8_cell_out),
-             .T(io8_cell_en)
-         );
+  //  IOBUF io8_cell_inst(
+  //            .O(io8_cell_in),
+  //            .IO(io8_cell),
+  //            .I(io8_cell_out),
+  //            .T(io8_cell_en)
+  //        );
 
-   IOBUF io9_cell_inst(
-             .O(io9_cell_in),
-             .IO(io9_cell),
-             .I(io9_cell_out),
-             .T(io9_cell_en)
-         );
+  //  IOBUF io9_cell_inst(
+  //            .O(io9_cell_in),
+  //            .IO(io9_cell),
+  //            .I(io9_cell_out),
+  //            .T(io9_cell_en)
+  //        );
 
-   IOBUF io10_cell_inst(
-             .O(io10_cell_in),
-             .IO(io10_cell),
-             .I(io10_cell_out),
-             .T(io10_cell_en)
-         );
+  //  IOBUF io10_cell_inst(
+  //            .O(io10_cell_in),
+  //            .IO(io10_cell),
+  //            .I(io10_cell_out),
+  //            .T(io10_cell_en)
+  //        );
 
-   IOBUF io12_cell_inst(
-             .O(io12_cell_in),
-             .IO(io12_cell),
-             .I(io12_cell_out),
-             .T(io12_cell_en)
-         );
+  //  IOBUF io12_cell_inst(
+  //            .O(io12_cell_in),
+  //            .IO(io12_cell),
+  //            .I(io12_cell_out),
+  //            .T(io12_cell_en)
+  //        );
 
-   IOBUF io13_cell_inst(
-             .O(io13_cell_in),
-             .IO(io13_cell),
-             .I(io13_cell_out),
-             .T(io13_cell_en)
-         );
+  //  IOBUF io13_cell_inst(
+  //            .O(io13_cell_in),
+  //            .IO(io13_cell),
+  //            .I(io13_cell_out),
+  //            .T(io13_cell_en)
+  //        );
 
-   IOBUF io16_cell_inst(
-             .O(io16_cell_in),
-             .IO(io16_cell),
-             .I(io16_cell_out),
-             .T(io16_cell_en)
-         );
+  //  IOBUF io16_cell_inst(
+  //            .O(io16_cell_in),
+  //            .IO(io16_cell),
+  //            .I(io16_cell_out),
+  //            .T(io16_cell_en)
+  //        );
 
    IOBUF io17_cell_inst(
              .O(io17_cell_in),
@@ -860,35 +1050,35 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
          );
    //-----IOBUF FOR GPIO-----//
 
-   IOBUF gpio_4_inst(
-             .O(gpio_4_in),
-             .IO(gpio_4),
-             .I(gpio_4_out),
-             .T(~gpio_4_en)
-         );
+  //  IOBUF gpio_4_inst(
+  //            .O(gpio_4_in),
+  //            .IO(gpio_4),
+  //            .I(gpio_4_out),
+  //            .T(~gpio_4_en)
+  //        );
 
-   IOBUF gpio_7_inst(
-             .O(gpio_7_in),
-             .IO(gpio_7),
-             .I(gpio_7_out),
-             .T(~gpio_7_en)
-         );
+  //  IOBUF gpio_7_inst(
+  //            .O(gpio_7_in),
+  //            .IO(gpio_7),
+  //            .I(gpio_7_out),
+  //            .T(~gpio_7_en)
+  //        );
 
-   IOBUF gpio_8_inst(
-             .O(gpio_8_in),
-             .IO(gpio_8),
-             .I(gpio_8_out),
-             .T(~gpio_8_en)
-         );
+  //  IOBUF gpio_8_inst(
+  //            .O(gpio_8_in),
+  //            .IO(gpio_8),
+  //            .I(gpio_8_out),
+  //            .T(~gpio_8_en)
+  //        );
 
-   IOBUF gpio_14_inst(
-             .O(gpio_14_in),
-             .IO(gpio_14),
-             .I(gpio_14_out),
-             .T(~gpio_14_en)
-         );
+  //  IOBUF gpio_14_inst(
+  //            .O(gpio_14_in),
+  //            .IO(gpio_14),
+  //            .I(gpio_14_out),
+  //            .T(~gpio_14_en)
+  //        );
 
-   IOBUF gpio_15_inst(.O(gpio_15_in),.IO(gpio_15),.I(gpio_15_out),.T(~gpio_15_en));
+  //  IOBUF gpio_15_inst(.O(gpio_15_in),.IO(gpio_15),.I(gpio_15_out),.T(~gpio_15_en));
    IOBUF gpio_16_inst(.O(gpio_16_in),.IO(gpio_16),.I(gpio_16_out),.T(~gpio_16_en));
    IOBUF gpio_17_inst(.O(gpio_17_in),.IO(gpio_17),.I(gpio_17_out),.T(~gpio_17_en));
    IOBUF gpio_18_inst(.O(gpio_18_in),.IO(gpio_18),.I(gpio_18_out),.T(~gpio_18_en));
@@ -905,10 +1095,10 @@ module fpga_top#( parameter AXI_ID_WIDTH = 4, parameter AXI_ADDR_WIDTH = 30)
    IOBUF gpio_29_inst(.O(gpio_29_in),.IO(gpio_29),.I(gpio_29_out),.T(~gpio_29_en));
    IOBUF gpio_30_inst(.O(gpio_30_in),.IO(gpio_30),.I(gpio_30_out),.T(~gpio_30_en));
    IOBUF gpio_31_inst(.O(gpio_31_in),.IO(gpio_31),.I(gpio_31_out),.T(~gpio_31_en));
-   IOBUF spi0_inst_mosi(.O(spi0_io_mosi_in_val),.IO(spi0_mosi),.I(spi0_io_mosi_out),.T(~spi0_io_mosi_outen));
-   IOBUF spi0_inst_miso(.O(spi0_io_miso_in_val),.IO(spi0_miso),.I(spi0_io_miso_out),.T(~spi0_io_miso_outen));
-   IOBUF spi0_inst_nss(.O(spi0_io_nss_in_val) ,.IO(spi0_nss) ,.I(spi0_io_nss_out) ,.T(~spi0_io_nss_outen));
-   IOBUF spi0_inst_sclk(.O(spi0_io_sclk_in_val) ,.IO(spi0_sclk) ,.I(spi0_io_sclk_out) ,.T(~spi0_io_sclk_outen));
+  //  IOBUF spi0_inst_mosi(.O(spi0_io_mosi_in_val),.IO(spi0_mosi),.I(spi0_io_mosi_out),.T(~spi0_io_mosi_outen));
+  //  IOBUF spi0_inst_miso(.O(spi0_io_miso_in_val),.IO(spi0_miso),.I(spi0_io_miso_out),.T(~spi0_io_miso_outen));
+  //  IOBUF spi0_inst_nss(.O(spi0_io_nss_in_val) ,.IO(spi0_nss) ,.I(spi0_io_nss_out) ,.T(~spi0_io_nss_outen));
+  //  IOBUF spi0_inst_sclk(.O(spi0_io_sclk_in_val) ,.IO(spi0_sclk) ,.I(spi0_io_sclk_out) ,.T(~spi0_io_sclk_outen));
 
 
 
