@@ -34,5 +34,7 @@
 void main()
 {
 	printf ("Hello World !\n");
+	getchar();
+	printf ("Hello World !\n");
 	while(1);
 }
