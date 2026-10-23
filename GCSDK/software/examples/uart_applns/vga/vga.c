@@ -97,9 +97,6 @@ int main(void)
      * correct for your VGA IP and board design.
      */
 
-    // Get some input from user before starting display
-    getchar();
-    
     vga_write32((uintptr_t)VGA_CTRL_REG, 0x00003581);
 
     printf("VGA register test completed.\n");
