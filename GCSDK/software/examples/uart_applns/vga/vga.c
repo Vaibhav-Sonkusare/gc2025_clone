@@ -1,40 +1,112 @@
-/***************************************************************************
-* Project           		:  shakti devt board
-* Name of the file	     	:  hello.c
-* Brief Description of file     :  Does the printing of hello with the help of uart communication protocol.
-* Name of Author    	        :  Sathya Narayanan N
-* Email ID                      :  sathya281@gmail.com
+#include <stdint.h>
+#include <stdio.h>
 
- Copyright (C) 2019  IIT Madras. All rights reserved.
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-***************************************************************************/
-/**
-@file hello.c
-@brief Prints "Hello world !" in the uart terminal.
-*/
-
-#include "uart.h"
-
-/** @fn void main()
- * @brief prints hello world
+/*
+ * VGA register test for Shakti Ganga.
+ *
+ * VGA slave base address: 0x00042000
+ *
+ * Register offsets:
+ *   0x000 : Control register
+ *   0x008 : HTIM
+ *   0x00C : VTIM
+ *   0x010 : HVLEN
+ *
+ * Framebuffer/test-memory range:
+ *   Base + 0x800 through Base + 0xFFC, in 4-byte increments.
  */
-void main()
+
+#define VGA_BASE_ADDR   0x00042000UL
+
+#define VGA_CTRL_OFFSET 0x000
+#define VGA_HTIM_OFFSET 0x008
+#define VGA_VTIM_OFFSET 0x00C
+#define VGA_HVLEN_OFFSET 0x010
+
+#define VGA_TEST_START  0x800
+#define VGA_TEST_END    0xFFC
+
+#define VGA_CTRL_REG  ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_CTRL_OFFSET))
+#define VGA_HTIM_REG  ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_HTIM_OFFSET))
+#define VGA_VTIM_REG  ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_VTIM_OFFSET))
+#define VGA_HVLEN_REG ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_HVLEN_OFFSET))
+
+static inline void vga_write32(uintptr_t address, uint32_t value)
 {
-	printf ("Hello World !\n");
-	getchar();
-	printf ("Hello World !\n");
-	while(1);
+    *(volatile uint32_t *)address = value;
+}
+
+static inline uint32_t vga_read32(uintptr_t address)
+{
+    return *(volatile uint32_t *)address;
+}
+
+int main(void)
+{
+    uint32_t value;
+    uintptr_t address;
+
+    printf("VGA register test started.\n");
+
+    /* Program timing and resolution registers. */
+    vga_write32((uintptr_t)VGA_HTIM_REG, 0x5F2F027F);
+    vga_write32((uintptr_t)VGA_VTIM_REG, 0x012001DF);
+    vga_write32((uintptr_t)VGA_HVLEN_REG, 0x031F020C);
+
+    /* Read back and verify the register values. */
+    value = vga_read32((uintptr_t)VGA_HTIM_REG);
+    printf("HTIM  [0x%08lX] = 0x%08lX\n",
+           (unsigned long)(VGA_BASE_ADDR + VGA_HTIM_OFFSET),
+           (unsigned long)value);
+
+    value = vga_read32((uintptr_t)VGA_VTIM_REG);
+    printf("VTIM  [0x%08lX] = 0x%08lX\n",
+           (unsigned long)(VGA_BASE_ADDR + VGA_VTIM_OFFSET),
+           (unsigned long)value);
+
+    value = vga_read32((uintptr_t)VGA_HVLEN_REG);
+    printf("HVLEN [0x%08lX] = 0x%08lX\n",
+           (unsigned long)(VGA_BASE_ADDR + VGA_HVLEN_OFFSET),
+           (unsigned long)value);
+
+    /*
+     * Fill the test-memory/framebuffer region with 0x00FF0000.
+     * Equivalent to:
+     *   for {set addr 0x40000800} {$addr <= 0x40000FFC} {incr addr 4}
+     *       {mwr $addr 0x00FF0000}
+     *
+     * Here, the provided VGA slave base address is used.
+     */
+    /*
+    printf("Filling VGA memory region...\n");
+
+    for (address = VGA_BASE_ADDR + VGA_TEST_START;
+         address <= VGA_BASE_ADDR + VGA_TEST_END;
+         address += sizeof(uint32_t)) {
+        vga_write32(address, 0x00FF0000);
+    }
+
+    printf("VGA memory fill complete.\n");
+    */
+    /*
+     * Optional: enable/start the VGA controller.
+     * The original XSDB command was:
+     *   mwr 0x40000000 0x00003581
+     *
+     * Uncomment only after confirming that this control value is
+     * correct for your VGA IP and board design.
+     */
+
+    // Get some input from user before starting display
+    getchar();
+    
+    vga_write32((uintptr_t)VGA_CTRL_REG, 0x00003581);
+
+    printf("VGA register test completed.\n");
+
+    while (1) {
+        /* Keep the bare-metal application running. */
+    }
+
+    return 0;
 }
