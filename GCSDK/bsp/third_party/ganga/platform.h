@@ -52,7 +52,7 @@ platform.h - header file for SoS C class SoC on artix7_100t
 #define MTIME      0x0200BFF8
 #define CLINT_DIVISOR   256
 
-#define CLOCK_FREQUENCY 50000000
+#define CLOCK_FREQUENCY 40000000
 
 /*!Debugger Offset */
 #define DBG_MEM_START 0x00000010

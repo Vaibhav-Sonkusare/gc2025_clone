@@ -2481,8 +2481,8 @@ Disassembly of section .text:
     80001ba6:	fea43423          	sd	a0,-24(s0)
     80001baa:	fe843783          	ld	a5,-24(s0)
     80001bae:	eb81                	bnez	a5,80001bbe <mach_clint_handler+0x38>
-    80001bb0:	000307b7          	lui	a5,0x30
-    80001bb4:	af078513          	addi	a0,a5,-1296 # 2faf0 <_tbss_end+0x2faf0>
+    80001bb0:	000267b7          	lui	a5,0x26
+    80001bb4:	25a78513          	addi	a0,a5,602 # 2625a <_tbss_end+0x2625a>
     80001bb8:	eabff0ef          	jal	80001a62 <configure_counter>
     80001bbc:	a819                	j	80001bd2 <mach_clint_handler+0x4c>
     80001bbe:	fe843703          	ld	a4,-24(s0)
@@ -5123,8 +5123,8 @@ Disassembly of section .rodata:
     8000390e:	4030                	lw	a2,64(s0)
     80003910:	0000                	unimp
     80003912:	0000                	unimp
-    80003914:	d784                	sw	s1,40(a5)
-    80003916:	00004187          	.insn	4, 0x4187
+    80003914:	12d0                	addi	a2,sp,356
+    80003916:	00004183          	lbu	gp,0(zero) # 0 <_tbss_end>
     8000391a:	3f00                	.insn	2, 0x3f00
     8000391c:	0000                	unimp
     8000391e:	0000                	unimp
