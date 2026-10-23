@@ -205,6 +205,9 @@ ifeq ($(PROGRAM),all)
 	cd ./AS32-TTL-100_LoRa && $(MAKE) all TARGET=$(TARGET)
 
 else
+ifeq ($(PROGRAM),vga)
+filepath := uart_applns/vga
+else
 ifeq ($(PROGRAM),loopback)
 filepath := uart_applns/loopback
 else
@@ -597,6 +600,7 @@ filepath := AS32-TTL-100_LoRa/lora_send_receive
 else
 
 	@echo "Entry for $(PROGRAM) not present"
+endif
 endif
 endif
 endif
