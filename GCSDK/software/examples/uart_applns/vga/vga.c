@@ -1,109 +1,86 @@
-#include <stdint.h>
-#include <stdio.h>
-
 /*
- * VGA register test for Shakti Ganga.
+ * vga_init.c - program the vga_lcd (AXI) register block from the Shakti core.
  *
- * VGA slave base address: 0x00042000
+ * Equivalent of the XSCT/Vivado script:
+ *   mwr 0x40000008 0x5F2F027F   (HTIM)
+ *   mwr 0x4000000C 0x012001DF   (VTIM)
+ *   mwr 0x40000010 0x031F020C   (HVLEN)
+ *   mrd of the three registers
+ *   palette (CLUT) 0x800..0xFFC filled with 0x00FF0000
+ *   # mwr 0x40000000 0x00003581 (CTRL, left disabled as in the script)
  *
- * Register offsets:
- *   0x000 : Control register
- *   0x008 : HTIM
- *   0x00C : VTIM
- *   0x010 : HVLEN
+ * Only the base address changes: on Shakti the VGA slave sits at 0x00042000.
  *
- * Framebuffer/test-memory range:
- *   Base + 0x800 through Base + 0xFFC, in 4-byte increments.
+ * Build like the hello example: copy software/examples/uart_applns/hello,
+ * rename it, and replace its .c file with this one.
  */
 
-#define VGA_BASE_ADDR   0x00042000UL
+#include <stdint.h>
+#include "platform.h"
+#include "uart.h"
 
-#define VGA_CTRL_OFFSET 0x000
-#define VGA_HTIM_OFFSET 0x008
-#define VGA_VTIM_OFFSET 0x00C
-#define VGA_HVLEN_OFFSET 0x010
+/* ---- VGA register map (offsets from the vga_lcd IP) ---- */
+#define VGA_BASE        0x00042000UL
 
-#define VGA_TEST_START  0x800
-#define VGA_TEST_END    0xFFC
+#define VGA_CTRL        0x000   /* control                                  */
+#define VGA_STAT        0x004   /* status                                   */
+#define VGA_HTIM        0x008   /* horizontal timing                        */
+#define VGA_VTIM        0x00C   /* vertical timing                          */
+#define VGA_HVLEN       0x010   /* horizontal / vertical total length       */
+#define VGA_VBARA       0x014   /* video base address A                     */
+#define VGA_VBARB       0x018   /* video base address B                     */
+#define VGA_CLUT_START  0x800   /* colour look-up table (palette)           */
+#define VGA_CLUT_END    0xFFC
 
-#define VGA_CTRL_REG  ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_CTRL_OFFSET))
-#define VGA_HTIM_REG  ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_HTIM_OFFSET))
-#define VGA_VTIM_REG  ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_VTIM_OFFSET))
-#define VGA_HVLEN_REG ((volatile uint32_t *)(VGA_BASE_ADDR + VGA_HVLEN_OFFSET))
+/* ---- values taken from the mwr script (640x480) ---- */
+#define HTIM_VAL        0x5F2F027FUL
+#define VTIM_VAL        0x012001DFUL
+#define HVLEN_VAL       0x031F020CUL
+#define CLUT_VAL        0x00FF0000UL   /* 0x00RRGGBB -> red */
+#define CTRL_VAL        0x00003581UL
 
-static inline void vga_write32(uintptr_t address, uint32_t value)
+/* Set to 1 to also write CTRL (this line is commented out in the script). */
+#define WRITE_CTRL      0
+
+static inline void vga_write(uint32_t off, uint32_t val)
 {
-    *(volatile uint32_t *)address = value;
+    *(volatile uint32_t *)(VGA_BASE + off) = val;
 }
 
-static inline uint32_t vga_read32(uintptr_t address)
+static inline uint32_t vga_read(uint32_t off)
 {
-    return *(volatile uint32_t *)address;
+    return *(volatile uint32_t *)(VGA_BASE + off);
 }
 
 int main(void)
 {
-    uint32_t value;
-    uintptr_t address;
+    uint32_t off;
 
-    printf("VGA register test started.\n");
+    /* mwr 0x...08 / 0C / 10 */
+    vga_write(VGA_HTIM,  HTIM_VAL);
+    vga_write(VGA_VTIM,  VTIM_VAL);
+    vga_write(VGA_HVLEN, HVLEN_VAL);
 
-    /* Program timing and resolution registers. */
-    vga_write32((uintptr_t)VGA_HTIM_REG, 0x5F2F027F);
-    vga_write32((uintptr_t)VGA_VTIM_REG, 0x012001DF);
-    vga_write32((uintptr_t)VGA_HVLEN_REG, 0x031F020C);
+    /* mrd 0x...08 / 0C / 10 */
+    printf("HTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_HTIM),  (unsigned)HTIM_VAL);
+    printf("VTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_VTIM),  (unsigned)VTIM_VAL);
+    printf("HVLEN = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_HVLEN), (unsigned)HVLEN_VAL);
 
-    /* Read back and verify the register values. */
-    value = vga_read32((uintptr_t)VGA_HTIM_REG);
-    printf("HTIM  [0x%08lX] = 0x%08lX\n",
-           (unsigned long)(VGA_BASE_ADDR + VGA_HTIM_OFFSET),
-           (unsigned long)value);
+    /* for {set addr 0x800} {$addr <= 0xFFC} {incr addr 4} { mwr ... } */
+    for (off = VGA_CLUT_START; off <= VGA_CLUT_END; off += 4)
+        vga_write(off, CLUT_VAL);
 
-    value = vga_read32((uintptr_t)VGA_VTIM_REG);
-    printf("VTIM  [0x%08lX] = 0x%08lX\n",
-           (unsigned long)(VGA_BASE_ADDR + VGA_VTIM_OFFSET),
-           (unsigned long)value);
+    /* read back a few palette entries as a sanity check */
+    printf("CLUT[0]   = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_START));
+    printf("CLUT[255] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_START + 255 * 4));
+    printf("CLUT[511] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_END));
 
-    value = vga_read32((uintptr_t)VGA_HVLEN_REG);
-    printf("HVLEN [0x%08lX] = 0x%08lX\n",
-           (unsigned long)(VGA_BASE_ADDR + VGA_HVLEN_OFFSET),
-           (unsigned long)value);
+#if WRITE_CTRL
+    vga_write(VGA_CTRL, CTRL_VAL);
+    printf("CTRL  = 0x%08x\n", (unsigned)vga_read(VGA_CTRL));
+#endif
 
-    /*
-     * Fill the test-memory/framebuffer region with 0x00FF0000.
-     * Equivalent to:
-     *   for {set addr 0x40000800} {$addr <= 0x40000FFC} {incr addr 4}
-     *       {mwr $addr 0x00FF0000}
-     *
-     * Here, the provided VGA slave base address is used.
-     */
-    /*
-    printf("Filling VGA memory region...\n");
-
-    for (address = VGA_BASE_ADDR + VGA_TEST_START;
-         address <= VGA_BASE_ADDR + VGA_TEST_END;
-         address += sizeof(uint32_t)) {
-        vga_write32(address, 0x00FF0000);
-    }
-
-    printf("VGA memory fill complete.\n");
-    */
-    /*
-     * Optional: enable/start the VGA controller.
-     * The original XSDB command was:
-     *   mwr 0x40000000 0x00003581
-     *
-     * Uncomment only after confirming that this control value is
-     * correct for your VGA IP and board design.
-     */
-
-    vga_write32((uintptr_t)VGA_CTRL_REG, 0x00003581);
-
-    printf("VGA register test completed.\n");
-
-    while (1) {
-        /* Keep the bare-metal application running. */
-    }
+    printf("STAT  = 0x%08x\n", (unsigned)vga_read(VGA_STAT));
 
     return 0;
 }
