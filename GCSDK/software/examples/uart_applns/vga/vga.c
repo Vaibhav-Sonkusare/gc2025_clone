@@ -52,6 +52,22 @@ static inline uint32_t vga_read(uint32_t off)
     return *(volatile uint32_t *)(VGA_BASE + off);
 }
 
+/* Print "<label> = 0xXXXXXXXX" without relying on %x / width flags. */
+static void print_hex32(const char *label, uint32_t val)
+{
+    static const char digits[] = "0123456789ABCDEF";
+    char buf[11];
+    int i;
+
+    buf[0] = '0';
+    buf[1] = 'x';
+    for (i = 0; i < 8; i++)
+        buf[2 + i] = digits[(val >> (28 - 4 * i)) & 0xF];
+    buf[10] = '\0';
+
+    printf("%s = %s\n", label, buf);
+}
+
 int main(void)
 {
     uint32_t off;
@@ -62,10 +78,14 @@ int main(void)
     vga_write(VGA_HVLEN, HVLEN_VAL);
 
     /* mrd 0x...08 / 0C / 10 */
-    printf("HTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_HTIM),  (unsigned)HTIM_VAL);
+    print_hex32("HTIM  ", vga_read(VGA_HTIM));
+    print_hex32("VTIM  ", vga_read(VGA_VTIM));
+    print_hex32("HVLEN ", vga_read(VGA_HVLENL);
+
+/*    printf("HTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_HTIM),  (unsigned)HTIM_VAL);
     printf("VTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_VTIM),  (unsigned)VTIM_VAL);
     printf("HVLEN = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_HVLEN), (unsigned)HVLEN_VAL);
-
+*/
     /* for {set addr 0x800} {$addr <= 0xFFC} {incr addr 4} { mwr ... } */
     for (off = VGA_CLUT_START; off <= VGA_CLUT_END; off += 4)
         vga_write(off, CLUT_VAL);
@@ -78,9 +98,13 @@ int main(void)
 #if WRITE_CTRL
     vga_write(VGA_CTRL, CTRL_VAL);
     printf("CTRL  = 0x%08x\n", (unsigned)vga_read(VGA_CTRL));
+    print_hex32("CTRL ", vga_read(VGA_CTRL));
 #endif
 
     printf("STAT  = 0x%08x\n", (unsigned)vga_read(VGA_STAT));
+
+
+    while (1);
 
     return 0;
 }
