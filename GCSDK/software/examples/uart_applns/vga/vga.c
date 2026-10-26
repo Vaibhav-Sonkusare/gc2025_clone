@@ -37,7 +37,7 @@
 #define VTIM_VAL        0x012001DFUL
 #define HVLEN_VAL       0x031F020CUL
 #define CLUT_VAL        0x00FF0000UL   /* 0x00RRGGBB -> red */
-#define CTRL_VAL        0x00003581UL
+#define CTRL_VAL        0x00003981UL
 
 /* Set to 1 to also write CTRL (this line is commented out in the script). */
 #define WRITE_CTRL      1

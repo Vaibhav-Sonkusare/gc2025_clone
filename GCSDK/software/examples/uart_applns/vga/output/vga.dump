@@ -3369,8 +3369,8 @@ Disassembly of section .text:
     800025f0:	00002517          	auipc	a0,0x2
     800025f4:	ed850513          	addi	a0,a0,-296 # 800044c8 <__rodata_start+0xb00>
     800025f8:	b78fe0ef          	jal	80000970 <printf>
-    800025fc:	678d                	lui	a5,0x3
-    800025fe:	58178593          	addi	a1,a5,1409 # 3581 <_tbss_end+0x3581>
+    800025fc:	6791                	lui	a5,0x4
+    800025fe:	98178593          	addi	a1,a5,-1663 # 3981 <_tbss_end+0x3981>
     80002602:	4501                	li	a0,0
     80002604:	e01ff0ef          	jal	80002404 <vga_write>
     80002608:	4501                	li	a0,0
