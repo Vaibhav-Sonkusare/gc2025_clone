@@ -95,6 +95,10 @@ int main(void)
     printf("CLUT[255] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_START + 255 * 4));
     printf("CLUT[511] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_END));
 */
+    print_hex32("CLUT[0]  ", vga_read(VGA_CLUT_START));
+    print_hex32("CLUT[255]", vga_read(VGA_CLUT_START + 255 * 4));
+    print_hex32("CLUT[511]", vga_read(VGA_CLUT_END));
+
 #if WRITE_CTRL
     vga_write(VGA_CTRL, CTRL_VAL);
 //    printf("CTRL  = 0x%08x\n", (unsigned)vga_read(VGA_CTRL));
@@ -104,6 +108,7 @@ int main(void)
 //    printf("STAT  = 0x%08x\n", (unsigned)vga_read(VGA_STAT));
     print_hex32("STAT  ", vga_read(VGA_STAT));
 
+    printf("Done\n");
 
     while (1);
 
