@@ -40,7 +40,7 @@
 #define CTRL_VAL        0x00003581UL
 
 /* Set to 1 to also write CTRL (this line is commented out in the script). */
-#define WRITE_CTRL      0
+#define WRITE_CTRL      1
 
 static inline void vga_write(uint32_t off, uint32_t val)
 {
