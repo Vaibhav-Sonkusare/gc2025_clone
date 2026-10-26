@@ -96,6 +96,9 @@ int main(void)
     printf("CLUT[511] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_END));
 */
     print_hex32("CLUT[0]  ", vga_read(VGA_CLUT_START));
+    print_hex32("CLUT[1]  ", vga_read(VGA_CLUT_START + 4));
+    print_hex32("CLUT[2]  ", vga_read(VGA_CLUT_START + 8));
+    print_hex32("CLUT[3]  ", vga_read(VGA_CLUT_START + 12));
     print_hex32("CLUT[255]", vga_read(VGA_CLUT_START + 255 * 4));
     print_hex32("CLUT[511]", vga_read(VGA_CLUT_END));
 
