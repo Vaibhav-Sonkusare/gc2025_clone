@@ -91,17 +91,18 @@ int main(void)
         vga_write(off, CLUT_VAL);
 
     /* read back a few palette entries as a sanity check */
-    printf("CLUT[0]   = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_START));
+/*    printf("CLUT[0]   = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_START));
     printf("CLUT[255] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_START + 255 * 4));
     printf("CLUT[511] = 0x%08x\n", (unsigned)vga_read(VGA_CLUT_END));
-
+*/
 #if WRITE_CTRL
     vga_write(VGA_CTRL, CTRL_VAL);
-    printf("CTRL  = 0x%08x\n", (unsigned)vga_read(VGA_CTRL));
+//    printf("CTRL  = 0x%08x\n", (unsigned)vga_read(VGA_CTRL));
     print_hex32("CTRL ", vga_read(VGA_CTRL));
 #endif
 
-    printf("STAT  = 0x%08x\n", (unsigned)vga_read(VGA_STAT));
+//    printf("STAT  = 0x%08x\n", (unsigned)vga_read(VGA_STAT));
+    print_hex32("STAT  ", vga_read(VGA_STAT));
 
 
     while (1);
