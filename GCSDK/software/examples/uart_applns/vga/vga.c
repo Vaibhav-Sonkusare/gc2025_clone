@@ -80,7 +80,7 @@ int main(void)
     /* mrd 0x...08 / 0C / 10 */
     print_hex32("HTIM  ", vga_read(VGA_HTIM));
     print_hex32("VTIM  ", vga_read(VGA_VTIM));
-    print_hex32("HVLEN ", vga_read(VGA_HVLENL);
+    print_hex32("HVLEN ", vga_read(VGA_HVLEN));
 
 /*    printf("HTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_HTIM),  (unsigned)HTIM_VAL);
     printf("VTIM  = 0x%08x (wrote 0x%08x)\n", (unsigned)vga_read(VGA_VTIM),  (unsigned)VTIM_VAL);
