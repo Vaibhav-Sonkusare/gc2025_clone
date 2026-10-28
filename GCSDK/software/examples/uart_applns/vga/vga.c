@@ -10,9 +10,6 @@
  *   # mwr 0x40000000 0x00003581 (CTRL, left disabled as in the script)
  *
  * Only the base address changes: on Shakti the VGA slave sits at 0x00042000.
- *
- * Build like the hello example: copy software/examples/uart_applns/hello,
- * rename it, and replace its .c file with this one.
  */
 
 #include <stdint.h>
@@ -39,8 +36,8 @@
 #define CLUT_VAL        0x00FF0000UL   /* 0x00RRGGBB -> red */
 #define CTRL_VAL        0x00003981UL
 
-/* Set to 1 to also write CTRL (this line is commented out in the script). */
-#define WRITE_CTRL      1
+/* Set to 1 to also write CTRL */
+#define WRITE_CTRL      0
 
 static inline void vga_write(uint32_t off, uint32_t val)
 {
